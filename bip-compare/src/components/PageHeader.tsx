@@ -10,18 +10,18 @@ export default function PageHeader({ title, subtitle, lastRunLabel }: PageHeader
   return (
     <div className="mb-6 hidden items-center justify-between gap-4 lg:flex">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">{title}</h1>
-        <p className="mt-0.5 text-sm text-slate-400">{subtitle}</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h1>
+        <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
       </div>
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-sm text-slate-400 shadow-sm backdrop-blur">
+        <div className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 px-3.5 py-2 text-sm text-slate-500 dark:text-slate-400 shadow-sm backdrop-blur">
           <CalendarClock size={16} className="text-violet-400" />
-          <span className="text-slate-500">Ostatnie uruchomienie</span>
-          <span className="font-medium text-slate-200">{lastRunLabel}</span>
+          <span className="text-slate-400 dark:text-slate-500">Ostatnie uruchomienie</span>
+          <span className="font-medium text-slate-900 dark:text-slate-200">{lastRunLabel}</span>
         </div>
         <button
           type="button"
-          className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-300 shadow-sm hover:bg-white/10"
+          className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 shadow-sm hover:bg-slate-200 dark:hover:bg-white/10"
           aria-label="Powiadomienia"
         >
           <Bell size={18} />

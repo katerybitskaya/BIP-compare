@@ -6,7 +6,7 @@ const KIND_STYLES: Record<FileKind, { icon: React.ComponentType<{ size?: number 
   doc: { icon: FileText, bg: 'bg-blue-500/15', text: 'text-blue-400' },
   xls: { icon: FileSpreadsheet, bg: 'bg-emerald-500/15', text: 'text-emerald-400' },
   image: { icon: FileImage, bg: 'bg-violet-500/15', text: 'text-violet-400' },
-  other: { icon: File, bg: 'bg-slate-500/15', text: 'text-slate-400' },
+  other: { icon: File, bg: 'bg-slate-500/15', text: 'text-slate-500 dark:text-slate-400' },
 };
 
 export default function FileIcon({ kind, size = 18 }: { kind: FileKind; size?: number }) {

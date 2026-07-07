@@ -63,31 +63,31 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
   }, [totalPages]);
 
   return (
-    <section className="flex min-w-0 flex-1 flex-col rounded-2xl border border-white/10 bg-white/[0.03] shadow-lg shadow-black/20 backdrop-blur">
-      <div className="flex flex-col gap-3 border-b border-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <section className="flex min-w-0 flex-1 flex-col rounded-2xl border border-slate-300 dark:border-white/10 bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur">
+      <div className="flex flex-col gap-3 border-b border-slate-200 dark:border-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-sm font-semibold text-slate-100">Wyniki – pliki</h2>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-slate-900/60 px-3 py-1.5">
-            <Search size={15} className="text-slate-500" />
+          <div className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-slate-900/60 px-3 py-1.5">
+            <Search size={15} className="text-slate-400 dark:text-slate-500" />
             <input
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
               type="text"
               placeholder="Szukaj pliku…"
-              className="w-36 bg-transparent text-sm text-slate-200 outline-none placeholder:text-slate-600 sm:w-44"
+              className="w-36 bg-transparent text-sm text-slate-900 dark:text-slate-200 outline-none placeholder:text-slate-600 sm:w-44"
             />
           </div>
           <div className="relative">
             <button
               type="button"
               onClick={() => setFilterOpen((v) => !v)}
-              className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/5"
+              className="flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-white/10 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5"
             >
               <SlidersHorizontal size={14} />
               Filtruj
             </button>
             {filterOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-44 rounded-xl border border-white/10 bg-[#131829] p-1.5 shadow-2xl shadow-black/50">
+              <div className="absolute right-0 z-10 mt-2 w-44 rounded-xl border border-slate-300 dark:border-white/10 bg-[#131829] p-1.5 shadow-2xl shadow-slate-200/50 dark:shadow-black/50">
                 {FILTERS.map((f) => (
                   <button
                     key={f.key}
@@ -96,7 +96,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
                     className={`flex w-full items-center rounded-lg px-2.5 py-1.5 text-left text-sm ${
                       statusFilter === f.key
                         ? 'bg-violet-500/15 text-violet-300'
-                        : 'text-slate-300 hover:bg-white/5'
+                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
                     }`}
                   >
                     {f.label}
@@ -111,7 +111,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
       <div className="overflow-x-auto">
         <table className="w-full min-w-[560px] border-collapse text-sm">
           <thead>
-            <tr className="text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+            <tr className="text-left text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
               <th className="px-4 py-3">Plik</th>
               <th className="px-3 py-3">Stary rozmiar</th>
               <th className="px-3 py-3">Nowy rozmiar</th>
@@ -126,20 +126,20 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
                 <tr
                   key={file.id}
                   onClick={() => onSelect(file)}
-                  className={`cursor-pointer border-t border-white/5 transition-colors ${
+                  className={`cursor-pointer border-t border-slate-200 dark:border-white/5 transition-colors ${
                     isSelected ? 'bg-violet-500/10' : 'hover:bg-white/[0.04]'
                   }`}
                 >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <FileIcon kind={file.kind} size={16} />
-                      <span className="truncate text-sm font-medium text-slate-200">{file.name}</span>
+                      <span className="truncate text-sm font-medium text-slate-900 dark:text-slate-200">{file.name}</span>
                     </div>
                   </td>
-                  <td className="px-3 py-3 whitespace-nowrap text-slate-400">
+                  <td className="px-3 py-3 whitespace-nowrap text-slate-500 dark:text-slate-400">
                     {formatSize(file.oldSizeKb)}
                   </td>
-                  <td className="px-3 py-3 whitespace-nowrap text-slate-400">
+                  <td className="px-3 py-3 whitespace-nowrap text-slate-500 dark:text-slate-400">
                     {formatSize(file.newSizeKb)}
                   </td>
                   <td className="px-3 py-3">
@@ -156,7 +156,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
             })}
             {pageItems.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-sm text-slate-500">
+                <td colSpan={5} className="px-4 py-10 text-center text-sm text-slate-400 dark:text-slate-500">
                   Brak plików spełniających kryteria wyszukiwania.
                 </td>
               </tr>
@@ -165,8 +165,8 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
         </table>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-slate-500">
+      <div className="flex flex-col gap-3 border-t border-slate-200 dark:border-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-slate-400 dark:text-slate-500">
           {filtered.length === 0
             ? '0 z 0 plików'
             : `${startIdx}-${endIdx} z ${filtered.length} plików`}
@@ -176,7 +176,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={safePage === 1}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-slate-400 disabled:opacity-30 hover:bg-white/5"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 dark:border-white/10 text-slate-500 dark:text-slate-400 disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-white/5"
           >
             <ChevronLeft size={15} />
           </button>
@@ -187,22 +187,22 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
               onClick={() => setPage(n)}
               className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium ${
                 n === safePage
-                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-900/40'
-                  : 'text-slate-400 hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-slate-900 dark:text-white shadow-md shadow-violet-900/40'
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
               }`}
             >
               {n}
             </button>
           ))}
-          {totalPages > 5 && <span className="px-1 text-slate-500">…</span>}
+          {totalPages > 5 && <span className="px-1 text-slate-400 dark:text-slate-500">…</span>}
           {totalPages > 5 && (
             <button
               type="button"
               onClick={() => setPage(totalPages)}
               className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium ${
                 safePage === totalPages
-                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-900/40'
-                  : 'text-slate-400 hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-slate-900 dark:text-white shadow-md shadow-violet-900/40'
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
               }`}
             >
               {totalPages}
@@ -212,7 +212,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={safePage === totalPages}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-slate-400 disabled:opacity-30 hover:bg-white/5"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 dark:border-white/10 text-slate-500 dark:text-slate-400 disabled:opacity-30 hover:bg-slate-100 dark:hover:bg-white/5"
           >
             <ChevronRight size={15} />
           </button>
