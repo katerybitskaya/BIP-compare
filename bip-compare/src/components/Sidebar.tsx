@@ -34,7 +34,7 @@ function SidebarContent({ active, onSelect }: Pick<SidebarProps, 'active' | 'onS
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-2.5 px-6 py-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 via-violet-500 to-blue-500 text-slate-900 dark:text-white shadow-lg shadow-violet-900/40">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-fuchsia-500 via-violet-500 to-blue-500 text-white shadow-lg shadow-violet-900/40">
           <Scale size={18} strokeWidth={2.4} />
         </div>
         <span className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">BIP Compare</span>
@@ -57,7 +57,7 @@ function SidebarContent({ active, onSelect }: Pick<SidebarProps, 'active' | 'onS
               {isActive && (
                 <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-fuchsia-400 to-blue-400" />
               )}
-              <Icon size={18} className={isActive ? 'text-violet-300' : 'text-slate-400 dark:text-slate-500'} />
+              <Icon size={18} className={isActive ? 'text-violet-600 dark:text-violet-300' : 'text-slate-400 dark:text-slate-500'} />
               {label}
             </button>
           );
@@ -73,7 +73,7 @@ function SidebarContent({ active, onSelect }: Pick<SidebarProps, 'active' | 'onS
           Pomoc
         </button>
         <div className="flex items-center gap-3 rounded-xl px-3 py-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-sm font-semibold text-slate-900 dark:text-white">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-sm font-semibold text-white">
             JK
           </div>
           <div className="min-w-0">
@@ -90,7 +90,7 @@ export default function Sidebar({ active, onSelect, open, onClose }: SidebarProp
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 border-r border-slate-200 dark:border-white/5 bg-white dark:bg-[#0d1120] lg:flex">
+      <aside className="relative dark:static hidden w-64 shrink-0 border-r border-slate-200 dark:border-white/5 bg-white dark:bg-[#0d1120] lg:flex">
         <SidebarContent active={active} onSelect={onSelect} />
       </aside>
 
@@ -106,7 +106,7 @@ export default function Sidebar({ active, onSelect, open, onClose }: SidebarProp
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-3 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:text-slate-200"
+              className="absolute right-3 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200"
               aria-label="Zamknij menu"
             >
               <X size={18} />

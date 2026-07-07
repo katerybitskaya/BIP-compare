@@ -13,7 +13,7 @@ function HttpBadge({ code }: { code: number | null }) {
   if (code === null) return <span className="text-slate-400 dark:text-slate-500">–</span>;
   const ok = code < 400;
   return (
-    <span className={ok ? 'text-emerald-400' : 'text-rose-400'}>
+    <span className={ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
       {code} {ok ? 'OK' : ''}
     </span>
   );
@@ -26,22 +26,22 @@ const NOTE_CONFIG: Record<
   ok: {
     icon: CheckCircle2,
     text: 'Plik identyczny — rozmiar i zawartość są takie same.',
-    tone: 'bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-400/20',
+    tone: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-400/20',
   },
   different: {
     icon: AlertTriangle,
     text: 'Wykryto różnicę w rozmiarze pliku między starym a nowym systemem.',
-    tone: 'bg-amber-500/10 text-amber-300 ring-1 ring-amber-400/20',
+    tone: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 ring-1 ring-amber-400/20',
   },
   error404: {
     icon: FileWarning,
     text: 'Plik jest niedostępny pod nowym adresem (błąd 404). Sprawdź, czy nie został przeniesiony.',
-    tone: 'bg-rose-500/10 text-rose-300 ring-1 ring-rose-400/20',
+    tone: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 ring-1 ring-rose-400/20',
   },
   new: {
     icon: Info,
     text: 'Plik występuje tylko w nowym systemie — brak odpowiednika w starej wersji BIP.',
-    tone: 'bg-blue-500/10 text-blue-300 ring-1 ring-blue-400/20',
+    tone: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 ring-1 ring-blue-400/20',
   },
   removed: {
     icon: Info,
@@ -53,9 +53,9 @@ const NOTE_CONFIG: Record<
 export default function FileDetailPanel({ file, onClose }: FileDetailPanelProps) {
   if (!file) {
     return (
-      <aside className="hidden w-full shrink-0 rounded-2xl border border-slate-300 dark:border-white/10 bg-white/[0.03] p-6 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur lg:flex lg:w-96 lg:flex-col lg:items-center lg:justify-center">
+      <aside className="hidden w-full shrink-0 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur lg:flex lg:w-96 lg:flex-col lg:items-center lg:justify-center">
         <div className="text-center text-sm text-slate-400 dark:text-slate-500">
-          <Info size={22} className="mx-auto mb-2 text-slate-600" />
+          <Info size={22} className="mx-auto mb-2 text-slate-300 dark:text-slate-600" />
           Wybierz plik z listy, aby zobaczyć szczegóły porównania.
         </div>
       </aside>
@@ -66,13 +66,13 @@ export default function FileDetailPanel({ file, onClose }: FileDetailPanelProps)
   const NoteIcon = note.icon;
 
   return (
-    <aside className="flex w-full shrink-0 flex-col rounded-2xl border border-slate-300 dark:border-white/10 bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur lg:w-96">
+    <aside className="flex w-full shrink-0 flex-col rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur lg:w-96">
       <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 p-4">
-        <h2 className="text-sm font-semibold text-slate-100">Szczegóły pliku</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Szczegóły pliku</h2>
         <button
           type="button"
           onClick={onClose}
-          className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:text-slate-200"
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200"
           aria-label="Zamknij szczegóły"
         >
           <X size={16} />
@@ -83,7 +83,7 @@ export default function FileDetailPanel({ file, onClose }: FileDetailPanelProps)
         <div className="flex items-start gap-3">
           <FileIcon kind={file.kind} size={20} />
           <div className="min-w-0 flex-1">
-            <p className="break-words text-sm font-medium text-slate-100">{file.name}</p>
+            <p className="break-words text-sm font-medium text-slate-900 dark:text-slate-100">{file.name}</p>
             <p className="mt-0.5 break-all text-xs text-slate-400 dark:text-slate-500">{file.path}</p>
           </div>
           <StatusBadge status={file.status} />
@@ -111,7 +111,7 @@ export default function FileDetailPanel({ file, onClose }: FileDetailPanelProps)
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-slate-500 dark:text-slate-400">Pobranie</dt>
-                <dd className={`font-medium ${file.oldDownloadOk ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <dd className={`font-medium ${file.oldDownloadOk ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                   {file.oldDownloadOk ? 'Działa' : 'Niedostępne'}
                 </dd>
               </div>
@@ -143,7 +143,7 @@ export default function FileDetailPanel({ file, onClose }: FileDetailPanelProps)
               </div>
               <div className="flex items-center justify-between">
                 <dt className="text-slate-500 dark:text-slate-400">Pobranie</dt>
-                <dd className={`font-medium ${file.newDownloadOk ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <dd className={`font-medium ${file.newDownloadOk ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                   {file.newDownloadOk ? 'Działa' : 'Niedostępne'}
                 </dd>
               </div>

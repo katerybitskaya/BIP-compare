@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import PageHeader from './components/PageHeader';
@@ -7,7 +7,6 @@ import StatCards from './components/StatCards';
 import FileResultsTable from './components/FileResultsTable';
 import FileDetailPanel from './components/FileDetailPanel';
 import SettingsTab from './components/SettingsTab';
-import { useEffect } from 'react';
 import { files as mockFiles, stats, lastRunLabel } from './data/mockData';
 import type { FileComparison, NavKey } from './types';
 
@@ -20,7 +19,6 @@ function App() {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
       if (saved === 'light' || saved === 'dark') return saved;
-      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
     }
     return 'dark';
   });

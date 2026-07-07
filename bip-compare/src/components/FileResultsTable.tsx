@@ -63,9 +63,9 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
   }, [totalPages]);
 
   return (
-    <section className="flex min-w-0 flex-1 flex-col rounded-2xl border border-slate-300 dark:border-white/10 bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur">
+    <section className="flex min-w-0 flex-1 flex-col rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur">
       <div className="flex flex-col gap-3 border-b border-slate-200 dark:border-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-sm font-semibold text-slate-100">Wyniki – pliki</h2>
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Wyniki – pliki</h2>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 rounded-lg border border-slate-300 dark:border-white/10 bg-slate-100 dark:bg-slate-900/60 px-3 py-1.5">
             <Search size={15} className="text-slate-400 dark:text-slate-500" />
@@ -74,7 +74,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
               onChange={(e) => handleQueryChange(e.target.value)}
               type="text"
               placeholder="Szukaj pliku…"
-              className="w-36 bg-transparent text-sm text-slate-900 dark:text-slate-200 outline-none placeholder:text-slate-600 sm:w-44"
+              className="w-36 bg-transparent text-sm text-slate-900 dark:text-slate-200 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 sm:w-44"
             />
           </div>
           <div className="relative">
@@ -87,7 +87,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
               Filtruj
             </button>
             {filterOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-44 rounded-xl border border-slate-300 dark:border-white/10 bg-[#131829] p-1.5 shadow-2xl shadow-slate-200/50 dark:shadow-black/50">
+              <div className="absolute right-0 z-10 mt-2 w-44 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#131829] p-1.5 shadow-2xl shadow-slate-200/50 dark:shadow-black/50">
                 {FILTERS.map((f) => (
                   <button
                     key={f.key}
@@ -95,7 +95,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
                     onClick={() => handleFilterChange(f.key)}
                     className={`flex w-full items-center rounded-lg px-2.5 py-1.5 text-left text-sm ${
                       statusFilter === f.key
-                        ? 'bg-violet-500/15 text-violet-300'
+                        ? 'bg-violet-500/15 text-violet-700 dark:text-violet-300'
                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
                     }`}
                   >
@@ -127,7 +127,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
                   key={file.id}
                   onClick={() => onSelect(file)}
                   className={`cursor-pointer border-t border-slate-200 dark:border-white/5 transition-colors ${
-                    isSelected ? 'bg-violet-500/10' : 'hover:bg-white/[0.04]'
+                    isSelected ? 'bg-violet-500/10' : 'hover:bg-slate-50 dark:hover:bg-white/[0.04]'
                   }`}
                 >
                   <td className="px-4 py-3">
@@ -145,7 +145,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
                   <td className="px-3 py-3">
                     <Download
                       size={16}
-                      className={file.newDownloadOk ? 'text-emerald-400' : 'text-rose-400'}
+                      className={file.newDownloadOk ? 'text-emerald-500 dark:text-emerald-400' : 'text-rose-500 dark:text-rose-400'}
                     />
                   </td>
                   <td className="px-4 py-3">
@@ -187,7 +187,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
               onClick={() => setPage(n)}
               className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium ${
                 n === safePage
-                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-slate-900 dark:text-white shadow-md shadow-violet-900/40'
+                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-900/40'
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
               }`}
             >
@@ -201,7 +201,7 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
               onClick={() => setPage(totalPages)}
               className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium ${
                 safePage === totalPages
-                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-slate-900 dark:text-white shadow-md shadow-violet-900/40'
+                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-900/40'
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
               }`}
             >

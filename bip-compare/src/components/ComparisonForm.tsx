@@ -32,7 +32,7 @@ export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps
     setScope((prev) => ({ ...prev, [key]: !prev[key] }));
 
   return (
-    <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white/[0.03] p-5 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur sm:p-6">
+    <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur sm:p-6">
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_1fr_auto]">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -45,7 +45,7 @@ export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps
               onChange={(e) => setOldUrl(e.target.value)}
               type="text"
               placeholder="https://bip.staryurzad.pl"
-              className="w-full bg-transparent text-sm text-slate-900 dark:text-slate-200 outline-none placeholder:text-slate-600"
+              className="w-full bg-transparent text-sm text-slate-900 dark:text-slate-200 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
             />
           </div>
         </div>
@@ -61,7 +61,7 @@ export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps
               onChange={(e) => setNewUrl(e.target.value)}
               type="text"
               placeholder="https://bip.nowyurzad.pl"
-              className="w-full bg-transparent text-sm text-slate-900 dark:text-slate-200 outline-none placeholder:text-slate-600"
+              className="w-full bg-transparent text-sm text-slate-900 dark:text-slate-200 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
             />
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps
                   type="checkbox"
                   checked={scope[opt.key]}
                   onChange={() => toggleScope(opt.key)}
-                  className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-violet-500 focus:ring-violet-500/40 focus:ring-offset-0"
+                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-violet-500 focus:ring-violet-500/40 focus:ring-offset-0"
                 />
                 {opt.label}
               </label>
@@ -92,7 +92,7 @@ export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps
           type="button"
           onClick={onRun}
           disabled={isRunning}
-          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-violet-500 to-blue-500 px-5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white shadow-lg shadow-violet-900/40 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-violet-500 to-blue-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isRunning ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
           {isRunning ? 'Porównywanie…' : 'Uruchom porównanie'}

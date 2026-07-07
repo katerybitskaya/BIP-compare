@@ -7,7 +7,7 @@ interface TopBarProps {
 
 export default function TopBar({ onMenuClick, lastRunLabel }: TopBarProps) {
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-slate-200 dark:border-white/5 bg-[#0b0e18]/90 px-4 py-3 backdrop-blur lg:hidden">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-slate-200 dark:border-white/5 bg-white/90 dark:bg-[#0b0e18]/90 px-4 py-3 backdrop-blur lg:hidden">
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -18,7 +18,7 @@ export default function TopBar({ onMenuClick, lastRunLabel }: TopBarProps) {
           <Menu size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 via-violet-500 to-blue-500 text-slate-900 dark:text-white">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-fuchsia-500 via-violet-500 to-blue-500 text-white">
             <Scale size={14} strokeWidth={2.6} />
           </div>
           <span className="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">BIP Compare</span>
