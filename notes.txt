@@ -1,7 +1,0 @@
-React
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
-
-npm install -g create-react-app - install react 
-npx crate-react-app reactApp - create a new react app
-npm run start - running the app
-npm run build - production 
