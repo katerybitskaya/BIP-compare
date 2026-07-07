@@ -44,17 +44,17 @@ export default function StatCards({ items }: { items: StatDefinition[] }) {
         return (
           <div
             key={stat.id}
-            className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5 shadow-lg shadow-black/20 backdrop-blur transition-colors hover:border-white/20"
+            className="flex items-start gap-4 rounded-2xl border border-slate-300 dark:border-white/10 bg-white/[0.03] p-5 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur transition-colors hover:border-slate-400 dark:border-white/20"
           >
             <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tone.bg} ${tone.text} ${tone.glow} ${tone.ring}`}>
               <Icon size={20} />
             </div>
             <div className="min-w-0">
-              <p className="text-sm text-slate-400">{stat.label}</p>
-              <p className="mt-0.5 text-2xl font-semibold tracking-tight text-white">
+              <p className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</p>
+              <p className="mt-0.5 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
                 {stat.value}
               </p>
-              <p className="mt-0.5 truncate text-xs text-slate-500">{stat.helper}</p>
+              <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">{stat.helper}</p>
             </div>
           </div>
         );

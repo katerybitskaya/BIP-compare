@@ -5,7 +5,7 @@ const STATUS_CONFIG: Record<FileStatus, { label: string; bg: string; text: strin
   different: { label: 'Różny rozmiar', bg: 'bg-amber-500/15', text: 'text-amber-400', ring: 'ring-1 ring-amber-400/20' },
   error404: { label: 'Błąd 404', bg: 'bg-rose-500/15', text: 'text-rose-400', ring: 'ring-1 ring-rose-400/20' },
   new: { label: 'Nowy plik', bg: 'bg-blue-500/15', text: 'text-blue-400', ring: 'ring-1 ring-blue-400/20' },
-  removed: { label: 'Usunięty', bg: 'bg-slate-500/15', text: 'text-slate-400', ring: 'ring-1 ring-slate-400/20' },
+  removed: { label: 'Usunięty', bg: 'bg-slate-500/15', text: 'text-slate-500 dark:text-slate-400', ring: 'ring-1 ring-slate-400/20' },
 };
 
 export default function StatusBadge({ status }: { status: FileStatus }) {
