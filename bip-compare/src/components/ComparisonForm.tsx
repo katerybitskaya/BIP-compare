@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link2, Play, Loader2 } from 'lucide-react';
+import { Link2, Play, Loader2, AlertCircle } from 'lucide-react';
 
 interface ScopeOption {
   key: string;
@@ -14,11 +14,12 @@ const SCOPE_OPTIONS: ScopeOption[] = [
 ];
 
 interface ComparisonFormProps {
-  onRun: () => void;
+  onRun: (oldUrl: string, newUrl: string) => void;
   isRunning: boolean;
+  error?: string | null;
 }
 
-export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps) {
+export default function ComparisonForm({ onRun, isRunning, error }: ComparisonFormProps) {
   const [oldUrl, setOldUrl] = useState('https://bip.staryurzad.pl');
   const [newUrl, setNewUrl] = useState('https://bip.nowyurzad.pl');
   const [scope, setScope] = useState<Record<string, boolean>>({
@@ -30,6 +31,13 @@ export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps
 
   const toggleScope = (key: string) =>
     setScope((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  function handleSubmit() {
+    const trimmedOld = oldUrl.trim();
+    const trimmedNew = newUrl.trim();
+    if (!trimmedOld || !trimmedNew) return;
+    onRun(trimmedOld, trimmedNew);
+  }
 
   return (
     <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur sm:p-6">
@@ -90,7 +98,7 @@ export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps
 
         <button
           type="button"
-          onClick={onRun}
+          onClick={handleSubmit}
           disabled={isRunning}
           className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-violet-500 to-blue-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -98,6 +106,17 @@ export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps
           {isRunning ? 'Porównywanie…' : 'Uruchom porównanie'}
         </button>
       </div>
+
+      {error && (
+        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-rose-500/10 p-3 text-xs text-rose-700 ring-1 ring-rose-400/20 dark:text-rose-300">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          <p>{error}</p>
+        </div>
+      )}
+
+      <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+        Uwaga: silnik porównawczy obecnie sprawdza tylko podstrony (zakres „Strony”, poprzez pełne przeszukanie obu witryn) — pozostałe opcje zakresu są zapisane w interfejsie na przyszłość.
+      </p>
     </section>
   );
 }

@@ -7,7 +7,9 @@ import StatCards from './components/StatCards';
 import FileResultsTable from './components/FileResultsTable';
 import FileDetailPanel from './components/FileDetailPanel';
 import SettingsTab from './components/SettingsTab';
+import ReportsTab from './components/ReportsTab';
 import { files as mockFiles, stats, lastRunLabel } from './data/mockData';
+import { runCompare, ApiError } from './api/compareApi';
 import type { FileComparison, NavKey } from './types';
 
 function App() {
@@ -15,6 +17,9 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<FileComparison | null>(mockFiles[0] ?? null);
   const [isRunning, setIsRunning] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [reportsRefreshKey, setReportsRefreshKey] = useState(0);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -35,9 +40,19 @@ function App() {
 
   const files = useMemo(() => mockFiles, []);
 
-  function handleRun() {
+  async function handleRun(oldUrl: string, newUrl: string) {
     setIsRunning(true);
-    window.setTimeout(() => setIsRunning(false), 1400);
+    setRunError(null);
+    try {
+      const result = await runCompare({ old_url: oldUrl, new_url: newUrl });
+      setReportsRefreshKey((k) => k + 1);
+      setSelectedReportId(result.id);
+      setActiveNav('reports');
+    } catch (err) {
+      setRunError(err instanceof ApiError ? err.message : 'Nie udało się uruchomić porównania.');
+    } finally {
+      setIsRunning(false);
+    }
   }
 
   return (
@@ -63,11 +78,13 @@ function App() {
             title={
               activeNav === 'settings' ? 'Ustawienia' :
               activeNav === 'dashboard' ? 'Dashboard' :
+              activeNav === 'reports' ? 'Raporty' :
               'W budowie'
             }
             subtitle={
               activeNav === 'settings' ? 'Zarządzaj ustawieniami aplikacji i preferencjami.' :
               activeNav === 'dashboard' ? 'Porównaj starą i nową wersję Biuletynu Informacji Publicznej.' :
+              activeNav === 'reports' ? 'Przeglądaj wyniki wcześniej uruchomionych porównań.' :
               'Funkcjonalność w trakcie realizacji.'
             }
             lastRunLabel={lastRunLabel}
@@ -76,7 +93,7 @@ function App() {
           <div className="space-y-6">
             {activeNav === 'dashboard' && (
               <>
-                <ComparisonForm onRun={handleRun} isRunning={isRunning} />
+                <ComparisonForm onRun={handleRun} isRunning={isRunning} error={runError} />
 
                 <StatCards items={stats} />
 
@@ -91,11 +108,19 @@ function App() {
               </>
             )}
 
+            {activeNav === 'reports' && (
+              <ReportsTab
+                refreshKey={reportsRefreshKey}
+                selectedId={selectedReportId}
+                onSelect={setSelectedReportId}
+              />
+            )}
+
             {activeNav === 'settings' && (
               <SettingsTab theme={theme} onThemeChange={setTheme} />
             )}
 
-            {activeNav !== 'dashboard' && activeNav !== 'settings' && (
+            {activeNav !== 'dashboard' && activeNav !== 'settings' && activeNav !== 'reports' && (
               <div className="flex flex-col items-center justify-center py-20 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
                 <h3 className="text-lg font-medium text-slate-900 dark:text-slate-200">Ta sekcja jest w budowie</h3>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Zapraszamy wkrótce.</p>
