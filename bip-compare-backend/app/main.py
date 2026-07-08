@@ -7,17 +7,19 @@ a JSON report describing:
   * the full list of discovered subpages per site,
   * which subpages are missing (existed on the old site, gone on the new one),
   * which subpages are "extra"/unneeded (only exist on the new site),
-  * which subpages are unchanged between both versions.
+  * which subpages are unchanged between both versions,
+  * for each unchanged (matched) subpage, a detailed diff of its content
+    (text/structure), links, and attachments — fetched separately per page.
 """
 from __future__ import annotations
 
 from typing import List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from .comparison import compare_sites, list_result_summaries, load_result
-from .models import CompareRequest, ComparisonResult, ReportSummary
+from .comparison import compare_sites, list_result_summaries, load_page_detail, load_result
+from .models import CompareRequest, ComparisonResult, PageDetail, ReportSummary
 
 app = FastAPI(
     title="BIP Compare API",
@@ -58,3 +60,17 @@ async def get_result(result_id: str) -> ComparisonResult:
     if result is None:
         raise HTTPException(status_code=404, detail="Nie znaleziono raportu o podanym id.")
     return result
+
+
+@app.get("/api/compare/{result_id}/pages", response_model=PageDetail)
+async def get_page_detail(
+    result_id: str,
+    path: str = Query(..., description="Ścieżka podstrony, np. /o-nas"),
+) -> PageDetail:
+    detail = load_page_detail(result_id, path)
+    if detail is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Brak szczegółowego porównania dla tej podstrony (albo raport nie istnieje, albo ta ścieżka nie ma wygenerowanych szczegółów).",
+        )
+    return detail

@@ -4,28 +4,54 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
-  FileX,
-  FilePlus,
   Loader2,
+  FileText,
+  Link2,
+  Paperclip,
+  Camera,
+  Info,
 } from 'lucide-react';
 import type { ComparisonResult } from '../api/types';
 import { getReport } from '../api/compareApi';
 import { formatDateTime, formatDuration } from '../utils/format';
+import { buildPageRows, buildStatItems } from '../utils/pageRows';
+import type { PageRow } from '../utils/pageRows';
+import StatCards from './StatCards';
+import PageResultsTable from './PageResultsTable';
+import PageDetailPanel from './PageDetailPanel';
 
 interface ReportDetailProps {
   reportId: string;
   onBack: () => void;
 }
 
+function ScopeBadge({ active, label, Icon }: { active: boolean; label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
+        active
+          ? 'bg-emerald-500/15 text-emerald-600 ring-1 ring-emerald-400/20 dark:text-emerald-400'
+          : 'bg-slate-500/10 text-slate-400 ring-1 ring-slate-400/10 dark:text-slate-500'
+      }`}
+    >
+      <Icon size={12} />
+      {label}
+      {active ? ' — sprawdzano' : ' — pominięto'}
+    </span>
+  );
+}
+
 export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
   const [report, setReport] = useState<ComparisonResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRow, setSelectedRow] = useState<PageRow | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setSelectedRow(null);
     getReport(reportId)
       .then((data) => {
         if (!cancelled) setReport(data);
@@ -107,93 +133,37 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
             <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
               Wygenerowano: {formatDateTime(report.generated_at)}
             </p>
-          </section>
 
-          <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4 text-center shadow-lg shadow-slate-200/50 dark:shadow-black/20">
-              <p className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">{report.unchanged_paths.length}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">podstron bez zmian</p>
-            </div>
-            <div className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4 text-center shadow-lg shadow-slate-200/50 dark:shadow-black/20">
-              <p className="text-2xl font-semibold text-rose-600 dark:text-rose-400">{report.missing_in_new.length}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">brakuje na nowym adresie</p>
-            </div>
-            <div className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4 text-center shadow-lg shadow-slate-200/50 dark:shadow-black/20">
-              <p className="text-2xl font-semibold text-amber-600 dark:text-amber-400">{report.extra_in_new.length}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">zbędnych na nowym adresie</p>
+            <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-200 dark:border-white/5 pt-4">
+              <ScopeBadge active={report.scope?.content ?? false} label="Zawartość" Icon={FileText} />
+              <ScopeBadge active={report.scope?.links ?? false} label="Linki" Icon={Link2} />
+              <ScopeBadge active={report.scope?.attachments ?? false} label="Pliki" Icon={Paperclip} />
+              <ScopeBadge active={false} label="Zrzuty ekranu (wkrótce)" Icon={Camera} />
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
-            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/5 p-4">
-              <FileX size={16} className="text-rose-500" />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Podstrony, których brakuje na nowym adresie ({report.missing_in_new.length})
-              </h3>
-            </div>
-            <div className="max-h-80 overflow-y-auto p-4">
-              {report.missing_in_new.length === 0 ? (
-                <p className="text-sm text-slate-400 dark:text-slate-500">Brak — wszystkie podstrony ze starego adresu istnieją na nowym.</p>
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {report.missing_in_new.map((entry) => (
-                    <li key={entry.path} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-rose-500/5 px-3 py-2">
-                      <span className="font-medium text-slate-800 dark:text-slate-200 break-all">{entry.path}</span>
-                      <span className="text-xs text-rose-600 dark:text-rose-400">{entry.reason}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+          <section className="flex items-start gap-2.5 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4 text-xs text-slate-500 dark:text-slate-400 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <Info size={16} className="mt-0.5 shrink-0 text-violet-400" />
+            <p>
+              Ten raport porównuje: <strong className="text-slate-700 dark:text-slate-300">listę podstron</strong> (brakujące/zbędne/bez
+              zmian — zawsze sprawdzane), <strong className="text-slate-700 dark:text-slate-300">zawartość</strong> (tekst i struktura
+              HTML), <strong className="text-slate-700 dark:text-slate-300">linki</strong> (brakujące/dodatkowe/niedziałające) oraz{' '}
+              <strong className="text-slate-700 dark:text-slate-300">załączone pliki</strong> (brakujące/dodatkowe/zmiana rozmiaru) — w
+              zależności od zakresu wybranego przy uruchomieniu (patrz odznaki powyżej). Dla każdej podstrony można przejść bezpośrednio do
+              starego i nowego adresu z panelu szczegółów poniżej. Zrzuty ekranu (porównanie wizualne) będą dodane w kolejnym etapie.
+            </p>
           </section>
 
-          <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
-            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/5 p-4">
-              <FilePlus size={16} className="text-amber-500" />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Podstrony zbędne — tylko na nowym adresie ({report.extra_in_new.length})
-              </h3>
-            </div>
-            <div className="max-h-80 overflow-y-auto p-4">
-              {report.extra_in_new.length === 0 ? (
-                <p className="text-sm text-slate-400 dark:text-slate-500">Brak — nowy adres nie ma dodatkowych podstron względem starego.</p>
-              ) : (
-                <ul className="space-y-2 text-sm">
-                  {report.extra_in_new.map((entry) => (
-                    <li key={entry.path} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-amber-500/5 px-3 py-2">
-                      <span className="font-medium text-slate-800 dark:text-slate-200 break-all">{entry.path}</span>
-                      <span className="text-xs text-amber-600 dark:text-amber-400">{entry.reason}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </section>
+          <StatCards items={buildStatItems(report)} />
 
-          <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
-            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/5 p-4">
-              <CheckCircle2 size={16} className="text-emerald-500" />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Podstrony bez zmian ({report.unchanged_paths.length})
-              </h3>
-            </div>
-            <div className="max-h-60 overflow-y-auto p-4">
-              {report.unchanged_paths.length === 0 ? (
-                <p className="text-sm text-slate-400 dark:text-slate-500">Brak wspólnych podstron.</p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {report.unchanged_paths.map((path) => (
-                    <span
-                      key={path}
-                      className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300"
-                    >
-                      {path}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+            <PageResultsTable
+              rows={buildPageRows(report)}
+              selectedPath={selectedRow?.path ?? null}
+              onSelect={setSelectedRow}
+            />
+            <PageDetailPanel reportId={report.id} row={selectedRow} onClose={() => setSelectedRow(null)} />
+          </div>
         </>
       )}
     </div>

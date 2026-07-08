@@ -1,4 +1,4 @@
-import type { CompareRequestPayload, ComparisonResult, ReportSummary } from './types';
+import type { CompareRequestPayload, ComparisonResult, PageDetail, ReportSummary } from './types';
 
 // The backend (bip-compare-backend, FastAPI) listens here by default.
 // Override with VITE_API_BASE_URL in a .env file if it runs elsewhere.
@@ -40,6 +40,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(detail);
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
   return (await response.json()) as T;
 }
 
@@ -56,4 +59,12 @@ export function listReports(): Promise<ReportSummary[]> {
 
 export function getReport(id: string): Promise<ComparisonResult> {
   return request<ComparisonResult>(`/api/compare/${id}`);
+}
+
+export function getPageDetail(resultId: string, path: string): Promise<PageDetail> {
+  return request<PageDetail>(`/api/compare/${resultId}/pages?path=${encodeURIComponent(path)}`);
+}
+
+export function clearAllReports(): Promise<{ removed: number }> {
+  return request<{ removed: number }>('/api/compare', { method: 'DELETE' });
 }
