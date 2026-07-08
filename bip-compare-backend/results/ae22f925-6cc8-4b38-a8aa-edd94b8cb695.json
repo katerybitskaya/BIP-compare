@@ -1,0 +1,1428 @@
+{
+  "id": "ae22f925-6cc8-4b38-a8aa-edd94b8cb695",
+  "generated_at": "2026-07-08T11:15:52.287942Z",
+  "duration_ms": 14643.4,
+  "old_url": "https://www.gov.pl/",
+  "new_url": "https://bip.staryurzad.pl/",
+  "old_site": {
+    "base_url": "https://www.gov.pl",
+    "reachable": true,
+    "root_status_code": 200,
+    "root_error": null,
+    "pages": [
+      {
+        "path": "/",
+        "url": "https://www.gov.pl/",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/prawa-autorskie",
+        "url": "https://www.gov.pl/web/gov/prawa-autorskie",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uslugi-dla-obywatela",
+        "url": "https://www.gov.pl/web/gov/uslugi-dla-obywatela",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uslugi-dla-przedsiebiorcy",
+        "url": "https://www.gov.pl/web/gov/uslugi-dla-przedsiebiorcy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/sluzbacywilna",
+        "url": "https://www.gov.pl/web/sluzbacywilna",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/ua",
+        "url": "https://www.gov.pl/web/ua",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/deklaracja-dostepnosci-serwisu-govpl",
+        "url": "https://www.gov.pl/web/gov/deklaracja-dostepnosci-serwisu-govpl",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/finanse/uwaga-na-falszywe-inwestycje--oszusci-podszywaja-sie-pod-instytucje-panstwowe",
+        "url": "https://www.gov.pl/web/finanse/uwaga-na-falszywe-inwestycje--oszusci-podszywaja-sie-pod-instytucje-panstwowe",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/katalog-jednostek",
+        "url": "https://www.gov.pl/web/gov/katalog-jednostek",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/profilzaufany",
+        "url": "https://www.gov.pl/web/profilzaufany",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/szczepimysie",
+        "url": "https://www.gov.pl/",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/finanse/deregulacja-20-przyjazna-administracja-skarbowa-i-pewnosc-prawa-podatkowego",
+        "url": "https://www.gov.pl/web/finanse/deregulacja-20-przyjazna-administracja-skarbowa-i-pewnosc-prawa-podatkowego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/bip",
+        "url": "https://www.gov.pl/web/bip",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/mswia/sluzby-w-gotowosci-przed-fala-upalow-czuwamy-nad-sytuacja-pogodowa",
+        "url": "https://www.gov.pl/web/mswia/sluzby-w-gotowosci-przed-fala-upalow-czuwamy-nad-sytuacja-pogodowa",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/ministerstwa",
+        "url": "https://www.gov.pl/web/gov/ministerstwa",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/premier",
+        "url": "https://www.gov.pl/web/premier",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/premier/sklad-rady-ministrow",
+        "url": "https://www.gov.pl/web/premier/sklad-rady-ministrow",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/podpisz-dokument-elektronicznie-wykorzystaj-podpis-zaufany",
+        "url": "https://www.gov.pl/web/gov/podpisz-dokument-elektronicznie-wykorzystaj-podpis-zaufany",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uslugi-dla-urzednika",
+        "url": "https://www.gov.pl/web/gov/uslugi-dla-urzednika",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zaloz-profil-zaufany",
+        "url": "https://www.gov.pl/web/profilzaufany",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/ua",
+        "url": "https://www.gov.pl/web/ua",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/warunki-korzystania",
+        "url": "https://www.gov.pl/web/gov/warunki-korzystania",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uslugi-dla-rolnika",
+        "url": "https://www.gov.pl/web/gov/uslugi-dla-rolnika",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/profilzaufany/wazna-zmiana-w-logowaniu-do-profilu-zaufanego",
+        "url": "https://www.gov.pl/web/profilzaufany/wazna-zmiana-w-logowaniu-do-profilu-zaufanego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/premier/premier-w-interesie-polski-jest-aby-ukraina-nie-przegrala-tej-wojny",
+        "url": "https://www.gov.pl/web/premier/premier-w-interesie-polski-jest-aby-ukraina-nie-przegrala-tej-wojny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/premier/polska-wzmacnia-bezpieczenstwo-i-rozwija-wspolprace-obronna-ze-stanami-zjednoczonymi",
+        "url": "https://www.gov.pl/web/premier/polska-wzmacnia-bezpieczenstwo-i-rozwija-wspolprace-obronna-ze-stanami-zjednoczonymi",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/obrona-narodowa/kazda-donacja-na-ukraine-byla-przekazywana-po-wczesniejszej-analizie-wojska-polskiego",
+        "url": "https://www.gov.pl/web/obrona-narodowa/kazda-donacja-na-ukraine-byla-przekazywana-po-wczesniejszej-analizie-wojska-polskiego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/premier/rozwoj-oze-to-inwestycja-w-bezpieczenstwo-polski-i-czysta-energie",
+        "url": "https://www.gov.pl/web/premier/rozwoj-oze-to-inwestycja-w-bezpieczenstwo-polski-i-czysta-energie",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/obrona-narodowa/wzmacniamy-wspolprace-ze-strona-amerykanska-w-domenie-kosmicznej",
+        "url": "https://www.gov.pl/web/obrona-narodowa/wzmacniamy-wspolprace-ze-strona-amerykanska-w-domenie-kosmicznej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/polityka-dotyczaca-cookies",
+        "url": "https://www.gov.pl/web/gov/polityka-dotyczaca-cookies",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/baza-wiedzy",
+        "url": "https://www.gov.pl/web/baza-wiedzy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/szukaj",
+        "url": "https://www.gov.pl/web/gov/szukaj",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/portal-gov",
+        "url": "https://www.gov.pl/web/gov/portal-gov",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov",
+        "url": "https://www.gov.pl/web/gov",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-rozbieznosc-w-danych-prawa-jazdy",
+        "url": "https://www.gov.pl/web/gov/zglos-rozbieznosc-w-danych-prawa-jazdy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-adres-do-e-doreczen-u-publicznego-dostawcy-uslugi-e-doreczen",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-adres-do-e-doreczen-u-publicznego-dostawcy-uslugi-e-doreczen",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-zeznanie-podatkowe-o-nabyciu-rzeczy-lub-praw-majatkowych-formularz-podatkowy-sd-3",
+        "url": "https://www.gov.pl/web/gov/zloz-zeznanie-podatkowe-o-nabyciu-rzeczy-lub-praw-majatkowych-formularz-podatkowy-sd-3",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zaswiadczenie-o-swoich-danych-przetwarzanych-w-rejestrze-dowodow-osobistych",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zaswiadczenie-o-swoich-danych-przetwarzanych-w-rejestrze-dowodow-osobistych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-wniosek-o-zmiane-decyzji-w-zakresie-wysokosci-dodatku-weterana-poszkodowanego",
+        "url": "https://www.gov.pl/web/gov/zloz-wniosek-o-zmiane-decyzji-w-zakresie-wysokosci-dodatku-weterana-poszkodowanego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zasilek-pielegnacyjny",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zasilek-pielegnacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-wniosek-o-dodatek-do-innych-zrodel-ciepla",
+        "url": "https://www.gov.pl/web/gov/zloz-wniosek-o-dodatek-do-innych-zrodel-ciepla",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wyznacz-pelnomocnika-do-podpisywania-elektronicznej-deklaracji-podatkowej",
+        "url": "https://www.gov.pl/web/gov/wyznacz-pelnomocnika-do-podpisywania-elektronicznej-deklaracji-podatkowej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/podpisz-jpkvat-z-deklaracja-profilem-zaufanym",
+        "url": "https://www.gov.pl/web/gov/podpisz-jpkvat-z-deklaracja-profilem-zaufanym",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/modul-obslugi-spraw-dla-cudzoziemcow-portal-uslugowy-i-informacyjny",
+        "url": "https://www.gov.pl/web/gov/modul-obslugi-spraw-dla-cudzoziemcow-portal-uslugowy-i-informacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-numer-pesel-dla-obywateli-polskich",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-numer-pesel-dla-obywateli-polskich",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zasilek-opiekunczy-na-opieke-nad-zdrowym-dzieckiem",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zasilek-opiekunczy-na-opieke-nad-zdrowym-dzieckiem",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/oplac-przejazd-droga-platna-e-toll",
+        "url": "https://www.gov.pl/web/gov/oplac-przejazd-droga-platna-e-toll",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wezwij-policje",
+        "url": "https://www.gov.pl/web/gov/wezwij-policje",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-odpis-aktu-stanu-cywilnego-urodzenia-malzenstwa-zgonu-en",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-odpis-aktu-stanu-cywilnego-urodzenia-malzenstwa-zgonu-en",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-status-weterana-poszkodowanego",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-status-weterana-poszkodowanego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zaswiadczenie-o-wysokosci-zaleglosci-podatkowych-malzonka",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zaswiadczenie-o-wysokosci-zaleglosci-podatkowych-malzonka",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/dowod-osobisty-informacje",
+        "url": "https://www.gov.pl/web/gov/dowod-osobisty-informacje",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/fundusze-europejskie-portal-informacyjny",
+        "url": "https://www.gov.pl/web/gov/fundusze-europejskie-portal-informacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/elektroniczne-ksiegi-wieczyste",
+        "url": "https://www.gov.pl/web/gov/elektroniczne-ksiegi-wieczyste",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-co-zrobic-jesli-jestes-swiadkiem-przemocy-w-rodzinie",
+        "url": "https://www.gov.pl/web/gov/sprawdz-co-zrobic-jesli-jestes-swiadkiem-przemocy-w-rodzinie",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/odbieraj-przesylki-lub-przekazy-pocztowe-w-dogodnym-dla-ciebie-miejscu",
+        "url": "https://www.gov.pl/web/gov/odbieraj-przesylki-lub-przekazy-pocztowe-w-dogodnym-dla-ciebie-miejscu",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-zamiar-glosowania-przez-pelnomocnika",
+        "url": "https://www.gov.pl/web/gov/zglos-zamiar-glosowania-przez-pelnomocnika",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/kategorie-prawa-jazdy",
+        "url": "https://www.gov.pl/web/gov/kategorie-prawa-jazdy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-rejestru-urbanistycznego",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-rejestru-urbanistycznego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-rozpoczecia-dzialalnosci-gospodarczej-rolniczej-lub-wniesienia-wkladu-do-spoldzielni-socjalnej",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-rozpoczecia-dzialalnosci-gospodarczej-rolniczej-lub-wniesienia-wkladu-do-spoldzielni-socjalnej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-dofinansowanie-do-kotla-gazowego",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-dofinansowanie-do-kotla-gazowego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-dane-innej-osoby-z-rejestru-dowodow-osobistych",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-dane-innej-osoby-z-rejestru-dowodow-osobistych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-orzeczenie-o-stopniu-niepelnosprawnosci",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-orzeczenie-o-stopniu-niepelnosprawnosci",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-zbycie-lub-nabycie-pojazdu-na-przyklad-sprzedaz-kupno-darowizne",
+        "url": "https://www.gov.pl/web/gov/zglos-zbycie-lub-nabycie-pojazdu-na-przyklad-sprzedaz-kupno-darowizne",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/prawa-konsumenta-portal-informacyjny",
+        "url": "https://www.gov.pl/web/gov/prawa-konsumenta-portal-informacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/dzieciecy-telefon-zaufania-rzecznika-praw-dziecka",
+        "url": "https://www.gov.pl/web/gov/dzieciecy-telefon-zaufania-rzecznika-praw-dziecka",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-pobyt-za-granica-system-odyseusz",
+        "url": "https://www.gov.pl/web/gov/zglos-pobyt-za-granica-system-odyseusz",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-szkolenia-osoby-wspomagajacej-pracownika-z-niepelnosprawnoscia",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-szkolenia-osoby-wspomagajacej-pracownika-z-niepelnosprawnoscia",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-dofinansowanie-dla-spoldzielni-socjalnej-osob-prawnych",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-dofinansowanie-dla-spoldzielni-socjalnej-osob-prawnych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-czy-paszport-jest-wazny",
+        "url": "https://www.gov.pl/web/gov/sprawdz-czy-paszport-jest-wazny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wypoczynek-dla-dzieci-i-mlodziezy-portal-informacyjny",
+        "url": "https://www.gov.pl/web/gov/wypoczynek-dla-dzieci-i-mlodziezy-portal-informacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/poinformuj-o-braku-dostepnosci-architektonicznej-lub-informacyjno-komunikacyjnej",
+        "url": "https://www.gov.pl/web/gov/poinformuj-o-braku-dostepnosci-architektonicznej-lub-informacyjno-komunikacyjnej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-czy-numer-pesel-innej-osoby-jest-zastrzezony",
+        "url": "https://www.gov.pl/web/gov/sprawdz-czy-numer-pesel-innej-osoby-jest-zastrzezony",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/yak-otrymaty-sotsialnu-dopomohu-hromadyanam-ukrayiny",
+        "url": "https://www.gov.pl/web/gov/yak-otrymaty-sotsialnu-dopomohu-hromadyanam-ukrayiny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-karte-duzej-rodziny",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-karte-duzej-rodziny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-swiadczenie-wspierajace",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-swiadczenie-wspierajace",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-uzyskania-wyksztalcenia-na-poziomie-wyzszym",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-uzyskania-wyksztalcenia-na-poziomie-wyzszym",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-swiadczenie-rehabilitacyjne-z-tytulu-ubezpieczenia-wypadkowego",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-swiadczenie-rehabilitacyjne-z-tytulu-ubezpieczenia-wypadkowego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/platforma-uslug-elektronicznych-skarbowo-celnych-puesc--portal-uslugowy",
+        "url": "https://www.gov.pl/web/gov/platforma-uslug-elektronicznych-skarbowo-celnych-puesc--portal-uslugowy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-dofinansowanie-w-programie-rehabilitacja-25",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-dofinansowanie-w-programie-rehabilitacja-25",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zdjecie-do-dowodu-lub-paszportu",
+        "url": "https://www.gov.pl/web/gov/zdjecie-do-dowodu-lub-paszportu",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-kto-weryfikowal-czy-masz-zastrzezony-numer-pesel",
+        "url": "https://www.gov.pl/web/gov/sprawdz-kto-weryfikowal-czy-masz-zastrzezony-numer-pesel",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-rejestru-danych-kontaktowych-rdk",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-rejestru-danych-kontaktowych-rdk",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-swiadczenie-pielegnacyjne",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-swiadczenie-pielegnacyjne",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/udostepnij-dokumenty-planistyczne-w-rejestrze-urbanistycznym",
+        "url": "https://www.gov.pl/web/gov/udostepnij-dokumenty-planistyczne-w-rejestrze-urbanistycznym",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zaplac-podatek-od-nieruchomosci",
+        "url": "https://www.gov.pl/web/gov/zaplac-podatek-od-nieruchomosci",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-lub-cofnij-zawieszenie-e-dowodu-osobistego-dziecka-lub-innej-osoby",
+        "url": "https://www.gov.pl/web/gov/zglos-lub-cofnij-zawieszenie-e-dowodu-osobistego-dziecka-lub-innej-osoby",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-aplikacji-mobilnych",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-aplikacji-mobilnych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zasilek-chorobowy",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zasilek-chorobowy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-numer-pesel--usluga-dla-cudzoziemcow-en",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-numer-pesel--usluga-dla-cudzoziemcow-en",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-poprawnosc-danych-przestrzennych-oraz-metadanych",
+        "url": "https://www.gov.pl/web/gov/sprawdz-poprawnosc-danych-przestrzennych-oraz-metadanych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/odzyskaj-zatrzymane-prawo-jazdy",
+        "url": "https://www.gov.pl/web/gov/odzyskaj-zatrzymane-prawo-jazdy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-historie-pojazdu",
+        "url": "https://www.gov.pl/web/gov/sprawdz-historie-pojazdu",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-utrate-lub-uszkodzenie-dowodu-osobistego-dziecka-lub-podopiecznego--uniewaznij-dowod",
+        "url": "https://www.gov.pl/web/gov/zglos-utrate-lub-uszkodzenie-dowodu-osobistego-dziecka-lub-podopiecznego--uniewaznij-dowod",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/mobywatel/mlegitymacja-studencka",
+        "url": "https://info.mobywatel.gov.pl/dokumenty/legitymacja-studencka",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/send-a-general-letter-service-card",
+        "url": "https://www.gov.pl/web/gov/send-a-general-letter-service-card",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/obowiazek-meldunkowy",
+        "url": "https://www.gov.pl/web/gov/obowiazek-meldunkowy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-swiadczenie-aktywnie-w-domu",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-swiadczenie-aktywnie-w-domu",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/potwierdz-polski-dokument-aby-uzywac-go-za-granica",
+        "url": "https://www.gov.pl/web/gov/potwierdz-polski-dokument-aby-uzywac-go-za-granica",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zaswiadczenia-o-przebiegu-lub-ukonczeniu-studiow",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zaswiadczenia-o-przebiegu-lub-ukonczeniu-studiow",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wymelduj-sie-z-pobytu-stalego",
+        "url": "https://www.gov.pl/web/gov/wymelduj-sie-z-pobytu-stalego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/korzystaj-z-bezplatnych-lekow-75",
+        "url": "https://www.gov.pl/web/gov/korzystaj-z-bezplatnych-lekow-75",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zastrzez-lub-cofnij-zastrzezenie-numeru-pesel-podopiecznego-lub-innej-osoby",
+        "url": "https://www.gov.pl/web/gov/zastrzez-lub-cofnij-zastrzezenie-numeru-pesel-podopiecznego-lub-innej-osoby",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/ksiegi-wieczyste",
+        "url": "https://www.gov.pl/web/gov/ksiegi-wieczyste",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-numer-pesel--usluga-dla-cudzoziemcow-ua",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-numer-pesel--usluga-dla-cudzoziemcow-ua",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-dodatek-na-pokrycie-kosztow-energii-elektrycznej-w-zwiazku-z-uzytkowaniem-koncentratora-tlenu-lub-respiratora",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-dodatek-na-pokrycie-kosztow-energii-elektrycznej-w-zwiazku-z-uzytkowaniem-koncentratora-tlenu-lub-respiratora",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-utrate-lub-uszkodzenie-swojego-dowodu-osobistego-uniewaznij-dowod",
+        "url": "https://www.gov.pl/web/gov/zglos-utrate-lub-uszkodzenie-swojego-dowodu-osobistego-uniewaznij-dowod",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-wniosek-o-zapewnienie-dostepnosci-cyfrowej-strony-internetowej-lub-aplikacji-mobilnej",
+        "url": "https://www.gov.pl/web/gov/zloz-wniosek-o-zapewnienie-dostepnosci-cyfrowej-strony-internetowej-lub-aplikacji-mobilnej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-swoje-dane-w-rejestrze-dokumentow-paszportowych",
+        "url": "https://www.gov.pl/web/gov/sprawdz-swoje-dane-w-rejestrze-dokumentow-paszportowych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-informacje-o-obrotach-towarowych-z-zagranica",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-informacje-o-obrotach-towarowych-z-zagranica",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-nieuprawnione-wykorzystanie-danych-osobowych-dziecka-lub-innej-osoby-kradziez-tozsamosci--uniewaznij-dowod",
+        "url": "https://www.gov.pl/web/gov/zglos-nieuprawnione-wykorzystanie-danych-osobowych-dziecka-lub-innej-osoby-kradziez-tozsamosci--uniewaznij-dowod",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-przygotowania-osob-niepelnosprawnych-do-stazu-zawodowego-w-administracji-rzadowej",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-przygotowania-osob-niepelnosprawnych-do-stazu-zawodowego-w-administracji-rzadowej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-swoje-dane-w-centralnym-rejestrze-wyborcow2",
+        "url": "https://www.gov.pl/web/gov/sprawdz-swoje-dane-w-centralnym-rejestrze-wyborcow2",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zmien-miejsce-glosowania",
+        "url": "https://www.gov.pl/web/gov/zmien-miejsce-glosowania",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-wniosek-o-oszacowanie-spowodowanych-przez-susze-strat-w-uprawach-rolnych",
+        "url": "https://www.gov.pl/web/gov/zloz-wniosek-o-oszacowanie-spowodowanych-przez-susze-strat-w-uprawach-rolnych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-zakupu-wozka-inwalidzkiego-o-napedzie-elektrycznym",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-zakupu-wozka-inwalidzkiego-o-napedzie-elektrycznym",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-programu-moj-prad",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-programu-moj-prad",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/niepelnosprawni-portal-informacyjny",
+        "url": "https://www.gov.pl/web/gov/niepelnosprawni-portal-informacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-dane-innej-osoby-z-rejestru-pesel",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-dane-innej-osoby-z-rejestru-pesel",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wymien-prawo-jazdy",
+        "url": "https://www.gov.pl/web/gov/wymien-prawo-jazdy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-dostep-do-elektronicznej-dokumentacji-medycznej",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-dostep-do-elektronicznej-dokumentacji-medycznej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/ustal-swoj-kapital-poczatkowy",
+        "url": "https://www.gov.pl/web/gov/ustal-swoj-kapital-poczatkowy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-czy-paszport-jest-gotowy",
+        "url": "https://www.gov.pl/web/gov/sprawdz-czy-paszport-jest-gotowy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zaplac-podatek-rolny",
+        "url": "https://www.gov.pl/web/gov/zaplac-podatek-rolny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zastrzez-swoj-numer-pesel-lub-cofnij-zastrzezenie",
+        "url": "https://www.gov.pl/web/gov/zastrzez-swoj-numer-pesel-lub-cofnij-zastrzezenie",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wykorzystaj-informacje-sektora-publicznego2",
+        "url": "https://www.gov.pl/web/gov/wykorzystaj-informacje-sektora-publicznego2",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-zakupu-sprzetu-rehabilitacyjnego",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-zakupu-sprzetu-rehabilitacyjnego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-uprawnienia-kierowcy",
+        "url": "https://www.gov.pl/web/gov/sprawdz-uprawnienia-kierowcy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/europejska-karta-ubezpieczenia-zdrowotnego-portal-informacyjny",
+        "url": "https://www.gov.pl/web/gov/europejska-karta-ubezpieczenia-zdrowotnego-portal-informacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zaswiadczenie-o-przebiegu-sluzby-wojskowej",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zaswiadczenie-o-przebiegu-sluzby-wojskowej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-zakupu-sprzetu-elektronicznego",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-zakupu-sprzetu-elektronicznego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zaplac-za-posiadanie-psa",
+        "url": "https://www.gov.pl/web/gov/zaplac-za-posiadanie-psa",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zaplac-podatek-lesny",
+        "url": "https://www.gov.pl/web/gov/zaplac-podatek-lesny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-oprocentowania-kredytu-bankowego",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-oprocentowania-kredytu-bankowego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/ekoportal-informacje-o-srodowisku-i-jego-ochronie",
+        "url": "https://www.gov.pl/web/gov/ekoportal-informacje-o-srodowisku-i-jego-ochronie",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-dofinansowanie-pobytu-w-zlobku",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-dofinansowanie-pobytu-w-zlobku",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-pomocy-w-opiece-nad-dziecmi-oraz-w-ich-wychowaniu",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-pomocy-w-opiece-nad-dziecmi-oraz-w-ich-wychowaniu",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-zmiane-miejsca-zamieszkania-do-wojskowej-komendy-uzupelnien",
+        "url": "https://www.gov.pl/web/gov/zglos-zmiane-miejsca-zamieszkania-do-wojskowej-komendy-uzupelnien",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-wniosek-o-e-wyrys-pog",
+        "url": "https://www.gov.pl/web/gov/zloz-wniosek-o-e-wyrys-pog",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-pomocy-spolecznej",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-pomocy-spolecznej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zasilek-rodzinny-wraz-z-dodatkami",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zasilek-rodzinny-wraz-z-dodatkami",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zgode-na-edukacje-domowa",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zgode-na-edukacje-domowa",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zgloszenie-glosowania-korespondencyjnego-dla-osob-glosujacych-za-granica",
+        "url": "https://www.gov.pl/web/dyplomacja/wybory-prezydenta-rp-2025-za-granica",
+        "status_code": 404,
+        "ok": false,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-likwidacji-barier-architektonicznych",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-likwidacji-barier-architektonicznych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/czym-jest-rejestr-pesel",
+        "url": "https://www.gov.pl/web/gov/czym-jest-rejestr-pesel",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-przestepstwo",
+        "url": "https://www.gov.pl/web/gov/zglos-przestepstwo",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-likwidacji-barier-w-komunikowaniu-sie",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-likwidacji-barier-w-komunikowaniu-sie",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-pozwolenie-na-kierowanie-tramwajem",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-pozwolenie-na-kierowanie-tramwajem",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zalatwiaj-sprawy-urzedowe-przez-internet-na-epuap",
+        "url": "https://www.gov.pl/web/gov/zalatwiaj-sprawy-urzedowe-przez-internet-na-epuap",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/potwierdz-swoje-dane-kontaktowe-w-rejestrze-danych-kontaktowych-rdk",
+        "url": "https://www.gov.pl/web/gov/potwierdz-swoje-dane-kontaktowe-w-rejestrze-danych-kontaktowych-rdk",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-uzyskania-prawa-jazdy",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-uzyskania-prawa-jazdy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-wniosek-o-wyplate-bonu-cieplowniczego",
+        "url": "https://www.gov.pl/web/gov/zloz-wniosek-o-wyplate-bonu-cieplowniczego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/gov/zloz-wniosek-o-udostepnienie-danych-jednostkowych-z-centralnej-ewidencji-pojazdow",
+        "url": "https://www.gov.pl/web/gov/zloz-wniosek-o-udostepnienie-danych-jednostkowych-z-centralnej-ewidencji-pojazdow",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zapisz-dziecko-do-przedszkola",
+        "url": "https://www.gov.pl/web/gov/zapisz-dziecko-do-przedszkola",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-zakupu-oprzyrzadowania-samochodu---narzad-sluchu",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-zakupu-oprzyrzadowania-samochodu---narzad-sluchu",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-europejska-karte-ubezpieczenia-zdrowotnego-ekuz",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-europejska-karte-ubezpieczenia-zdrowotnego-ekuz",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-nieuprawnione-wykorzystanie-swoich-danych-osobowych-kradziez-tozsamosci--uniewaznij-dowod",
+        "url": "https://www.gov.pl/web/gov/zglos-nieuprawnione-wykorzystanie-swoich-danych-osobowych-kradziez-tozsamosci--uniewaznij-dowod",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/poland-businessharbour/znajdz-wsparcie2",
+        "url": "https://www.gov.pl/web/poland-businessharbour/znajdz-wsparcie2",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/otrzymuj-wiadomosci-o-nadejsciu-przesylki-awizo-w-formie-sms-lub-na-adres-e-mail",
+        "url": "https://www.gov.pl/web/gov/otrzymuj-wiadomosci-o-nadejsciu-przesylki-awizo-w-formie-sms-lub-na-adres-e-mail",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/powiadom-o-utracie-lub-zniszczeniu-ksiazeczki-wojskowej",
+        "url": "https://www.gov.pl/web/gov/powiadom-o-utracie-lub-zniszczeniu-ksiazeczki-wojskowej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zarejestruj-pojazd-za-posrednictwem-salonu-sprzedazy",
+        "url": "https://www.gov.pl/web/gov/zarejestruj-pojazd-za-posrednictwem-salonu-sprzedazy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/sprawdz-swoje-dane-w-rejestrze-pesel",
+        "url": "https://www.gov.pl/web/gov/sprawdz-swoje-dane-w-rejestrze-pesel",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-zawiadomienie-o-braku-dostepnosci-produktu-lub-uslugi",
+        "url": "https://www.gov.pl/web/gov/zloz-zawiadomienie-o-braku-dostepnosci-produktu-lub-uslugi",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zasilek-chorobowy-gdy-skonczylo-ci-sie-ubezpieczenie",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zasilek-chorobowy-gdy-skonczylo-ci-sie-ubezpieczenie",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/polski-bon-turystyczny---dla-dziecka",
+        "url": "https://www.gov.pl/web/gov/polski-bon-turystyczny---dla-dziecka",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/centralna-ewidencja-dzialalnosci-gospodarczej---portal-informacyjny",
+        "url": "https://www.gov.pl/web/gov/centralna-ewidencja-dzialalnosci-gospodarczej---portal-informacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-zaswiadczenie-i-glosuj-tam-gdzie-bedziesz-w-dniu-wyborow",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-zaswiadczenie-i-glosuj-tam-gdzie-bedziesz-w-dniu-wyborow",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-deklaracje-do-centralnej-ewidencji-emisyjnosci-budynkow-ceeb",
+        "url": "https://www.gov.pl/web/gov/zloz-deklaracje-do-centralnej-ewidencji-emisyjnosci-budynkow-ceeb",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wymelduj-sie-z-pobytu-czasowego-en",
+        "url": "https://www.gov.pl/web/gov/wymelduj-sie-z-pobytu-czasowego-en",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-wniosek-o-ustalenie-lokalizacji-inwestycji-celu-publicznego-albo-warunkow-zabudowy",
+        "url": "https://www.gov.pl/web/gov/zloz-wniosek-o-ustalenie-lokalizacji-inwestycji-celu-publicznego-albo-warunkow-zabudowy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/informacje-o-refundacji-lekow-i-innych-produktow",
+        "url": "https://www.gov.pl/web/gov/informacje-o-refundacji-lekow-i-innych-produktow",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-podatkowa-interpretacje-ogolna",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-podatkowa-interpretacje-ogolna",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/szukasz-kwalifikacji--skorzystaj-z-portalu-zintegrowanego-rejestru-kwalifikacji",
+        "url": "https://www.gov.pl/web/gov/szukasz-kwalifikacji--skorzystaj-z-portalu-zintegrowanego-rejestru-kwalifikacji",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-dofinansowanie-zakupu-samochodu-osobowego",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-dofinansowanie-zakupu-samochodu-osobowego",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-wyjazd-za-granice",
+        "url": "https://www.gov.pl/web/gov/zglos-wyjazd-za-granice",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/praca-portal-uslugowy-i-portal-informacyjny",
+        "url": "https://www.gov.pl/web/gov/praca-portal-uslugowy-i-portal-informacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-wniosek-o-zakup-preferencyjny-wegla-dla-gospodarstw-domowych",
+        "url": "https://www.gov.pl/web/gov/zloz-wniosek-o-zakup-preferencyjny-wegla-dla-gospodarstw-domowych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/portal-podatkowy",
+        "url": "https://www.gov.pl/web/gov/portal-podatkowy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-zakupu-przedmiotow-ortopedycznych-i-srodkow-pomocniczych",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-zakupu-przedmiotow-ortopedycznych-i-srodkow-pomocniczych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-pomocy-funduszu-sprawiedliwosci-wniosek-czesc-a",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-pomocy-funduszu-sprawiedliwosci-wniosek-czesc-a",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-darmowej-pomocy-prawnej",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-darmowej-pomocy-prawnej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/otrymayte-dofinansuvannya-doplatu-za-perebuvannya-v-yaslakh",
+        "url": "https://www.gov.pl/web/gov/otrymayte-dofinansuvannya-doplatu-za-perebuvannya-v-yaslakh",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/platforma-uslug-elektronicznych-zakladu-ubezpieczen-spolecznych",
+        "url": "https://www.gov.pl/web/gov/platforma-uslug-elektronicznych-zakladu-ubezpieczen-spolecznych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-likwidacji-barier-technicznych",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-likwidacji-barier-technicznych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-dofinansowania-do-zakupu-uslugi-tlumacza-jezyka-migowego-lub-tlumacza-przewodnika",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-dofinansowania-do-zakupu-uslugi-tlumacza-jezyka-migowego-lub-tlumacza-przewodnika",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wymien-zagraniczne-prawo-jazdy-na-polskie",
+        "url": "https://www.gov.pl/web/gov/wymien-zagraniczne-prawo-jazdy-na-polskie",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-pomoc-w-sprowadzeniu-dziecka-uprowadzonego-za-granice",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-pomoc-w-sprowadzeniu-dziecka-uprowadzonego-za-granice",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/paszport-informacje-o-dokumencie",
+        "url": "https://www.gov.pl/web/gov/paszport-informacje-o-dokumencie",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-ulgi-podatkowej-na-dziecko",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-ulgi-podatkowej-na-dziecko",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wyraz-zgode-na-wydanie-paszportu",
+        "url": "https://www.gov.pl/web/gov/wyraz-zgode-na-wydanie-paszportu",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-oswiadczenie-dotyczace-zwiekszenia-limitu-na-energie-elektryczna",
+        "url": "https://www.gov.pl/web/gov/zloz-oswiadczenie-dotyczace-zwiekszenia-limitu-na-energie-elektryczna",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-nagrode-za-prace-plastyczna-w-konkursie-sztuka-osob-niepelnosprawnych",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-nagrode-za-prace-plastyczna-w-konkursie-sztuka-osob-niepelnosprawnych",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wez-slub-cywilny",
+        "url": "https://www.gov.pl/web/gov/wez-slub-cywilny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/skorzystaj-z-programu-dobry-start2",
+        "url": "https://www.gov.pl/web/gov/skorzystaj-z-programu-dobry-start2",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/uzyskaj-drugi-paszport",
+        "url": "https://www.gov.pl/web/gov/uzyskaj-drugi-paszport",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wymien-karte-motorowerowa-na-prawo-jazdy-kategorii-am",
+        "url": "https://www.gov.pl/web/gov/wymien-karte-motorowerowa-na-prawo-jazdy-kategorii-am",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zloz-skarge-na-brak-dostepnosci-architektonicznej-lub-informacyjno-komunikacyjnej",
+        "url": "https://www.gov.pl/web/gov/zloz-skarge-na-brak-dostepnosci-architektonicznej-lub-informacyjno-komunikacyjnej",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/wojsko-polskie-portal-informacyjny",
+        "url": "https://www.gov.pl/web/gov/wojsko-polskie-portal-informacyjny",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/zglos-powrot-z-zagranicy",
+        "url": "https://www.gov.pl/web/gov/zglos-powrot-z-zagranicy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/web/gov/odbieraj-listy-polecone-ze-swojej-skrzynki-na-listy",
+        "url": "https://www.gov.pl/web/gov/odbieraj-listy-polecone-ze-swojej-skrzynki-na-listy",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      }
+    ],
+    "page_count": 200
+  },
+  "new_site": {
+    "base_url": "https://bip.staryurzad.pl",
+    "reachable": false,
+    "root_status_code": null,
+    "root_error": "[Errno 11001] getaddrinfo failed",
+    "pages": [],
+    "page_count": 0
+  },
+  "both_reachable": false,
+  "missing_in_new": [],
+  "extra_in_new": [],
+  "unchanged_paths": []
+}
