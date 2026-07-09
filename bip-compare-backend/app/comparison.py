@@ -2,28 +2,25 @@
 
 Each comparison run writes its results under ``results/{id}/``:
 
-  results/{id}/summary.json    -- page list, missing/extra/unchanged, file/link diffs
-  results/{id}/snapshot.json   -- {"old": ..., "new": ...} full raw content of every
-                                   crawled page on both sites, in one file
+  results/{id}/summary.json     -- page list, missing/extra/unchanged, file/link diffs
+  results/{id}/pages/old.json   -- full raw content of every crawled page on the old site
+  results/{id}/pages/new.json   -- same, for the new site
 
 The raw per-page snapshots (HTML, extracted text, structure signature,
 links, attachments) are saved so a later step can diff any given page's old
-vs. new content on demand, without re-crawling anything. Old and new are
-kept in one file (rather than two) because every reader that needs the raw
-content -- the content-diff endpoint in particular -- always needs both
-sides at once; one combined read is cheaper than two separate ones, and it
-was previously the more frequently exercised path.
+vs. new content on demand, without re-crawling anything.
 
 A site-wide comparison of every unique link and every unique file found
 anywhere on either site is also computed (when the corresponding scope flag
 is enabled) and saved straight into summary.json alongside everything else
 -- no extra JSON file needed, since both are small, flat lists.
 
-All saved JSON is compact (no indentation) -- these files are only ever
-read back by this same backend, never hand-edited, and skipping the
-indentation noticeably cuts serialization time and disk size for large
-sites (a full page's HTML can run to tens of KB, multiplied by hundreds of
-pages).
+All saved JSON is written with indentation (human-readable) rather than as
+one compact line -- these files are occasionally opened directly (e.g. to
+double-check what a report actually captured), and a multi-megabyte single
+line is effectively unopenable in a normal text editor. The extra
+indentation overhead is small next to the cost of the network requests
+that produced the data in the first place.
 """
 from __future__ import annotations
 
@@ -309,19 +306,19 @@ async def build_link_diffs(
     return diffs
 
 
-def _write_snapshot(path: Path, old_snapshot: RawSiteSnapshot, new_snapshot: RawSiteSnapshot) -> None:
-    """Serializes both sides' raw content into one compact JSON file.
+def _write_snapshots(pages_dir: Path, old_snapshot: RawSiteSnapshot, new_snapshot: RawSiteSnapshot, same_site: bool) -> None:
+    """Serializes each side's raw content into its own readable JSON file.
 
     Runs inside asyncio.to_thread (see compare_sites) since JSON-encoding a
     full site's worth of HTML is CPU-bound and would otherwise block the
     event loop while the file/link probing steps are trying to make
     concurrent network progress.
     """
-    combined = {
-        "old": old_snapshot.model_dump(mode="json"),
-        "new": new_snapshot.model_dump(mode="json"),
-    }
-    path.write_text(json.dumps(combined, ensure_ascii=False), encoding="utf-8")
+    (pages_dir / "old.json").write_text(old_snapshot.model_dump_json(indent=2), encoding="utf-8")
+    if same_site:
+        (pages_dir / "new.json").write_text(old_snapshot.model_dump_json(indent=2), encoding="utf-8")
+    else:
+        (pages_dir / "new.json").write_text(new_snapshot.model_dump_json(indent=2), encoding="utf-8")
 
 
 async def compare_sites(req: CompareRequest) -> ComparisonResult:
@@ -492,12 +489,13 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
 
         # --- Raw per-page content snapshot -----------------------------------
         # Full HTML/text/links/attachments for every crawled page on both
-        # sites, saved in one combined file (see _write_snapshot) via
-        # asyncio.to_thread so the JSON serialisation (potentially several MB
-        # for large sites) doesn't block the event loop.
+        # sites, saved as pages/old.json + pages/new.json (see
+        # _write_snapshots) via asyncio.to_thread so the JSON serialisation
+        # (potentially several MB for large sites) doesn't block the event loop.
         old_snapshot = _build_raw_snapshot(old_report, old_content)
         new_snapshot = old_snapshot if same_site else _build_raw_snapshot(new_report, new_content)
-        snapshot_path = result_dir / "snapshot.json"
+        pages_dir = result_dir / "pages"
+        pages_dir.mkdir(parents=True, exist_ok=True)
 
         # --- Site-wide file (attachment) and link comparisons ---------------
         # Run snapshot writing and the two probe-heavy comparisons in parallel
@@ -515,7 +513,7 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         file_diffs, link_diffs, _ = await asyncio.gather(
             _run_file_diffs(),
             _run_link_diffs(),
-            asyncio.to_thread(_write_snapshot, snapshot_path, old_snapshot, new_snapshot),
+            asyncio.to_thread(_write_snapshots, pages_dir, old_snapshot, new_snapshot, same_site),
         )
 
     duration_ms = (time.perf_counter() - started) * 1000
@@ -547,7 +545,7 @@ def _save_result(result: ComparisonResult) -> None:
     result_dir = RESULTS_DIR / result.id
     result_dir.mkdir(parents=True, exist_ok=True)
     out_path = result_dir / "summary.json"
-    out_path.write_text(result.model_dump_json(), encoding="utf-8")
+    out_path.write_text(result.model_dump_json(indent=2), encoding="utf-8")
 
 
 def _to_summary(result: ComparisonResult) -> ReportSummary:
@@ -584,13 +582,18 @@ def load_result(result_id: str) -> ComparisonResult | None:
 
 def load_raw_snapshot(result_id: str, side: str) -> RawSiteSnapshot | None:
     """Loads the full raw per-page content snapshot for one side ("old" or
-    "new") of a saved comparison, from the combined snapshot.json file.
+    "new") of a saved comparison, from results/{id}/pages/{side}.json.
 
-    Falls back to the older per-side ``pages/{old,new}.json`` layout so
-    reports saved before old/new were merged into one file keep working.
+    Also falls back to a combined results/{id}/snapshot.json, in case this
+    report was saved during the brief period where old/new were merged into
+    a single compact file -- keeps those reports readable too.
     """
     if side not in ("old", "new"):
         return None
+
+    pages_path = RESULTS_DIR / result_id / "pages" / f"{side}.json"
+    if pages_path.exists():
+        return RawSiteSnapshot.model_validate_json(pages_path.read_text(encoding="utf-8"))
 
     combined_path = RESULTS_DIR / result_id / "snapshot.json"
     if combined_path.exists():
@@ -600,10 +603,7 @@ def load_raw_snapshot(result_id: str, side: str) -> RawSiteSnapshot | None:
             return None
         return RawSiteSnapshot.model_validate(entry)
 
-    legacy_path = RESULTS_DIR / result_id / "pages" / f"{side}.json"
-    if not legacy_path.exists():
-        return None
-    return RawSiteSnapshot.model_validate_json(legacy_path.read_text(encoding="utf-8"))
+    return None
 
 
 def list_result_summaries() -> list[ReportSummary]:

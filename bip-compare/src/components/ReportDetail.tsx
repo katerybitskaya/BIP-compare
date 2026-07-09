@@ -22,6 +22,7 @@ import FileDetailPanel from './FileDetailPanel';
 import StatCards from './StatCards';
 import { buildLinkRows, buildLinkStatItems } from '../utils/linkRows';
 import { buildFileRows, buildFileStatItems } from '../utils/fileRows';
+import { buildContentStatItems } from '../utils/contentStats';
 import type { FileComparison, LinkComparison } from '../types';
 
 interface ReportDetailProps {
@@ -71,6 +72,7 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
     };
   }, [reportId]);
 
+  const contentStatItems = useMemo(() => (report ? buildContentStatItems(report) : []), [report]);
   const linkRows = useMemo(() => (report ? buildLinkRows(report) : []), [report]);
   const linkStatItems = useMemo(() => (report ? buildLinkStatItems(report) : []), [report]);
   const fileRows = useMemo(() => (report ? buildFileRows(report) : []), [report]);
@@ -256,7 +258,10 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
                   Co najmniej jedna ze stron jest niedostępna, więc porównanie zawartości nie jest możliwe.
                 </p>
               ) : (
-                <ContentComparisonSection reportId={report.id} report={report} />
+                <div className="space-y-4">
+                  <StatCards items={contentStatItems} />
+                  <ContentComparisonSection reportId={report.id} report={report} />
+                </div>
               )}
             </div>
           </section>

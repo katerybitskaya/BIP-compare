@@ -62,8 +62,8 @@ class PageDiffEntry(BaseModel):
 
 
 # --- Raw per-page content snapshot -----------------------------------------
-# Saved (both sides together) as results/{id}/snapshot.json — the full
-# crawled content of every page on one site (HTML, extracted text,
+# Saved as results/{id}/pages/old.json and results/{id}/pages/new.json — the
+# full crawled content of every page on one site (HTML, extracted text,
 # structure signature, links, attachments), so a later step can diff any
 # given page's old vs. new content without re-crawling anything.
 
@@ -106,9 +106,9 @@ class StructureDiffRow(BaseModel):
 
 class PageContentDiff(BaseModel):
     """On-demand content comparison for a single page, built from the raw
-    old/new snapshots (results/{id}/snapshot.json) when the user opens
-    that page in the report -- not pre-computed for every page up front,
-    so a full site crawl stays fast even for large sites."""
+    old/new snapshots (results/{id}/pages/{old,new}.json) when the user
+    opens that page in the report -- not pre-computed for every page up
+    front, so a full site crawl stays fast even for large sites."""
 
     path: str
     status: str = Field(description="same | changed | removed | added")
