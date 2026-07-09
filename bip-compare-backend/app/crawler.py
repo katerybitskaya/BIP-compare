@@ -51,6 +51,44 @@ STRUCTURE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "table", "img", "ul",
 # single request run forever.
 SAFETY_MAX_PAGES = 5000
 
+# How many times a single request is retried after a network-level failure
+# (timeout, connection reset, ...) before the page/link/file is actually
+# classified as broken. A busy real site under the load of a full crawl can
+# drop or stall the occasional request; without a retry, one bad moment
+# permanently misclassifies an otherwise-fine page as "missing" or "broken".
+REQUEST_RETRIES = 2
+RETRY_BACKOFF_SECONDS = 0.4
+
+
+def _timeout(timeout_seconds: float) -> httpx.Timeout:
+    """Builds a per-request timeout where waiting for a free connection in
+    the shared pool does NOT count against the user's configured budget.
+
+    httpx.Timeout(x) (a plain float) applies x to connect/read/write *and*
+    pool-checkout time. When the crawl and the link/file probing step are
+    both hammering one shared AsyncClient (bounded to ~20 connections) with
+    hundreds or thousands of requests, many requests spend most of their
+    time simply queued for a connection -- with pool time counted against
+    the same budget, those get killed as "timeouts" before ever reaching
+    the network, which then look like broken/missing pages that are
+    actually completely fine. Setting pool=None makes the queue wait
+    unbounded, so only genuine connect/read/write slowness counts.
+    """
+    return httpx.Timeout(timeout_seconds, pool=None)
+
+
+async def _get_with_retry(client: httpx.AsyncClient, url: str, timeout_seconds: float) -> httpx.Response:
+    last_exc: Optional[httpx.HTTPError] = None
+    for attempt in range(REQUEST_RETRIES + 1):
+        try:
+            return await client.get(url, timeout=_timeout(timeout_seconds), follow_redirects=True)
+        except httpx.HTTPError as exc:
+            last_exc = exc
+            if attempt < REQUEST_RETRIES:
+                await asyncio.sleep(RETRY_BACKOFF_SECONDS * (attempt + 1))
+    assert last_exc is not None
+    raise last_exc
+
 
 @dataclass
 class PageContent:
@@ -197,7 +235,7 @@ async def crawl_site(
 
     # 1) Reachability probe on the root URL.
     try:
-        root_resp = await client.get(base, timeout=timeout_seconds, follow_redirects=True)
+        root_resp = await _get_with_retry(client, base, timeout_seconds)
         report.reachable = True
         report.root_status_code = root_resp.status_code
     except httpx.HTTPError as exc:
@@ -215,7 +253,7 @@ async def crawl_site(
     async def fetch_one(path: str) -> tuple[PageStatus, Set[str], Optional[PageContent]]:
         full_url = urljoin(base, path)
         try:
-            resp = await client.get(full_url, timeout=timeout_seconds, follow_redirects=True)
+            resp = await _get_with_retry(client, full_url, timeout_seconds)
             status = resp.status_code
             ok = status < 400
             page = PageStatus(path=path, url=str(resp.url), status_code=status, ok=ok)
@@ -266,7 +304,7 @@ async def probe_path(
     base = _normalize_base(base_url)
     full_url = urljoin(base, path)
     try:
-        resp = await client.get(full_url, timeout=timeout_seconds, follow_redirects=True)
+        resp = await _get_with_retry(client, full_url, timeout_seconds)
         status = resp.status_code
         return PageStatus(path=path, url=str(resp.url), status_code=status, ok=status < 400)
     except httpx.HTTPError as exc:

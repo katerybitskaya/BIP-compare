@@ -27,7 +27,15 @@ from typing import Dict, Optional
 
 import httpx
 
-from .crawler import PageContent, crawl_site, probe_path
+from .crawler import (
+    REQUEST_RETRIES,
+    RETRY_BACKOFF_SECONDS,
+    PageContent,
+    _normalize_base,
+    _timeout,
+    crawl_site,
+    probe_path,
+)
 from .models import (
     CompareRequest,
     ComparisonResult,
@@ -109,25 +117,32 @@ def _aggregate_attachments(content_by_path: Dict[str, PageContent]) -> Dict[str,
 async def _probe_file(
     client: httpx.AsyncClient, href: str, timeout_seconds: float, cache: Dict[str, dict]
 ) -> dict:
+    """Checks whether ``href`` responds (HEAD, falling back to GET if the
+    server doesn't support HEAD), retrying on transient network failures so
+    a single dropped connection under heavy crawl load doesn't permanently
+    misclassify a perfectly fine link/file as broken."""
     if href in cache:
         return cache[href]
     result = {"status_code": None, "ok": False, "size_bytes": None, "content_type": None}
-    try:
-        resp = await client.head(href, timeout=timeout_seconds, follow_redirects=True)
-        if resp.status_code >= 400 or resp.status_code == 405:
-            # Some servers don't implement HEAD (or block it) — fall back to GET.
-            resp = await client.get(href, timeout=timeout_seconds, follow_redirects=True)
-        result["status_code"] = resp.status_code
-        result["ok"] = resp.status_code < 400
-        content_length = resp.headers.get("content-length")
-        if content_length is not None:
-            try:
-                result["size_bytes"] = int(content_length)
-            except ValueError:
-                pass
-        result["content_type"] = resp.headers.get("content-type")
-    except httpx.HTTPError:
-        pass
+    for attempt in range(REQUEST_RETRIES + 1):
+        try:
+            resp = await client.head(href, timeout=_timeout(timeout_seconds), follow_redirects=True)
+            if resp.status_code >= 400 or resp.status_code == 405:
+                # Some servers don't implement HEAD (or block it) — fall back to GET.
+                resp = await client.get(href, timeout=_timeout(timeout_seconds), follow_redirects=True)
+            result["status_code"] = resp.status_code
+            result["ok"] = resp.status_code < 400
+            content_length = resp.headers.get("content-length")
+            if content_length is not None:
+                try:
+                    result["size_bytes"] = int(content_length)
+                except ValueError:
+                    pass
+            result["content_type"] = resp.headers.get("content-type")
+            break
+        except httpx.HTTPError:
+            if attempt < REQUEST_RETRIES:
+                await asyncio.sleep(RETRY_BACKOFF_SECONDS * (attempt + 1))
     cache[href] = result
     return result
 
@@ -261,11 +276,22 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
     started = time.perf_counter()
     result_id = str(uuid.uuid4())
 
+    # If both addresses point at the exact same site, crawling it twice in
+    # parallel would only double the load on that one server (competing for
+    # the same connection pool and, if it's rate-limited, tripping it) while
+    # being guaranteed to report zero differences anyway. Crawl it once and
+    # reuse the result for both "sides" instead.
+    same_site = _normalize_base(str(req.old_url)) == _normalize_base(str(req.new_url))
+
     async with httpx.AsyncClient(headers=DEFAULT_HEADERS, limits=CLIENT_LIMITS) as client:
-        (old_report, old_content), (new_report, new_content) = await asyncio.gather(
-            crawl_site(client, str(req.old_url), req.max_pages, req.timeout_seconds),
-            crawl_site(client, str(req.new_url), req.max_pages, req.timeout_seconds),
-        )
+        if same_site:
+            old_report, old_content = await crawl_site(client, str(req.old_url), req.max_pages, req.timeout_seconds)
+            new_report, new_content = old_report, old_content
+        else:
+            (old_report, old_content), (new_report, new_content) = await asyncio.gather(
+                crawl_site(client, str(req.old_url), req.max_pages, req.timeout_seconds),
+                crawl_site(client, str(req.new_url), req.max_pages, req.timeout_seconds),
+            )
 
         both_reachable = old_report.reachable and new_report.reachable
 
@@ -275,14 +301,14 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         old_status_by_path = {p.path: p for p in old_report.pages}
         new_status_by_path = {p.path: p for p in new_report.pages}
 
-        candidate_missing = sorted(old_paths - new_paths)
-        candidate_extra = sorted(new_paths - old_paths)
-        unchanged = sorted(old_paths & new_paths)
+        candidate_missing = [] if same_site else sorted(old_paths - new_paths)
+        candidate_extra = [] if same_site else sorted(new_paths - old_paths)
+        unchanged = sorted(old_paths) if same_site else sorted(old_paths & new_paths)
 
         missing_in_new: list[PageDiffEntry] = []
         extra_in_new: list[PageDiffEntry] = []
 
-        if both_reachable:
+        if both_reachable and not same_site:
             # A path only *looks* missing if the other site's own crawl never
             # found a link to it. Before declaring it gone, probe the exact
             # same path directly on the new site — it might exist but just be
@@ -330,7 +356,7 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         # "X / Y stron zmienionych" tile and the report's content overview.
         content_checked_count = 0
         content_changed_count = 0
-        if both_reachable and req.scope.content:
+        if both_reachable and req.scope.content and not same_site:
             for path in unchanged:
                 old_page = old_content.get(path)
                 new_page = new_content.get(path)
@@ -339,6 +365,9 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
                 content_checked_count += 1
                 if old_page.html != new_page.html or old_page.text != new_page.text:
                     content_changed_count += 1
+        elif both_reachable and req.scope.content and same_site:
+            content_checked_count = len(unchanged)
+            content_changed_count = 0
 
         # --- Raw per-page content snapshots --------------------------------
         # Full HTML/text/links/attachments for every crawled page on each
@@ -348,7 +377,7 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         pages_dir = RESULTS_DIR / result_id / "pages"
         pages_dir.mkdir(parents=True, exist_ok=True)
         old_snapshot = _build_raw_snapshot(old_report, old_content)
-        new_snapshot = _build_raw_snapshot(new_report, new_content)
+        new_snapshot = old_snapshot if same_site else _build_raw_snapshot(new_report, new_content)
         (pages_dir / "old.json").write_text(old_snapshot.model_dump_json(indent=2), encoding="utf-8")
         (pages_dir / "new.json").write_text(new_snapshot.model_dump_json(indent=2), encoding="utf-8")
 

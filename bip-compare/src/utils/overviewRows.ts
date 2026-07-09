@@ -45,7 +45,7 @@ export function buildOverviewStatItems(report: ComparisonResult): StatDefinition
       value: tileValue(true, pagesIssues),
       helper: 'podstron z różnicą',
       tone: 'blue',
-      icon: 'files',
+      icon: 'globe',
     },
     {
       id: 'content',
@@ -53,7 +53,7 @@ export function buildOverviewStatItems(report: ComparisonResult): StatDefinition
       value: tileValue(scopeContent, contentChanged),
       helper: scopeContent ? 'stron zmienionych' : 'pominięte w zakresie',
       tone: 'amber',
-      icon: 'diff',
+      icon: 'code',
     },
     {
       id: 'links',
@@ -61,7 +61,7 @@ export function buildOverviewStatItems(report: ComparisonResult): StatDefinition
       value: tileValue(scopeLinks, linkIssues),
       helper: scopeLinks ? 'linków z różnicą' : 'pominięte w zakresie',
       tone: 'red',
-      icon: 'alert',
+      icon: 'link',
     },
     {
       id: 'files',
@@ -69,7 +69,7 @@ export function buildOverviewStatItems(report: ComparisonResult): StatDefinition
       value: tileValue(scopeAttachments, fileIssues),
       helper: scopeAttachments ? 'plików z różnicą' : 'pominięte w zakresie',
       tone: 'green',
-      icon: 'check',
+      icon: 'files',
     },
   ];
 }
