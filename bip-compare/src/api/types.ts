@@ -141,6 +141,8 @@ export interface ComparisonResult {
   unchanged_paths: string[];
   file_diffs?: FileDiffEntry[];
   link_diffs?: LinkDiffEntry[];
+  content_checked_count?: number;
+  content_changed_count?: number;
 }
 
 export interface ReportSummary {
@@ -163,4 +165,6 @@ export interface ReportSummary {
   file_issue_count?: number;
   link_count?: number;
   link_issue_count?: number;
+  content_checked_count?: number;
+  content_changed_count?: number;
 }

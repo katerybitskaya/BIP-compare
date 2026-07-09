@@ -47,6 +47,32 @@ export interface StatDefinition {
   icon: 'files' | 'diff' | 'check' | 'alert';
 }
 
+// --- Dashboard overview (category-level summary of a report) --------------
+
+export type CategoryId = 'pages' | 'content' | 'links' | 'files';
+
+export type CategoryStatus = 'ok' | 'issues' | 'skipped';
+
+export interface CategoryOverviewRow {
+  id: CategoryId;
+  label: string;
+  checked: number;
+  issues: number;
+  status: CategoryStatus;
+}
+
+export interface CategoryBreakdownStat {
+  label: string;
+  value: number;
+  tone: 'default' | 'success' | 'danger' | 'warning';
+}
+
+export interface CategoryOverviewEntry {
+  row: CategoryOverviewRow;
+  breakdown: CategoryBreakdownStat[];
+  emptyMessage: string | null;
+}
+
 export type NavKey =
   | 'dashboard'
   | 'comparisons'
