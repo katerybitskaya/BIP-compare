@@ -33,6 +33,7 @@ from .crawler import (
     PageContent,
     _normalize_base,
     _timeout,
+    check_reachable,
     crawl_site,
     probe_path,
 )
@@ -71,6 +72,18 @@ MAX_FILES = 1000
 # far more numerous than attachments (every nav item repeats on every
 # page), so the cap is a bit higher.
 MAX_LINKS = 1500
+
+# Maximum number of concurrent probe requests for missing/extra pages,
+# files and links probing steps. The httpx client already limits open
+# connections (CLIENT_LIMITS), but an explicit asyncio semaphore prevents
+# thousands of coroutines from piling up in the event loop at once when
+# a site has many candidates.
+PROBE_CONCURRENCY = 30
+
+# Upper bound on the timeout used for probing individual links/files/pages
+# after crawling. Users may set timeout_seconds up to 120 s (needed for slow
+# BIP page downloads), but a single probe HEAD/GET doesn't need that long.
+PROBE_TIMEOUT_CAP = 15.0
 
 
 def _build_raw_snapshot(site_report: SiteReport, content_by_path: Dict[str, PageContent]) -> RawSiteSnapshot:
@@ -115,34 +128,45 @@ def _aggregate_attachments(content_by_path: Dict[str, PageContent]) -> Dict[str,
 
 
 async def _probe_file(
-    client: httpx.AsyncClient, href: str, timeout_seconds: float, cache: Dict[str, dict]
+    client: httpx.AsyncClient,
+    href: str,
+    timeout_seconds: float,
+    cache: Dict[str, dict],
+    semaphore: asyncio.Semaphore,
 ) -> dict:
     """Checks whether ``href`` responds (HEAD, falling back to GET if the
     server doesn't support HEAD), retrying on transient network failures so
     a single dropped connection under heavy crawl load doesn't permanently
-    misclassify a perfectly fine link/file as broken."""
+    misclassify a perfectly fine link/file as broken.
+
+    The ``semaphore`` argument limits how many probes run concurrently so that
+    sites with large numbers of files/links don't spawn thousands of coroutines
+    into the event loop at once.
+    """
     if href in cache:
         return cache[href]
+    t = min(timeout_seconds, PROBE_TIMEOUT_CAP)
     result = {"status_code": None, "ok": False, "size_bytes": None, "content_type": None}
-    for attempt in range(REQUEST_RETRIES + 1):
-        try:
-            resp = await client.head(href, timeout=_timeout(timeout_seconds), follow_redirects=True)
-            if resp.status_code >= 400 or resp.status_code == 405:
-                # Some servers don't implement HEAD (or block it) — fall back to GET.
-                resp = await client.get(href, timeout=_timeout(timeout_seconds), follow_redirects=True)
-            result["status_code"] = resp.status_code
-            result["ok"] = resp.status_code < 400
-            content_length = resp.headers.get("content-length")
-            if content_length is not None:
-                try:
-                    result["size_bytes"] = int(content_length)
-                except ValueError:
-                    pass
-            result["content_type"] = resp.headers.get("content-type")
-            break
-        except httpx.HTTPError:
-            if attempt < REQUEST_RETRIES:
-                await asyncio.sleep(RETRY_BACKOFF_SECONDS * (attempt + 1))
+    async with semaphore:
+        for attempt in range(REQUEST_RETRIES + 1):
+            try:
+                resp = await client.head(href, timeout=_timeout(t), follow_redirects=True)
+                if resp.status_code >= 400 or resp.status_code == 405:
+                    # Some servers don't implement HEAD (or block it) — fall back to GET.
+                    resp = await client.get(href, timeout=_timeout(t), follow_redirects=True)
+                result["status_code"] = resp.status_code
+                result["ok"] = resp.status_code < 400
+                content_length = resp.headers.get("content-length")
+                if content_length is not None:
+                    try:
+                        result["size_bytes"] = int(content_length)
+                    except ValueError:
+                        pass
+                result["content_type"] = resp.headers.get("content-type")
+                break
+            except httpx.HTTPError:
+                if attempt < REQUEST_RETRIES:
+                    await asyncio.sleep(RETRY_BACKOFF_SECONDS * (attempt + 1))
     cache[href] = result
     return result
 
@@ -162,12 +186,13 @@ async def build_file_diffs(
     all_keys = sorted(set(old_files) | set(new_files))[:MAX_FILES]
 
     cache: Dict[str, dict] = {}
+    semaphore = asyncio.Semaphore(PROBE_CONCURRENCY)
 
     async def probe_side(files_map: Dict[str, Dict[str, str]], key: str) -> Optional[FileEntry]:
         entry = files_map.get(key)
         if entry is None:
             return None
-        probe = await _probe_file(client, entry["href"], timeout_seconds, cache)
+        probe = await _probe_file(client, entry["href"], timeout_seconds, cache, semaphore)
         return FileEntry(
             filename=entry["filename"],
             href=entry["href"],
@@ -236,12 +261,13 @@ async def build_link_diffs(
     all_keys = sorted(set(old_links) | set(new_links))[:MAX_LINKS]
 
     cache: Dict[str, dict] = {}
+    semaphore = asyncio.Semaphore(PROBE_CONCURRENCY)
 
     async def probe_side(links_map: Dict[str, Dict[str, str]], key: str) -> Optional[LinkEntry]:
         entry = links_map.get(key)
         if entry is None:
             return None
-        probe = await _probe_file(client, entry["href"], timeout_seconds, cache)
+        probe = await _probe_file(client, entry["href"], timeout_seconds, cache, semaphore)
         return LinkEntry(
             href=entry["href"],
             text=entry["text"],
@@ -284,6 +310,64 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
     same_site = _normalize_base(str(req.old_url)) == _normalize_base(str(req.new_url))
 
     async with httpx.AsyncClient(headers=DEFAULT_HEADERS, limits=CLIENT_LIMITS) as client:
+
+        # --- Step 0: fast reachability probe (early exit) ------------------
+        # Check both root URLs BEFORE starting any full crawl. If either site
+        # is unreachable we can return immediately with a clear error message
+        # instead of waiting for the crawl to time out on every page.
+        if same_site:
+            old_reachable, old_root_code, old_root_err = await check_reachable(
+                client, str(req.old_url), req.timeout_seconds
+            )
+            new_reachable, new_root_code, new_root_err = old_reachable, old_root_code, old_root_err
+        else:
+            (old_reachable, old_root_code, old_root_err), (new_reachable, new_root_code, new_root_err) = (
+                await asyncio.gather(
+                    check_reachable(client, str(req.old_url), req.timeout_seconds),
+                    check_reachable(client, str(req.new_url), req.timeout_seconds),
+                )
+            )
+
+        if not old_reachable or not new_reachable:
+            # Build minimal SiteReports so the caller can display which site
+            # failed and why, without doing any further network work.
+            old_report = SiteReport(
+                base_url=_normalize_base(str(req.old_url)),
+                reachable=old_reachable,
+                root_status_code=old_root_code,
+                root_error=old_root_err,
+                page_count=0,
+            )
+            new_report = SiteReport(
+                base_url=_normalize_base(str(req.new_url)),
+                reachable=new_reachable,
+                root_status_code=new_root_code,
+                root_error=new_root_err,
+                page_count=0,
+            )
+            duration_ms = (time.perf_counter() - started) * 1000
+            result = ComparisonResult(
+                id=result_id,
+                generated_at=datetime.now(timezone.utc),
+                duration_ms=round(duration_ms, 1),
+                old_url=str(req.old_url),
+                new_url=str(req.new_url),
+                old_site=old_report,
+                new_site=new_report,
+                both_reachable=False,
+                scope=req.scope,
+                missing_in_new=[],
+                extra_in_new=[],
+                unchanged_paths=[],
+                file_diffs=[],
+                link_diffs=[],
+                content_checked_count=0,
+                content_changed_count=0,
+            )
+            _save_result(result)
+            return result
+
+        # --- Step 1: full BFS crawl of both sites --------------------------
         if same_site:
             old_report, old_content = await crawl_site(client, str(req.old_url), req.max_pages, req.timeout_seconds)
             new_report, new_content = old_report, old_content
@@ -313,9 +397,21 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
             # found a link to it. Before declaring it gone, probe the exact
             # same path directly on the new site — it might exist but just be
             # unlinked, in which case it isn't really "missing".
-            missing_probes = await asyncio.gather(
-                *[probe_path(client, str(req.new_url), path, req.timeout_seconds) for path in candidate_missing]
+            probe_sem = asyncio.Semaphore(PROBE_CONCURRENCY)
+
+            async def _probe_missing(path: str):
+                async with probe_sem:
+                    return await probe_path(client, str(req.new_url), path, req.timeout_seconds)
+
+            async def _probe_extra(path: str):
+                async with probe_sem:
+                    return await probe_path(client, str(req.old_url), path, req.timeout_seconds)
+
+            missing_probes, extra_probes = await asyncio.gather(
+                asyncio.gather(*[_probe_missing(p) for p in candidate_missing]),
+                asyncio.gather(*[_probe_extra(p) for p in candidate_extra]),
             )
+
             for path, probe in zip(candidate_missing, missing_probes):
                 if probe.ok:
                     continue  # exists on new site, just unlinked — not missing
@@ -331,9 +427,6 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
                     )
                 )
 
-            extra_probes = await asyncio.gather(
-                *[probe_path(client, str(req.old_url), path, req.timeout_seconds) for path in candidate_extra]
-            )
             for path, probe in zip(candidate_extra, extra_probes):
                 if probe.ok:
                     continue  # exists on old site too, just unlinked — not really "extra"
@@ -372,28 +465,43 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         # --- Raw per-page content snapshots --------------------------------
         # Full HTML/text/links/attachments for every crawled page on each
         # site, saved so a later step can diff any page's content on demand.
-        # Cheap to build — no extra network requests, just serializing data
-        # already gathered by the crawl.
+        # Written via asyncio.to_thread so the JSON serialisation (potentially
+        # several MB for large sites) doesn't block the event loop.
         pages_dir = RESULTS_DIR / result_id / "pages"
         pages_dir.mkdir(parents=True, exist_ok=True)
         old_snapshot = _build_raw_snapshot(old_report, old_content)
         new_snapshot = old_snapshot if same_site else _build_raw_snapshot(new_report, new_content)
-        (pages_dir / "old.json").write_text(old_snapshot.model_dump_json(indent=2), encoding="utf-8")
-        (pages_dir / "new.json").write_text(new_snapshot.model_dump_json(indent=2), encoding="utf-8")
 
-        # --- Site-wide file (attachment) comparison ------------------------
-        # Every file discovered anywhere on either site, compared by
-        # name/size/reachability. Powers the Dashboard's flat file list.
+        def _write_snapshots() -> None:
+            (pages_dir / "old.json").write_text(old_snapshot.model_dump_json(indent=2), encoding="utf-8")
+            if not same_site:
+                (pages_dir / "new.json").write_text(new_snapshot.model_dump_json(indent=2), encoding="utf-8")
+            else:
+                # Both sides are identical — save a single file for both paths
+                # so load_raw_snapshot can find whichever side it's asked for.
+                (pages_dir / "new.json").write_text(old_snapshot.model_dump_json(indent=2), encoding="utf-8")
+
+        # --- Site-wide file (attachment) and link comparisons ---------------
+        # Run snapshot writing and the two probe-heavy comparisons in parallel
+        # so the I/O and network work overlap rather than being serialised.
         file_diffs: list[FileDiffEntry] = []
-        if both_reachable and req.scope.attachments:
-            file_diffs = await build_file_diffs(client, old_content, new_content, req.timeout_seconds)
-
-        # --- Site-wide link comparison ---------------------------------
-        # Every link discovered anywhere on either site, compared by
-        # reachability/existence. Powers the report's "Porównanie linków".
         link_diffs: list[LinkDiffEntry] = []
-        if both_reachable and req.scope.links:
-            link_diffs = await build_link_diffs(client, old_content, new_content, req.timeout_seconds)
+
+        async def _run_file_diffs():
+            if both_reachable and req.scope.attachments:
+                return await build_file_diffs(client, old_content, new_content, req.timeout_seconds)
+            return []
+
+        async def _run_link_diffs():
+            if both_reachable and req.scope.links:
+                return await build_link_diffs(client, old_content, new_content, req.timeout_seconds)
+            return []
+
+        file_diffs, link_diffs, _ = await asyncio.gather(
+            _run_file_diffs(),
+            _run_link_diffs(),
+            asyncio.to_thread(_write_snapshots),
+        )
 
     duration_ms = (time.perf_counter() - started) * 1000
 

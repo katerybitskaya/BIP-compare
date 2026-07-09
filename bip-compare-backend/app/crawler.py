@@ -90,6 +90,31 @@ async def _get_with_retry(client: httpx.AsyncClient, url: str, timeout_seconds: 
     raise last_exc
 
 
+async def check_reachable(
+    client: httpx.AsyncClient,
+    url: str,
+    timeout_seconds: float,
+) -> tuple[bool, Optional[int], Optional[str]]:
+    """Fast reachability probe for a single root URL.
+
+    Uses a capped timeout (at most 10 s, regardless of the user's configured
+    budget) and a single retry so that an unreachable site is detected in at
+    most ~20 s instead of waiting out the full crawl budget. Returns a
+    (reachable, status_code, error_message) triple.
+    """
+    probe_timeout = min(timeout_seconds, 10.0)
+    last_exc: Optional[Exception] = None
+    for attempt in range(2):  # one retry only
+        try:
+            resp = await client.get(url, timeout=httpx.Timeout(probe_timeout, pool=None), follow_redirects=True)
+            return True, resp.status_code, None
+        except httpx.HTTPError as exc:
+            last_exc = exc
+            if attempt == 0:
+                await asyncio.sleep(RETRY_BACKOFF_SECONDS)
+    return False, None, str(last_exc)
+
+
 @dataclass
 class PageContent:
     """Everything extracted from one successfully fetched HTML page, saved
