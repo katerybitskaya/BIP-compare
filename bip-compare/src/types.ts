@@ -44,7 +44,7 @@ export interface StatDefinition {
   value: string;
   helper: string;
   tone: 'blue' | 'amber' | 'green' | 'red';
-  icon: 'files' | 'diff' | 'check' | 'alert';
+  icon: 'files' | 'diff' | 'check' | 'alert' | 'globe' | 'code' | 'link';
 }
 
 // --- Dashboard overview (category-level summary of a report) --------------
