@@ -1,20 +1,32 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import PageHeader from './components/PageHeader';
 import ComparisonForm from './components/ComparisonForm';
 import StatCards from './components/StatCards';
-import FileResultsTable from './components/FileResultsTable';
-import FileDetailPanel from './components/FileDetailPanel';
+import CategoryOverviewTable from './components/CategoryOverviewTable';
+import CategoryDetailPanel from './components/CategoryDetailPanel';
 import SettingsTab from './components/SettingsTab';
-import { files as mockFiles, stats, lastRunLabel } from './data/mockData';
-import type { FileComparison, NavKey } from './types';
+import ReportsTab from './components/ReportsTab';
+import ErrorBoundary from './components/ErrorBoundary';
+import { runCompare, listReports, getReport, ApiError } from './api/compareApi';
+import type { CompareScope, ComparisonResult } from './api/types';
+import { buildOverviewStatItems, buildCategoryOverview } from './utils/overviewRows';
+import { formatDateTime } from './utils/format';
+import type { CategoryId, CategoryOverviewRow, NavKey } from './types';
 
 function App() {
   const [activeNav, setActiveNav] = useState<NavKey>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<FileComparison | null>(mockFiles[0] ?? null);
   const [isRunning, setIsRunning] = useState(false);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [reportsRefreshKey, setReportsRefreshKey] = useState(0);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+
+  const [currentReport, setCurrentReport] = useState<ComparisonResult | null>(null);
+  const [loadingInitialReport, setLoadingInitialReport] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null);
+
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -33,11 +45,59 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const files = useMemo(() => mockFiles, []);
+  // Load the most recently saved report on first mount, so the Dashboard
+  // shows real results even before the user runs anything this session.
+  useEffect(() => {
+    let cancelled = false;
+    listReports()
+      .then((reports) => (reports.length > 0 ? getReport(reports[0].id) : null))
+      .then((result) => {
+        if (!cancelled && result) setCurrentReport(result);
+      })
+      .catch(() => {
+        // No saved reports yet (or backend unreachable) — Dashboard just
+        // shows its empty state, no need to surface an error for this.
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingInitialReport(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  function handleRun() {
+  const overviewStatItems = useMemo(() => (currentReport ? buildOverviewStatItems(currentReport) : []), [currentReport]);
+  const categoryEntries = useMemo(() => (currentReport ? buildCategoryOverview(currentReport) : []), [currentReport]);
+  const categoryRows: CategoryOverviewRow[] = useMemo(() => categoryEntries.map((e) => e.row), [categoryEntries]);
+  const selectedCategoryEntry = useMemo(
+    () => categoryEntries.find((e) => e.row.id === selectedCategory) ?? null,
+    [categoryEntries, selectedCategory]
+  );
+  const lastRunLabel = currentReport ? formatDateTime(currentReport.generated_at) : 'Brak dotychczasowych porównań';
+
+  function handleSelectCategory(row: CategoryOverviewRow) {
+    setSelectedCategory(row.id);
+  }
+
+  function handleViewFullReport() {
+    if (!currentReport) return;
+    setSelectedReportId(currentReport.id);
+    setActiveNav('reports');
+  }
+
+  async function handleRun(oldUrl: string, newUrl: string, scope: CompareScope) {
     setIsRunning(true);
-    window.setTimeout(() => setIsRunning(false), 1400);
+    setRunError(null);
+    try {
+      const result = await runCompare({ old_url: oldUrl, new_url: newUrl, scope });
+      setCurrentReport(result);
+      setSelectedCategory(null);
+      setReportsRefreshKey((k) => k + 1);
+    } catch (err) {
+      setRunError(err instanceof ApiError ? err.message : 'Nie udało się uruchomić porównania.');
+    } finally {
+      setIsRunning(false);
+    }
   }
 
   return (
@@ -63,11 +123,13 @@ function App() {
             title={
               activeNav === 'settings' ? 'Ustawienia' :
               activeNav === 'dashboard' ? 'Dashboard' :
+              activeNav === 'reports' ? 'Raporty' :
               'W budowie'
             }
             subtitle={
               activeNav === 'settings' ? 'Zarządzaj ustawieniami aplikacji i preferencjami.' :
               activeNav === 'dashboard' ? 'Porównaj starą i nową wersję Biuletynu Informacji Publicznej.' :
+              activeNav === 'reports' ? 'Przeglądaj wyniki wcześniej uruchomionych porównań.' :
               'Funkcjonalność w trakcie realizacji.'
             }
             lastRunLabel={lastRunLabel}
@@ -76,26 +138,52 @@ function App() {
           <div className="space-y-6">
             {activeNav === 'dashboard' && (
               <>
-                <ComparisonForm onRun={handleRun} isRunning={isRunning} />
+                <ComparisonForm onRun={handleRun} isRunning={isRunning} error={runError} />
 
-                <StatCards items={stats} />
+                <ErrorBoundary what="wyników ostatniego porównania">
+                  {currentReport && !currentReport.both_reachable && (
+                    <div className="flex items-start gap-2.5 rounded-2xl border border-rose-300 dark:border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-700 dark:text-rose-300">
+                      Co najmniej jedna ze stron jest niedostępna, więc pełne porównanie nie zostało wykonane. Zobacz pełny raport, aby sprawdzić szczegóły.
+                    </div>
+                  )}
 
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-                  <FileResultsTable
-                    files={files}
-                    selectedId={selectedFile?.id ?? null}
-                    onSelect={setSelectedFile}
-                  />
-                  <FileDetailPanel file={selectedFile} onClose={() => setSelectedFile(null)} />
-                </div>
+                  {currentReport && currentReport.both_reachable && (
+                    <div className="space-y-6">
+                      <StatCards items={overviewStatItems} />
+
+                      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                        <CategoryOverviewTable
+                          rows={categoryRows}
+                          selectedId={selectedCategory}
+                          onSelect={handleSelectCategory}
+                        />
+                        <CategoryDetailPanel entry={selectedCategoryEntry} onViewFullReport={handleViewFullReport} />
+                      </div>
+                    </div>
+                  )}
+
+                  {!currentReport && !loadingInitialReport && !isRunning && (
+                    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-12 text-center text-sm text-slate-400 dark:text-slate-500">
+                      Brak jeszcze żadnego porównania. Uruchom pierwsze powyżej, aby zobaczyć wyniki.
+                    </div>
+                  )}
+                </ErrorBoundary>
               </>
+            )}
+
+            {activeNav === 'reports' && (
+              <ReportsTab
+                refreshKey={reportsRefreshKey}
+                selectedId={selectedReportId}
+                onSelect={setSelectedReportId}
+              />
             )}
 
             {activeNav === 'settings' && (
               <SettingsTab theme={theme} onThemeChange={setTheme} />
             )}
 
-            {activeNav !== 'dashboard' && activeNav !== 'settings' && (
+            {activeNav !== 'dashboard' && activeNav !== 'settings' && activeNav !== 'reports' && (
               <div className="flex flex-col items-center justify-center py-20 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
                 <h3 className="text-lg font-medium text-slate-900 dark:text-slate-200">Ta sekcja jest w budowie</h3>
                 <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Zapraszamy wkrótce.</p>

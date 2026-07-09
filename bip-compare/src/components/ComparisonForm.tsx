@@ -1,35 +1,44 @@
 import { useState } from 'react';
-import { Link2, Play, Loader2 } from 'lucide-react';
+import { Link2, Play, Loader2, AlertCircle } from 'lucide-react';
+import type { CompareScope } from '../api/types';
 
 interface ScopeOption {
-  key: string;
+  key: keyof CompareScope;
   label: string;
 }
 
 const SCOPE_OPTIONS: ScopeOption[] = [
-  { key: 'pages', label: 'Strony' },
+  { key: 'content', label: 'Zawartość' },
   { key: 'links', label: 'Linki' },
-  { key: 'files', label: 'Pliki' },
-  { key: 'screenshots', label: 'Zrzuty ekranów' },
+  { key: 'attachments', label: 'Pliki' },
 ];
 
 interface ComparisonFormProps {
-  onRun: () => void;
+  onRun: (oldUrl: string, newUrl: string, scope: CompareScope) => void;
   isRunning: boolean;
+  error?: string | null;
 }
 
-export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps) {
+export default function ComparisonForm({ onRun, isRunning, error }: ComparisonFormProps) {
   const [oldUrl, setOldUrl] = useState('https://bip.staryurzad.pl');
   const [newUrl, setNewUrl] = useState('https://bip.nowyurzad.pl');
-  const [scope, setScope] = useState<Record<string, boolean>>({
-    pages: true,
+  const [scope, setScope] = useState<CompareScope>({
+    content: true,
     links: true,
-    files: true,
-    screenshots: false,
+    attachments: true,
   });
 
-  const toggleScope = (key: string) =>
+  const toggleScope = (key: keyof CompareScope) =>
     setScope((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const noScopeSelected = !scope.content && !scope.links && !scope.attachments;
+
+  function handleSubmit() {
+    const trimmedOld = oldUrl.trim();
+    const trimmedNew = newUrl.trim();
+    if (!trimmedOld || !trimmedNew) return;
+    onRun(trimmedOld, trimmedNew, scope);
+  }
 
   return (
     <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur sm:p-6">
@@ -85,19 +94,43 @@ export default function ComparisonForm({ onRun, isRunning }: ComparisonFormProps
                 {opt.label}
               </label>
             ))}
+            <label className="flex cursor-not-allowed items-center gap-2 text-sm text-slate-300 dark:text-slate-600">
+              <input type="checkbox" checked={false} disabled className="h-4 w-4 rounded border-slate-300 dark:border-slate-600" />
+              Zrzuty ekranów (wkrótce)
+            </label>
           </div>
         </div>
 
         <button
           type="button"
-          onClick={onRun}
-          disabled={isRunning}
+          onClick={handleSubmit}
+          disabled={isRunning || noScopeSelected}
           className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-violet-500 to-blue-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isRunning ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
           {isRunning ? 'Porównywanie…' : 'Uruchom porównanie'}
         </button>
       </div>
+
+      {noScopeSelected && !isRunning && (
+        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-700 ring-1 ring-amber-400/20 dark:text-amber-300">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          <p>Wybierz co najmniej jeden element zakresu testu (zawartość, linki lub pliki).</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-rose-500/10 p-3 text-xs text-rose-700 ring-1 ring-rose-400/20 dark:text-rose-300">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          <p>{error}</p>
+        </div>
+      )}
+
+      <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+        Podstrony obu witryn są zawsze w pełni przeszukiwane (żeby wykryć brakujące/zbędne adresy). Zakres testu określa,
+        które dodatkowe szczegóły są sprawdzane dla podstron wspólnych dla obu wersji. Zrzuty ekranu to funkcja
+        zarezerwowana na przyszłość — checkbox jest na razie tylko informacyjny.
+      </p>
     </section>
   );
 }
