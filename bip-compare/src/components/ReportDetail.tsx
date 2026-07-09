@@ -10,6 +10,7 @@ import {
   FileCode,
   Link2,
   FileStack,
+  Globe,
 } from 'lucide-react';
 import type { ComparisonResult } from '../api/types';
 import { getReport } from '../api/compareApi';
@@ -167,6 +168,86 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
             <div className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4 text-center shadow-lg shadow-slate-200/50 dark:shadow-black/20">
               <p className="text-2xl font-semibold text-amber-600 dark:text-amber-400">{report.extra_in_new.length}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">zbędnych na nowym adresie</p>
+            </div>
+          </section>
+
+          {/* === Wszystkie podstrony === */}
+          <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/5 p-4">
+              <Globe size={16} className="text-violet-500" />
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Wszystkie podstrony
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 divide-y divide-slate-200 dark:divide-white/5 lg:divide-y-0 lg:divide-x">
+              {/* Stary adres */}
+              <div className="p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/10 px-2.5 py-1 text-xs font-medium text-violet-700 dark:text-violet-300">
+                    Stary adres
+                  </span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">{report.old_site.page_count} podstron</span>
+                </div>
+                <div className="max-h-72 overflow-y-auto pr-1">
+                  {report.old_site.pages.length === 0 ? (
+                    <p className="text-sm text-slate-400 dark:text-slate-500">Brak podstron.</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {report.old_site.pages.map((page) => (
+                        <li
+                          key={page.path}
+                          className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                        >
+                          <span className="font-mono text-xs text-slate-700 dark:text-slate-300 break-all">{page.path}</span>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                              page.ok
+                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                                : 'bg-rose-500/10 text-rose-700 dark:text-rose-300'
+                            }`}
+                          >
+                            {page.status_code ?? (page.error ? 'err' : '?')}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+              {/* Nowy adres */}
+              <div className="p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-700 dark:text-blue-300">
+                    Nowy adres
+                  </span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">{report.new_site.page_count} podstron</span>
+                </div>
+                <div className="max-h-72 overflow-y-auto pr-1">
+                  {report.new_site.pages.length === 0 ? (
+                    <p className="text-sm text-slate-400 dark:text-slate-500">Brak podstron.</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {report.new_site.pages.map((page) => (
+                        <li
+                          key={page.path}
+                          className="flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors"
+                        >
+                          <span className="font-mono text-xs text-slate-700 dark:text-slate-300 break-all">{page.path}</span>
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                              page.ok
+                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                                : 'bg-rose-500/10 text-rose-700 dark:text-rose-300'
+                            }`}
+                          >
+                            {page.status_code ?? (page.error ? 'err' : '?')}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
             </div>
           </section>
 

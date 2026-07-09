@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Globe } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import PageHeader from './components/PageHeader';
@@ -168,6 +169,34 @@ function App() {
 
                   {currentReport && currentReport.both_reachable && (
                     <div className="space-y-6">
+                      {/* Liczba podstron – stary i nowy adres */}
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="flex items-center gap-4 rounded-2xl border border-violet-300/40 dark:border-violet-500/20 bg-gradient-to-br from-violet-500/10 to-purple-400/5 p-5 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-400/10 text-violet-600 dark:text-violet-300 shadow-[0_0_20px_-4px_rgba(139,92,246,0.5)] ring-1 ring-violet-400/20">
+                            <Globe size={20} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Stary adres BIP</p>
+                            <p className="mt-0.5 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                              {currentReport.old_site.page_count}
+                            </p>
+                            <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">podstron znalezionych</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 rounded-2xl border border-blue-300/40 dark:border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-cyan-400/5 p-5 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-400/10 text-blue-600 dark:text-blue-300 shadow-[0_0_20px_-4px_rgba(59,130,246,0.5)] ring-1 ring-blue-400/20">
+                            <Globe size={20} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Nowy adres BIP</p>
+                            <p className="mt-0.5 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                              {currentReport.new_site.page_count}
+                            </p>
+                            <p className="mt-0.5 truncate text-xs text-slate-400 dark:text-slate-500">podstron znalezionych</p>
+                          </div>
+                        </div>
+                      </div>
+
                       <StatCards items={overviewStatItems} />
 
                       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">

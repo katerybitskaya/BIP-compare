@@ -1,7 +1,6 @@
+results/
 __pycache__/
-*.pyc
+*.py[cod]
 .venv/
 venv/
-results/*
-!results/.gitkeep
-*.log
+.env

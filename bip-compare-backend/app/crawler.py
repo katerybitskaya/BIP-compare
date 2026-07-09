@@ -1,336 +1,270 @@
-"""Asynchronous same-host site crawler used to discover every subpage of a
-BIP (Biuletyn Informacji Publicznej) website starting from its base URL.
+"""
+Site crawler — BFS crawl of a BIP website.
 
-In addition to the page list (used for missing/extra detection), each
-successfully fetched HTML page also has its visible text, full link list,
-and attachment (file) list extracted — kept in-memory as ``PageContent`` and
-handed back to the caller so it can build the detailed per-page diff
-(content / links / attachments) without re-fetching anything.
+Discovers all internal HTML pages, records their HTTP status,
+and optionally collects raw content (HTML, text, links, attachments)
+needed for deeper comparison.
 """
 from __future__ import annotations
 
-import asyncio
-import os
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set
+import hashlib
+from collections import deque
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse, urlunparse
 
-import httpx
+import requests
 from bs4 import BeautifulSoup
 
-from .models import PageStatus, SiteReport
+from .models import PageStatus, RawPageEntry, RawSiteSnapshot, SiteReport
 
-# File extensions that represent downloadable assets rather than HTML pages.
-# The frontend already treats these as "pliki" (files), not "podstrony" (pages),
-# so the page-crawler skips them when building the BFS frontier, and the
-# content-extraction step files them under "attachments" instead of "links".
-ASSET_EXTENSIONS = {
-    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".zip", ".rar",
-    ".7z", ".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp", ".ico", ".css",
-    ".js", ".mp3", ".mp4", ".avi", ".mov", ".woff", ".woff2", ".ttf", ".xml",
-    ".rss", ".txt", ".csv",
+# File extensions treated as attachments (not crawled as pages)
+_ATTACHMENT_EXTENSIONS = frozenset({
+    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+    ".odt", ".ods", ".odp",
+    ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2",
+    ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp",
+    ".mp3", ".mp4", ".avi", ".mov", ".wmv",
+    ".txt", ".csv", ".xml", ".json",
+    ".rtf", ".eml", ".msg",
+})
+
+_SESSION_HEADERS = {
+    "User-Agent": "BIP-Compare/1.0 (automated site comparison tool)",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "pl,en;q=0.5",
 }
 
-# Extensions that count as "attachments" for the Załączone pliki comparison —
-# a subset of ASSET_EXTENSIONS that excludes pure web assets (css/js/fonts/
-# icons) nobody would call a "document attached to the page".
-ATTACHMENT_EXTENSIONS = {
-    ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".zip", ".rar",
-    ".7z", ".jpg", ".jpeg", ".png", ".gif", ".webp", ".csv",
-}
 
-SKIPPED_SCHEMES = {"mailto", "tel", "javascript", "data"}
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-# Tags whose counts form a lightweight "structure signature" of a page, used
-# to flag layout/formatting differences without doing a full DOM diff.
-STRUCTURE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "table", "img", "ul", "ol", "a"]
-
-# If the caller doesn't set max_pages, the crawl is effectively "unlimited" —
-# but we still keep an internal ceiling so a pathological site (e.g. an
-# infinite calendar/pagination generating endless unique URLs) can't make a
-# single request run forever.
-SAFETY_MAX_PAGES = 5000
-
-# How many times a single request is retried after a network-level failure
-# (timeout, connection reset, ...) before the page/link/file is actually
-# classified as broken. A busy real site under the load of a full crawl can
-# drop or stall the occasional request; without a retry, one bad moment
-# permanently misclassifies an otherwise-fine page as "missing" or "broken".
-REQUEST_RETRIES = 2
-RETRY_BACKOFF_SECONDS = 0.4
+def _is_attachment(url: str) -> bool:
+    path = urlparse(url).path.lower()
+    return any(path.endswith(ext) for ext in _ATTACHMENT_EXTENSIONS)
 
 
-def _timeout(timeout_seconds: float) -> httpx.Timeout:
-    """Builds a per-request timeout where waiting for a free connection in
-    the shared pool does NOT count against the user's configured budget.
-
-    httpx.Timeout(x) (a plain float) applies x to connect/read/write *and*
-    pool-checkout time. When the crawl and the link/file probing step are
-    both hammering one shared AsyncClient (bounded to ~20 connections) with
-    hundreds or thousands of requests, many requests spend most of their
-    time simply queued for a connection -- with pool time counted against
-    the same budget, those get killed as "timeouts" before ever reaching
-    the network, which then look like broken/missing pages that are
-    actually completely fine. Setting pool=None makes the queue wait
-    unbounded, so only genuine connect/read/write slowness counts.
-    """
-    return httpx.Timeout(timeout_seconds, pool=None)
+def _normalize_url(url: str) -> str:
+    """Strip fragment; normalise trailing slash to bare path."""
+    p = urlparse(url)
+    path = p.path.rstrip("/") or "/"
+    return urlunparse((p.scheme, p.netloc, path, p.params, p.query, ""))
 
 
-async def _get_with_retry(client: httpx.AsyncClient, url: str, timeout_seconds: float) -> httpx.Response:
-    last_exc: Optional[httpx.HTTPError] = None
-    for attempt in range(REQUEST_RETRIES + 1):
-        try:
-            return await client.get(url, timeout=_timeout(timeout_seconds), follow_redirects=True)
-        except httpx.HTTPError as exc:
-            last_exc = exc
-            if attempt < REQUEST_RETRIES:
-                await asyncio.sleep(RETRY_BACKOFF_SECONDS * (attempt + 1))
-    assert last_exc is not None
-    raise last_exc
+def _page_path(url: str) -> str:
+    """Return path (+ query string if present) as the canonical page key."""
+    p = urlparse(url)
+    path = p.path.rstrip("/") or "/"
+    return f"{path}?{p.query}" if p.query else path
 
 
-async def check_reachable(
-    client: httpx.AsyncClient,
-    url: str,
-    timeout_seconds: float,
-) -> tuple[bool, Optional[int], Optional[str]]:
-    """Fast reachability probe for a single root URL.
-
-    Uses a capped timeout (at most 10 s, regardless of the user's configured
-    budget) and a single retry so that an unreachable site is detected in at
-    most ~20 s instead of waiting out the full crawl budget. Returns a
-    (reachable, status_code, error_message) triple.
-    """
-    probe_timeout = min(timeout_seconds, 10.0)
-    last_exc: Optional[Exception] = None
-    for attempt in range(2):  # one retry only
-        try:
-            resp = await client.get(url, timeout=httpx.Timeout(probe_timeout, pool=None), follow_redirects=True)
-            return True, resp.status_code, None
-        except httpx.HTTPError as exc:
-            last_exc = exc
-            if attempt == 0:
-                await asyncio.sleep(RETRY_BACKOFF_SECONDS)
-    return False, None, str(last_exc)
+def _link_key(href: str, text: str) -> str:
+    return hashlib.md5(f"{href}|{text}".encode()).hexdigest()[:12]
 
 
-@dataclass
-class PageContent:
-    """Everything extracted from one successfully fetched HTML page, saved
-    to results/{id}/snapshot.json for later content comparison."""
-
-    html: str = ""
-    text: str = ""
-    structure: Dict[str, int] = field(default_factory=dict)
-    links: List[Dict[str, str]] = field(default_factory=list)         # non-asset <a href>
-    attachments: List[Dict[str, str]] = field(default_factory=list)   # asset <a href>
+def _attachment_key(href: str) -> str:
+    return hashlib.md5(href.encode()).hexdigest()[:12]
 
 
-def _normalize_base(url: str) -> str:
-    parsed = urlparse(str(url))
-    return urlunparse((parsed.scheme, parsed.netloc, "", "", "", ""))
+# ---------------------------------------------------------------------------
+# Main crawl function
+# ---------------------------------------------------------------------------
 
-
-def _normalize_path(url: str) -> str:
-    """Return a comparable path (no scheme/host, no fragment, no query)."""
-    parsed = urlparse(url)
-    path = parsed.path or "/"
-    if len(path) > 1 and path.endswith("/"):
-        path = path.rstrip("/")
-    return path or "/"
-
-
-def _is_asset(path: str) -> bool:
-    lower = path.lower()
-    return any(lower.endswith(ext) for ext in ASSET_EXTENSIONS)
-
-
-def _is_attachment(path: str) -> bool:
-    lower = path.lower()
-    return any(lower.endswith(ext) for ext in ATTACHMENT_EXTENSIONS)
-
-
-def _filename_from_href(href: str) -> str:
-    name = os.path.basename(urlparse(href).path)
-    return name or href
-
-
-def _extract_links(html: str, page_url: str, host: str) -> Set[str]:
-    """Same-host, non-asset links only — feeds the BFS crawl frontier."""
-    soup = BeautifulSoup(html, "lxml")
-    found: Set[str] = set()
-    for tag in soup.find_all("a", href=True):
-        href = tag["href"].strip()
-        if not href or href.startswith("#"):
-            continue
-        parsed = urlparse(href)
-        if parsed.scheme in SKIPPED_SCHEMES:
-            continue
-        absolute = urljoin(page_url, href)
-        absolute_parsed = urlparse(absolute)
-        if absolute_parsed.scheme not in ("http", "https"):
-            continue
-        if absolute_parsed.netloc != host:
-            continue  # stay within the same site
-        path = _normalize_path(absolute)
-        if _is_asset(path):
-            continue
-        found.add(path)
-    return found
-
-
-def _extract_page_content(html: str, page_url: str, host: str) -> PageContent:
-    """Full extraction for the detailed per-page diff: visible text,
-    structure signature, and every link on the page (any host), split into
-    plain links vs. attachments. Runs on HTML already fetched by the crawl,
-    so it costs no extra network requests.
-
-    Each link also gets a "key" used for old-vs-new matching: for a link
-    that stays on the same site as the page it was found on, the key is
-    just its path (e.g. "/kontakt.html") -- because the old and new sites
-    almost always live on different hosts, so the *same* internal link
-    would otherwise never match between versions. For links to a different
-    (external/third-party) host, the key is the full absolute URL, since
-    there's no "same site" normalization to apply.
-    """
-    soup = BeautifulSoup(html, "lxml")
-
-    for tag in soup(["script", "style", "noscript"]):
-        tag.decompose()
-    text = soup.get_text(separator="\n", strip=True)
-
-    structure = {tag: len(soup.find_all(tag)) for tag in STRUCTURE_TAGS}
-
-    links: List[Dict[str, str]] = []
-    attachments: List[Dict[str, str]] = []
-    seen_hrefs: Set[str] = set()
-
-    for tag in soup.find_all("a", href=True):
-        href = tag["href"].strip()
-        if not href or href.startswith("#"):
-            continue
-        parsed = urlparse(href)
-        if parsed.scheme in SKIPPED_SCHEMES:
-            continue
-        absolute = urljoin(page_url, href)
-        absolute_parsed = urlparse(absolute)
-        if absolute_parsed.scheme not in ("http", "https"):
-            continue
-        if absolute in seen_hrefs:
-            continue
-        seen_hrefs.add(absolute)
-
-        link_text = tag.get_text(strip=True)
-        path = absolute_parsed.path or "/"
-        same_host = absolute_parsed.netloc == host
-        key = _normalize_path(absolute) if same_host else absolute
-        if _is_attachment(path):
-            attachments.append({"href": absolute, "filename": _filename_from_href(absolute), "key": key})
-        else:
-            links.append({"href": absolute, "text": link_text, "key": key})
-
-    return PageContent(html=html, text=text, structure=structure, links=links, attachments=attachments)
-
-
-async def crawl_site(
-    client: httpx.AsyncClient,
+def crawl_site(
     base_url: str,
-    max_pages: Optional[int],
-    timeout_seconds: float,
-) -> tuple[SiteReport, Dict[str, PageContent]]:
-    """Breadth-first crawl of every reachable HTML subpage on ``base_url``.
-
-    Pages are fetched in same-depth batches (concurrently, bounded by the
-    ``httpx.AsyncClient``'s connection limits) rather than one at a time, so
-    sites with many subpages don't take forever to crawl. If ``max_pages`` is
-    None, the crawl continues until every discovered same-host page has been
-    visited (capped internally at ``SAFETY_MAX_PAGES`` as a last resort).
-
-    Returns the usual ``SiteReport`` plus a ``path -> PageContent`` map for
-    every page that was fetched successfully as HTML, so the caller can build
-    detailed content/links/attachments diffs without re-fetching.
+    *,
+    max_pages: int = 10000,
+    timeout: int = 15,
+    collect_raw: bool = False,
+) -> Tuple[SiteReport, Optional[Dict[str, RawPageEntry]]]:
     """
-    base = _normalize_base(base_url)
-    host = urlparse(base).netloc
-    effective_max = max_pages if max_pages is not None else SAFETY_MAX_PAGES
+    BFS-crawl *base_url* and every internal HTML link found on the pages.
 
-    report = SiteReport(base_url=base, reachable=False)
-    content_by_path: Dict[str, PageContent] = {}
+    Parameters
+    ----------
+    base_url    : Starting URL.
+    max_pages   : Hard limit on the number of pages to visit.
+    timeout     : Per-request timeout in seconds.
+    collect_raw : Whether to collect full HTML/text/links/attachments.
 
-    # 1) Reachability probe on the root URL.
+    Returns
+    -------
+    (SiteReport, raw_pages | None)
+        raw_pages is a dict keyed by page path and is only returned when
+        collect_raw=True.
+    """
+    session = requests.Session()
+    session.headers.update(_SESSION_HEADERS)
+
+    base_netloc = urlparse(base_url).netloc
+
+    # ------------------------------------------------------------------
+    # 1. Check root reachability
+    # ------------------------------------------------------------------
+    root_status_code: Optional[int] = None
+    root_error: Optional[str] = None
+    reachable = False
+
     try:
-        root_resp = await _get_with_retry(client, base, timeout_seconds)
-        report.reachable = True
-        report.root_status_code = root_resp.status_code
-    except httpx.HTTPError as exc:
-        report.reachable = False
-        report.root_error = str(exc)
-        report.page_count = 0
-        return report, content_by_path
+        resp = session.get(base_url, timeout=timeout, allow_redirects=True)
+        root_status_code = resp.status_code
+        reachable = resp.ok
+        if not resp.ok:
+            root_error = f"HTTP {resp.status_code}"
+    except requests.exceptions.ConnectionError as exc:
+        root_error = f"Błąd połączenia: {str(exc)[:120]}"
+    except requests.exceptions.Timeout:
+        root_error = "Timeout"
+    except Exception as exc:  # noqa: BLE001
+        root_error = str(exc)[:120]
 
-    # 2) Breadth-first traversal, restricted to the same host, one "layer"
-    #    (frontier) of pages fetched concurrently at a time.
-    visited: Set[str] = set()
-    frontier: Set[str] = {"/"}
-    pages: list[PageStatus] = []
+    if not reachable:
+        return (
+            SiteReport(
+                base_url=base_url,
+                reachable=False,
+                root_status_code=root_status_code,
+                root_error=root_error,
+                pages=[],
+                page_count=0,
+            ),
+            None,
+        )
 
-    async def fetch_one(path: str) -> tuple[PageStatus, Set[str], Optional[PageContent]]:
-        full_url = urljoin(base, path)
+    # ------------------------------------------------------------------
+    # 2. BFS crawl
+    # ------------------------------------------------------------------
+    visited: set[str] = set()
+    queue: deque[str] = deque([_normalize_url(base_url)])
+    pages: List[PageStatus] = []
+    raw_pages: Dict[str, RawPageEntry] = {} if collect_raw else None  # type: ignore[assignment]
+
+    while queue and len(pages) < max_pages:
+        url = queue.popleft()
+        if url in visited:
+            continue
+        visited.add(url)
+
+        path = _page_path(url)
+        status_code: Optional[int] = None
+        ok = False
+        error: Optional[str] = None
+        html_content: Optional[str] = None
+
         try:
-            resp = await _get_with_retry(client, full_url, timeout_seconds)
-            status = resp.status_code
-            ok = status < 400
-            page = PageStatus(path=path, url=str(resp.url), status_code=status, ok=ok)
-            links: Set[str] = set()
-            content: Optional[PageContent] = None
-            content_type = resp.headers.get("content-type", "")
-            if ok and "text/html" in content_type:
-                links = _extract_links(resp.text, str(resp.url), host)
-                content = _extract_page_content(resp.text, str(resp.url), host)
-            return page, links, content
-        except httpx.HTTPError as exc:
-            return PageStatus(path=path, url=full_url, status_code=None, ok=False, error=str(exc)), set(), None
+            resp = session.get(url, timeout=timeout, allow_redirects=True)
+            status_code = resp.status_code
+            ok = resp.ok
+            if not resp.ok:
+                error = f"HTTP {resp.status_code}"
+            else:
+                ct = resp.headers.get("content-type", "")
+                if "html" in ct:
+                    html_content = resp.text
+        except requests.exceptions.ConnectionError as exc:
+            error = f"Błąd połączenia: {str(exc)[:80]}"
+        except requests.exceptions.Timeout:
+            error = "Timeout"
+        except Exception as exc:  # noqa: BLE001
+            error = str(exc)[:80]
 
-    while frontier and len(pages) < effective_max:
-        batch = [p for p in frontier if p not in visited]
-        if not batch:
-            break
-        remaining_budget = effective_max - len(pages)
-        batch = batch[:remaining_budget]
-        for path in batch:
-            visited.add(path)
+        pages.append(
+            PageStatus(path=path, url=url, status_code=status_code, ok=ok, error=error)
+        )
 
-        results = await asyncio.gather(*(fetch_one(path) for path in batch))
+        # ---- Parse HTML --------------------------------------------------
+        soup: Optional[BeautifulSoup] = None
+        if html_content:
+            soup = BeautifulSoup(html_content, "html.parser")
 
-        next_frontier: Set[str] = set()
-        for page, links, content in results:
-            pages.append(page)
-            if content is not None:
-                content_by_path[page.path] = content
-            for link in links:
-                if link not in visited:
-                    next_frontier.add(link)
-        frontier = next_frontier
+        # ---- Collect raw data (if requested) -----------------------------
+        if collect_raw:
+            text: Optional[str] = None
+            structure: Optional[Dict[str, int]] = None
+            links_list: Optional[List[Dict[str, str]]] = None
+            attachments_list: Optional[List[Dict[str, str]]] = None
 
-    report.pages = pages
-    report.page_count = len(pages)
-    return report, content_by_path
+            if soup is not None:
+                text = soup.get_text(separator="\n", strip=True)
+
+                structure = {}
+                for tag in soup.find_all(True):
+                    structure[tag.name] = structure.get(tag.name, 0) + 1
+
+                links_list = []
+                attachments_list = []
+                seen_link_keys: set[str] = set()
+                seen_att_keys: set[str] = set()
+
+                for a in soup.find_all("a", href=True):
+                    raw_href: str = a["href"].strip()
+                    if not raw_href or raw_href.startswith(("#", "javascript:", "mailto:", "tel:")):
+                        continue
+                    abs_href = urljoin(url, raw_href)
+                    link_text = a.get_text(strip=True)
+
+                    if _is_attachment(abs_href):
+                        filename = urlparse(abs_href).path.split("/")[-1]
+                        key = _attachment_key(abs_href)
+                        if key not in seen_att_keys:
+                            seen_att_keys.add(key)
+                            attachments_list.append(
+                                {"href": abs_href, "filename": filename, "key": key}
+                            )
+                    else:
+                        key = _link_key(abs_href, link_text)
+                        if key not in seen_link_keys:
+                            seen_link_keys.add(key)
+                            links_list.append(
+                                {"href": abs_href, "text": link_text, "key": key}
+                            )
+
+            raw_pages[path] = RawPageEntry(
+                url=url,
+                status_code=status_code,
+                ok=ok,
+                error=error,
+                html=html_content,
+                text=text,
+                structure=structure,
+                links=links_list,
+                attachments=attachments_list,
+            )
+
+        # ---- Discover new internal links for the queue -------------------
+        if soup is not None:
+            for a in soup.find_all("a", href=True):
+                raw_href = a["href"].strip()
+                if not raw_href or raw_href.startswith(("#", "javascript:", "mailto:", "tel:")):
+                    continue
+                abs_href = urljoin(url, raw_href)
+                p = urlparse(abs_href)
+                if p.netloc == base_netloc and not _is_attachment(abs_href):
+                    norm = _normalize_url(abs_href)
+                    if norm not in visited:
+                        queue.append(norm)
+
+    return (
+        SiteReport(
+            base_url=base_url,
+            reachable=True,
+            root_status_code=root_status_code,
+            root_error=None,
+            pages=pages,
+            page_count=len(pages),
+        ),
+        raw_pages,
+    )
 
 
-async def probe_path(
-    client: httpx.AsyncClient,
-    base_url: str,
-    path: str,
-    timeout_seconds: float,
-) -> PageStatus:
-    """Directly check whether ``path`` responds successfully on ``base_url``,
-    independent of whether that site's own crawl discovered a link to it."""
-    base = _normalize_base(base_url)
-    full_url = urljoin(base, path)
-    try:
-        resp = await _get_with_retry(client, full_url, timeout_seconds)
-        status = resp.status_code
-        return PageStatus(path=path, url=str(resp.url), status_code=status, ok=status < 400)
-    except httpx.HTTPError as exc:
-        return PageStatus(path=path, url=full_url, status_code=None, ok=False, error=str(exc))
+def build_raw_snapshot(
+    site: SiteReport,
+    raw_pages: Optional[Dict[str, RawPageEntry]],
+) -> RawSiteSnapshot:
+    return RawSiteSnapshot(
+        base_url=site.base_url,
+        reachable=site.reachable,
+        root_status_code=site.root_status_code,
+        root_error=site.root_error,
+        pages=raw_pages or {},
+    )
