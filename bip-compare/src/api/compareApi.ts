@@ -1,4 +1,10 @@
-import type { CompareRequestPayload, ComparisonResult, ReportSummary } from './types';
+import type {
+  CompareRequestPayload,
+  ComparisonResult,
+  PageContentDiff,
+  RawSiteSnapshot,
+  ReportSummary,
+} from './types';
 
 // The backend (bip-compare-backend, FastAPI) listens here by default.
 // Override with VITE_API_BASE_URL in a .env file if it runs elsewhere.
@@ -40,6 +46,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(detail);
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
   return (await response.json()) as T;
 }
 
@@ -56,4 +65,21 @@ export function listReports(): Promise<ReportSummary[]> {
 
 export function getReport(id: string): Promise<ComparisonResult> {
   return request<ComparisonResult>(`/api/compare/${id}`);
+}
+
+/** Fetches the full raw per-page content snapshot (HTML/text/links/
+ * attachments for every crawled page) of one side of a saved comparison. */
+export function getRawSnapshot(resultId: string, side: 'old' | 'new'): Promise<RawSiteSnapshot> {
+  return request<RawSiteSnapshot>(`/api/compare/${resultId}/raw/${side}`);
+}
+
+/** Fetches an on-demand old-vs-new content diff (text, HTML structure, HTML
+ * source) for a single page path. Only available when the report's scope
+ * had "content" enabled — the backend returns HTTP 400 otherwise. */
+export function getContentDiff(resultId: string, path: string): Promise<PageContentDiff> {
+  return request<PageContentDiff>(`/api/compare/${resultId}/content-diff?path=${encodeURIComponent(path)}`);
+}
+
+export function clearAllReports(): Promise<{ removed: number }> {
+  return request<{ removed: number }>('/api/compare', { method: 'DELETE' });
 }

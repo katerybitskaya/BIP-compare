@@ -20,6 +20,24 @@ export interface FileComparison {
   status: FileStatus;
 }
 
+export type LinkStatus = 'ok' | 'broken' | 'new' | 'removed';
+
+export interface LinkComparison {
+  id: string;
+  text: string;
+  path: string;
+  external: boolean;
+  oldHref: string | null;
+  newHref: string | null;
+  oldHttp: number | null;
+  newHttp: number | null;
+  oldSourcePath: string | null;
+  newSourcePath: string | null;
+  oldWorks: boolean;
+  newWorks: boolean;
+  status: LinkStatus;
+}
+
 export interface StatDefinition {
   id: string;
   label: string;

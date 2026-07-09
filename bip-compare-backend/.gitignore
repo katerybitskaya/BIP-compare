@@ -2,6 +2,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-results/*.json
+results/*
 !results/.gitkeep
 *.log

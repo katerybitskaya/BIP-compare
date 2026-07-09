@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -7,25 +7,55 @@ import {
   FileX,
   FilePlus,
   Loader2,
+  FileCode,
+  Link2,
+  FileStack,
 } from 'lucide-react';
 import type { ComparisonResult } from '../api/types';
 import { getReport } from '../api/compareApi';
 import { formatDateTime, formatDuration } from '../utils/format';
+import ContentComparisonSection from './ContentComparisonSection';
+import LinkResultsTable from './LinkResultsTable';
+import LinkDetailPanel from './LinkDetailPanel';
+import FileResultsTable from './FileResultsTable';
+import FileDetailPanel from './FileDetailPanel';
+import StatCards from './StatCards';
+import { buildLinkRows, buildLinkStatItems } from '../utils/linkRows';
+import { buildFileRows, buildFileStatItems } from '../utils/fileRows';
+import type { FileComparison, LinkComparison } from '../types';
 
 interface ReportDetailProps {
   reportId: string;
   onBack: () => void;
 }
 
+function ScopeChip({ label, active }: { label: string; active: boolean }) {
+  return (
+    <span
+      className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
+        active
+          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+          : 'bg-slate-500/10 text-slate-500 dark:text-slate-400'
+      }`}
+    >
+      {label}: {active ? 'porównywane' : 'pominięte'}
+    </span>
+  );
+}
+
 export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
   const [report, setReport] = useState<ComparisonResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLink, setSelectedLink] = useState<LinkComparison | null>(null);
+  const [selectedFile, setSelectedFile] = useState<FileComparison | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setSelectedLink(null);
+    setSelectedFile(null);
     getReport(reportId)
       .then((data) => {
         if (!cancelled) setReport(data);
@@ -40,6 +70,15 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
       cancelled = true;
     };
   }, [reportId]);
+
+  const linkRows = useMemo(() => (report ? buildLinkRows(report) : []), [report]);
+  const linkStatItems = useMemo(() => (report ? buildLinkStatItems(report) : []), [report]);
+  const fileRows = useMemo(() => (report ? buildFileRows(report) : []), [report]);
+  const fileStatItems = useMemo(() => (report ? buildFileStatItems(report) : []), [report]);
+
+  const scopeContent = report?.scope?.content ?? true;
+  const scopeLinks = report?.scope?.links ?? true;
+  const scopeAttachments = report?.scope?.attachments ?? true;
 
   return (
     <div className="space-y-5">
@@ -107,6 +146,13 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
             <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
               Wygenerowano: {formatDateTime(report.generated_at)}
             </p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-200 dark:border-white/5 pt-3">
+              <span className="text-xs text-slate-400 dark:text-slate-500">Zakres porównania:</span>
+              <ScopeChip label="Zawartość" active={scopeContent} />
+              <ScopeChip label="Linki" active={scopeLinks} />
+              <ScopeChip label="Pliki" active={scopeAttachments} />
+            </div>
           </section>
 
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -190,6 +236,90 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
                       {path}
                     </span>
                   ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/5 p-4">
+              <FileCode size={16} className="text-sky-500" />
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Porównanie zawartości HTML</h3>
+            </div>
+            <div className="p-4">
+              {!scopeContent ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Zawartość (HTML) nie była porównywana dla tego raportu — zakres „Zawartość” był odznaczony przy uruchamianiu porównania.
+                </p>
+              ) : !report.both_reachable ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Co najmniej jedna ze stron jest niedostępna, więc porównanie zawartości nie jest możliwe.
+                </p>
+              ) : (
+                <ContentComparisonSection reportId={report.id} report={report} />
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/5 p-4">
+              <Link2 size={16} className="text-violet-500" />
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Porównanie linków</h3>
+            </div>
+            <div className="p-4">
+              {!scopeLinks ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Linki nie były porównywane dla tego raportu — zakres „Linki” był odznaczony przy uruchamianiu porównania.
+                </p>
+              ) : !report.both_reachable ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Co najmniej jedna ze stron jest niedostępna, więc porównanie linków nie jest możliwe.
+                </p>
+              ) : linkRows.length === 0 ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">Nie znaleziono żadnych linków do porównania.</p>
+              ) : (
+                <div className="space-y-4">
+                  <StatCards items={linkStatItems} />
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+                    <LinkResultsTable
+                      links={linkRows}
+                      selectedId={selectedLink?.id ?? null}
+                      onSelect={setSelectedLink}
+                    />
+                    <LinkDetailPanel link={selectedLink} onClose={() => setSelectedLink(null)} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/5 p-4">
+              <FileStack size={16} className="text-blue-500" />
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Porównanie plików</h3>
+            </div>
+            <div className="p-4">
+              {!scopeAttachments ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Pliki nie były porównywane dla tego raportu — zakres „Pliki” był odznaczony przy uruchamianiu porównania.
+                </p>
+              ) : !report.both_reachable ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Co najmniej jedna ze stron jest niedostępna, więc porównanie plików nie jest możliwe.
+                </p>
+              ) : fileRows.length === 0 ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">Nie znaleziono żadnych plików do porównania.</p>
+              ) : (
+                <div className="space-y-4">
+                  <StatCards items={fileStatItems} />
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+                    <FileResultsTable
+                      files={fileRows}
+                      selectedId={selectedFile?.id ?? null}
+                      onSelect={setSelectedFile}
+                    />
+                    <FileDetailPanel file={selectedFile} onClose={() => setSelectedFile(null)} />
+                  </div>
                 </div>
               )}
             </div>

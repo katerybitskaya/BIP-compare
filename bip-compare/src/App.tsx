@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import PageHeader from './components/PageHeader';
@@ -8,18 +8,25 @@ import FileResultsTable from './components/FileResultsTable';
 import FileDetailPanel from './components/FileDetailPanel';
 import SettingsTab from './components/SettingsTab';
 import ReportsTab from './components/ReportsTab';
-import { files as mockFiles, stats, lastRunLabel } from './data/mockData';
-import { runCompare, ApiError } from './api/compareApi';
+import ErrorBoundary from './components/ErrorBoundary';
+import { runCompare, listReports, getReport, ApiError } from './api/compareApi';
+import type { CompareScope, ComparisonResult } from './api/types';
+import { buildFileRows, buildFileStatItems } from './utils/fileRows';
+import { formatDateTime } from './utils/format';
 import type { FileComparison, NavKey } from './types';
 
 function App() {
   const [activeNav, setActiveNav] = useState<NavKey>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<FileComparison | null>(mockFiles[0] ?? null);
   const [isRunning, setIsRunning] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
   const [reportsRefreshKey, setReportsRefreshKey] = useState(0);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+
+  const [currentReport, setCurrentReport] = useState<ComparisonResult | null>(null);
+  const [loadingInitialReport, setLoadingInitialReport] = useState(true);
+  const [selectedFile, setSelectedFile] = useState<FileComparison | null>(null);
+
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -38,16 +45,39 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const files = useMemo(() => mockFiles, []);
+  // Load the most recently saved report on first mount, so the Dashboard
+  // shows real results even before the user runs anything this session.
+  useEffect(() => {
+    let cancelled = false;
+    listReports()
+      .then((reports) => (reports.length > 0 ? getReport(reports[0].id) : null))
+      .then((result) => {
+        if (!cancelled && result) setCurrentReport(result);
+      })
+      .catch(() => {
+        // No saved reports yet (or backend unreachable) — Dashboard just
+        // shows its empty state, no need to surface an error for this.
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingInitialReport(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  async function handleRun(oldUrl: string, newUrl: string) {
+  const fileRows = useMemo(() => (currentReport ? buildFileRows(currentReport) : []), [currentReport]);
+  const statItems = useMemo(() => (currentReport ? buildFileStatItems(currentReport) : []), [currentReport]);
+  const lastRunLabel = currentReport ? formatDateTime(currentReport.generated_at) : 'Brak dotychczasowych porównań';
+
+  async function handleRun(oldUrl: string, newUrl: string, scope: CompareScope) {
     setIsRunning(true);
     setRunError(null);
     try {
-      const result = await runCompare({ old_url: oldUrl, new_url: newUrl });
+      const result = await runCompare({ old_url: oldUrl, new_url: newUrl, scope });
+      setCurrentReport(result);
+      setSelectedFile(null);
       setReportsRefreshKey((k) => k + 1);
-      setSelectedReportId(result.id);
-      setActiveNav('reports');
     } catch (err) {
       setRunError(err instanceof ApiError ? err.message : 'Nie udało się uruchomić porównania.');
     } finally {
@@ -95,16 +125,28 @@ function App() {
               <>
                 <ComparisonForm onRun={handleRun} isRunning={isRunning} error={runError} />
 
-                <StatCards items={stats} />
+                <ErrorBoundary what="wyników ostatniego porównania">
+                  {currentReport && (
+                    <div className="space-y-6">
+                      <StatCards items={statItems} />
 
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-                  <FileResultsTable
-                    files={files}
-                    selectedId={selectedFile?.id ?? null}
-                    onSelect={setSelectedFile}
-                  />
-                  <FileDetailPanel file={selectedFile} onClose={() => setSelectedFile(null)} />
-                </div>
+                      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                        <FileResultsTable
+                          files={fileRows}
+                          selectedId={selectedFile?.id ?? null}
+                          onSelect={setSelectedFile}
+                        />
+                        <FileDetailPanel file={selectedFile} onClose={() => setSelectedFile(null)} />
+                      </div>
+                    </div>
+                  )}
+
+                  {!currentReport && !loadingInitialReport && !isRunning && (
+                    <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-12 text-center text-sm text-slate-400 dark:text-slate-500">
+                      Brak jeszcze żadnego porównania. Uruchom pierwsze powyżej, aby zobaczyć wyniki.
+                    </div>
+                  )}
+                </ErrorBoundary>
               </>
             )}
 
