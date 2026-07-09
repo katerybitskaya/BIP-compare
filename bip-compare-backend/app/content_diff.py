@@ -1,7 +1,7 @@
 """Builds a readable diff between the old and new content of one page.
 
 Uses the raw HTML/text snapshots already captured by the crawler
-(results/{id}/pages/old.json and new.json) -- no re-crawling needed. The
+(results/{id}/snapshot.json) -- no re-crawling needed. The
 diff is computed on demand, for one page at a time, when the user opens
 it in the report. That keeps a full site crawl fast even for sites with
 thousands of pages: the cost of diffing is only paid for the page the

@@ -118,7 +118,7 @@ async def check_reachable(
 @dataclass
 class PageContent:
     """Everything extracted from one successfully fetched HTML page, saved
-    to results/{id}/pages/{old,new}.json for later content comparison."""
+    to results/{id}/snapshot.json for later content comparison."""
 
     html: str = ""
     text: str = ""

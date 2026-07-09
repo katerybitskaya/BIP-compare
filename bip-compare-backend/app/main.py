@@ -12,8 +12,8 @@ a JSON report describing:
     either site.
 
 The full raw content of every crawled page (HTML, text, links, attachments)
-is saved per-site under results/{id}/pages/{old,new}.json and can be fetched
-via /api/compare/{id}/raw/{side}. On top of that, /api/compare/{id}/content-diff
+is saved for both sites together under results/{id}/snapshot.json and can be
+fetched via /api/compare/{id}/raw/{side}. On top of that, /api/compare/{id}/content-diff
 computes a readable old-vs-new diff (text, HTML structure, HTML source) for
 one page at a time, on demand -- only when the "Zawartość" (content) scope
 was enabled for that report.
