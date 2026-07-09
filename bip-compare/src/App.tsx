@@ -23,6 +23,15 @@ function App() {
   const [reportsRefreshKey, setReportsRefreshKey] = useState(0);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
+  // Form state lifted here so it survives tab switches
+  const [oldUrl, setOldUrl] = useState('');
+  const [newUrl, setNewUrl] = useState('');
+  const [scope, setScope] = useState<CompareScope>({
+    content: true,
+    links: true,
+    attachments: true,
+  });
+
   const [currentReport, setCurrentReport] = useState<ComparisonResult | null>(null);
   const [loadingInitialReport, setLoadingInitialReport] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null);
@@ -138,7 +147,17 @@ function App() {
           <div className="space-y-6">
             {activeNav === 'dashboard' && (
               <>
-                <ComparisonForm onRun={handleRun} isRunning={isRunning} error={runError} />
+                <ComparisonForm
+                  oldUrl={oldUrl}
+                  newUrl={newUrl}
+                  scope={scope}
+                  onOldUrlChange={setOldUrl}
+                  onNewUrlChange={setNewUrl}
+                  onScopeChange={setScope}
+                  onRun={handleRun}
+                  isRunning={isRunning}
+                  error={runError}
+                />
 
                 <ErrorBoundary what="wyników ostatniego porównania">
                   {currentReport && !currentReport.both_reachable && (

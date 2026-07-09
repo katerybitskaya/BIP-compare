@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link2, Play, Loader2, AlertCircle } from 'lucide-react';
 import type { CompareScope } from '../api/types';
 
@@ -14,22 +13,30 @@ const SCOPE_OPTIONS: ScopeOption[] = [
 ];
 
 interface ComparisonFormProps {
+  oldUrl: string;
+  newUrl: string;
+  scope: CompareScope;
+  onOldUrlChange: (value: string) => void;
+  onNewUrlChange: (value: string) => void;
+  onScopeChange: (scope: CompareScope) => void;
   onRun: (oldUrl: string, newUrl: string, scope: CompareScope) => void;
   isRunning: boolean;
   error?: string | null;
 }
 
-export default function ComparisonForm({ onRun, isRunning, error }: ComparisonFormProps) {
-  const [oldUrl, setOldUrl] = useState('https://bip.staryurzad.pl');
-  const [newUrl, setNewUrl] = useState('https://bip.nowyurzad.pl');
-  const [scope, setScope] = useState<CompareScope>({
-    content: true,
-    links: true,
-    attachments: true,
-  });
-
+export default function ComparisonForm({
+  oldUrl,
+  newUrl,
+  scope,
+  onOldUrlChange,
+  onNewUrlChange,
+  onScopeChange,
+  onRun,
+  isRunning,
+  error,
+}: ComparisonFormProps) {
   const toggleScope = (key: keyof CompareScope) =>
-    setScope((prev) => ({ ...prev, [key]: !prev[key] }));
+    onScopeChange({ ...scope, [key]: !scope[key] });
 
   const noScopeSelected = !scope.content && !scope.links && !scope.attachments;
 
@@ -51,7 +58,7 @@ export default function ComparisonForm({ onRun, isRunning, error }: ComparisonFo
             <Link2 size={16} className="shrink-0 text-slate-400 dark:text-slate-500" />
             <input
               value={oldUrl}
-              onChange={(e) => setOldUrl(e.target.value)}
+              onChange={(e) => onOldUrlChange(e.target.value)}
               type="text"
               placeholder="https://bip.staryurzad.pl"
               className="w-full bg-transparent text-sm text-slate-900 dark:text-slate-200 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
@@ -67,7 +74,7 @@ export default function ComparisonForm({ onRun, isRunning, error }: ComparisonFo
             <Link2 size={16} className="shrink-0 text-slate-400 dark:text-slate-500" />
             <input
               value={newUrl}
-              onChange={(e) => setNewUrl(e.target.value)}
+              onChange={(e) => onNewUrlChange(e.target.value)}
               type="text"
               placeholder="https://bip.nowyurzad.pl"
               className="w-full bg-transparent text-sm text-slate-900 dark:text-slate-200 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600"
@@ -134,3 +141,4 @@ export default function ComparisonForm({ onRun, isRunning, error }: ComparisonFo
     </section>
   );
 }
+
