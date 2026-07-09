@@ -31,7 +31,7 @@ class CompareRequest(BaseModel):
             "generujących nieskończoną liczbę adresów)."
         ),
     )
-    timeout_seconds: float = Field(10.0, ge=1.0, le=60.0, description="Limit czasu pojedynczego żądania HTTP")
+    timeout_seconds: float = Field(30.0, ge=1.0, le=120.0, description="Limit czasu pojedynczego żądania HTTP")
     scope: CompareScope = Field(default_factory=CompareScope, description="Które opcjonalne sprawdzenia wykonać")
 
 
