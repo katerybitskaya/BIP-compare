@@ -2,18 +2,22 @@
 
 Each comparison run writes its results under ``results/{id}/``:
 
-  results/{id}/summary.json        -- page list, missing/extra/unchanged (as before)
-  results/{id}/pages/{hash}.json   -- one file per matched page, with the
-                                       detailed content/links/attachments diff
+  results/{id}/summary.json     -- page list, missing/extra/unchanged, file diffs
+  results/{id}/pages/old.json   -- full raw content of every crawled page on the old site
+  results/{id}/pages/new.json   -- same, for the new site
 
-Splitting it this way keeps summary.json small and fast to load for the
-report list / overview, while the (potentially much larger) per-page detail
-is only read when a user actually opens that page's diff.
+The raw per-page snapshots (HTML, extracted text, structure signature,
+links, attachments) are saved so a later step can diff any given page's old
+vs. new content on demand, without re-crawling anything.
+
+A site-wide comparison of every unique link and every unique file found
+anywhere on either site is also computed (when the corresponding scope flag
+is enabled) and saved straight into summary.json alongside everything else
+-- no extra JSON file needed, since both are small, flat lists.
 """
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import shutil
 import time
 import uuid
@@ -24,23 +28,18 @@ from typing import Dict, Optional
 import httpx
 
 from .crawler import PageContent, crawl_site, probe_path
-from .diffing import (
-    diff_attachments,
-    diff_content,
-    diff_links,
-    has_attachment_issues,
-    has_content_diff,
-    has_link_issues,
-)
 from .models import (
     CompareRequest,
-    CompareScope,
     ComparisonResult,
     FileDiffEntry,
     FileEntry,
-    PageDetail,
+    LinkDiffEntry,
+    LinkEntry,
     PageDiffEntry,
+    RawPageEntry,
+    RawSiteSnapshot,
     ReportSummary,
+    SiteReport,
 )
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
@@ -51,76 +50,45 @@ DEFAULT_HEADERS = {
 }
 
 # Bounds how many requests are ever in flight at once (across crawling both
-# sites and the later diff-probing/detail step), regardless of how many pages
-# a site turns out to have — keeps large sites from opening hundreds of
+# sites and the later file-probing step), regardless of how many pages a
+# site turns out to have — keeps large sites from opening hundreds of
 # simultaneous connections.
 CLIENT_LIMITS = httpx.Limits(max_connections=20, max_keepalive_connections=10)
-
-# Caps how many matched pages get the expensive detailed diff (content +
-# every link's HTTP status + every attachment's size). Without a cap, a site
-# with thousands of unchanged pages would multiply the request count by
-# (links-per-page + attachments-per-page) on top of the original crawl. This
-# is a safety valve for pathologically large sites, not a normal limit.
-MAX_DETAILED_PAGES = 500
 
 # Caps how many unique files (attachments) get probed for the site-wide file
 # comparison (Dashboard's "Wyniki - pliki" list), across the whole site.
 MAX_FILES = 1000
 
+# Same idea, but for the site-wide link comparison -- links are usually
+# far more numerous than attachments (every nav item repeats on every
+# page), so the cap is a bit higher.
+MAX_LINKS = 1500
 
-def _path_hash(path: str) -> str:
-    """Stable, filesystem-safe filename for a page path."""
-    return hashlib.sha1(path.encode("utf-8")).hexdigest()[:16]
 
-
-async def _build_page_detail(
-    client: httpx.AsyncClient,
-    path: str,
-    old_content: Dict[str, PageContent],
-    new_content: Dict[str, PageContent],
-    old_url_by_path: Dict[str, str],
-    new_url_by_path: Dict[str, str],
-    timeout_seconds: float,
-    scope: CompareScope,
-    link_status_cache: Dict[str, Optional[int]],
-    attachment_size_cache: Dict[str, Optional[int]],
-) -> Optional[PageDetail]:
-    old_page = old_content.get(path)
-    new_page = new_content.get(path)
-    if old_page is None or new_page is None:
-        return None  # not fetched as HTML on one side (or fetch failed) — nothing to diff in detail
-
-    content_diff = None
-    if scope.content:
-        content_diff = diff_content(old_page.text, new_page.text, old_page.structure, new_page.structure)
-
-    links_diff = None
-    attachments_diff = None
-    coros = []
-    if scope.links:
-        coros.append(diff_links(client, old_page.links, new_page.links, timeout_seconds, link_status_cache))
-    if scope.attachments:
-        coros.append(diff_attachments(client, old_page.attachments, new_page.attachments, timeout_seconds, attachment_size_cache))
-    if coros:
-        results = await asyncio.gather(*coros)
-        idx = 0
-        if scope.links:
-            links_diff = results[idx]
-            idx += 1
-        if scope.attachments:
-            attachments_diff = results[idx]
-
-    if content_diff is None and links_diff is None and attachments_diff is None:
-        return None  # nothing was in scope for this run — no detail to save
-
-    return PageDetail(
-        path=path,
-        old_url=old_url_by_path[path],
-        new_url=new_url_by_path[path],
-        content_diff=content_diff,
-        links_diff=links_diff,
-        attachments_diff=attachments_diff,
-        screenshot_diff=None,  # reserved for a future step (visual/screenshot comparison)
+def _build_raw_snapshot(site_report: SiteReport, content_by_path: Dict[str, PageContent]) -> RawSiteSnapshot:
+    """Combines the crawl's per-page status (SiteReport.pages) with the
+    extracted content (PageContent, for pages fetched as HTML) into one
+    self-contained snapshot of everything found on this site."""
+    pages: Dict[str, RawPageEntry] = {}
+    for page in site_report.pages:
+        content = content_by_path.get(page.path)
+        pages[page.path] = RawPageEntry(
+            url=page.url,
+            status_code=page.status_code,
+            ok=page.ok,
+            error=page.error,
+            html=content.html if content else None,
+            text=content.text if content else None,
+            structure=content.structure if content else None,
+            links=content.links if content else None,
+            attachments=content.attachments if content else None,
+        )
+    return RawSiteSnapshot(
+        base_url=site_report.base_url,
+        reachable=site_report.reachable,
+        root_status_code=site_report.root_status_code,
+        root_error=site_report.root_error,
+        pages=pages,
     )
 
 
@@ -172,8 +140,7 @@ async def build_file_diffs(
 ) -> list[FileDiffEntry]:
     """Site-wide comparison of every downloadable file (attachment) found
     anywhere on either site — independent of which specific page(s) link to
-    it. This is what powers the Dashboard's flat "Wyniki - pliki" table,
-    as distinct from AttachmentsDiff (which is scoped to one matched page).
+    it. This is what powers the Dashboard's flat "Wyniki - pliki" table.
     """
     old_files = _aggregate_attachments(old_content)
     new_files = _aggregate_attachments(new_content)
@@ -221,6 +188,72 @@ async def build_file_diffs(
         diffs.append(FileDiffEntry(key=key, filename=filename, old=old_entry, new=new_entry, status=status))
 
     diffs.sort(key=lambda d: d.filename.lower())
+    return diffs
+
+
+def _aggregate_links(content_by_path: Dict[str, PageContent]) -> Dict[str, Dict[str, str]]:
+    """Every unique link (<a href>, excluding attachments) discovered
+    anywhere on one site's crawl, keyed the same way as crawler._extract_page_content
+    builds each link's "key" -- normalized path for same-host links, full
+    absolute URL for cross-host ones. The first page found linking to a
+    given href "wins" as its recorded source_path and link text."""
+    links: Dict[str, Dict[str, str]] = {}
+    for path, page_content in content_by_path.items():
+        for link in page_content.links:
+            key = link.get("key", link["href"])
+            if key not in links:
+                links[key] = {"href": link["href"], "text": link.get("text", ""), "source_path": path}
+    return links
+
+
+async def build_link_diffs(
+    client: httpx.AsyncClient,
+    old_content: Dict[str, PageContent],
+    new_content: Dict[str, PageContent],
+    timeout_seconds: float,
+) -> list[LinkDiffEntry]:
+    """Site-wide comparison of every link found anywhere on either site --
+    independent of which specific page(s) point to it. Reuses the same
+    HEAD-then-GET probing as the file comparison, since checking "does this
+    href respond" is identical logic either way."""
+    old_links = _aggregate_links(old_content)
+    new_links = _aggregate_links(new_content)
+    all_keys = sorted(set(old_links) | set(new_links))[:MAX_LINKS]
+
+    cache: Dict[str, dict] = {}
+
+    async def probe_side(links_map: Dict[str, Dict[str, str]], key: str) -> Optional[LinkEntry]:
+        entry = links_map.get(key)
+        if entry is None:
+            return None
+        probe = await _probe_file(client, entry["href"], timeout_seconds, cache)
+        return LinkEntry(
+            href=entry["href"],
+            text=entry["text"],
+            status_code=probe["status_code"],
+            ok=probe["ok"],
+            source_path=entry["source_path"],
+        )
+
+    old_entries, new_entries = await asyncio.gather(
+        asyncio.gather(*[probe_side(old_links, k) for k in all_keys]),
+        asyncio.gather(*[probe_side(new_links, k) for k in all_keys]),
+    )
+
+    diffs: list[LinkDiffEntry] = []
+    for key, old_entry, new_entry in zip(all_keys, old_entries, new_entries):
+        text = (old_entry or new_entry).text or key  # type: ignore[union-attr]
+        if old_entry is None:
+            status = "new"
+        elif new_entry is None:
+            status = "removed"
+        elif not new_entry.ok:
+            status = "broken"
+        else:
+            status = "ok"
+        diffs.append(LinkDiffEntry(key=key, text=text, old=old_entry, new=new_entry, status=status))
+
+    diffs.sort(key=lambda d: d.text.lower())
     return diffs
 
 
@@ -290,54 +323,31 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
                     )
                 )
 
-        # --- Detailed per-page diff: content / links / attachments --------
-        page_details: Dict[str, str] = {}
-        pages_with_content_changes = 0
-        pages_with_link_issues = 0
-        pages_with_attachment_issues = 0
-
-        scope_active = req.scope.content or req.scope.links or req.scope.attachments
-        if both_reachable and unchanged and scope_active:
-            detail_paths = unchanged[:MAX_DETAILED_PAGES]
-            old_url_by_path = {p: old_status_by_path[p].url for p in detail_paths}
-            new_url_by_path = {p: new_status_by_path[p].url for p in detail_paths}
-            link_status_cache: Dict[str, Optional[int]] = {}
-            attachment_size_cache: Dict[str, Optional[int]] = {}
-
-            details = await asyncio.gather(
-                *[
-                    _build_page_detail(
-                        client, path, old_content, new_content,
-                        old_url_by_path, new_url_by_path,
-                        req.timeout_seconds, req.scope, link_status_cache, attachment_size_cache,
-                    )
-                    for path in detail_paths
-                ]
-            )
-
-            pages_dir = RESULTS_DIR / result_id / "pages"
-            pages_dir.mkdir(parents=True, exist_ok=True)
-            for path, detail in zip(detail_paths, details):
-                if detail is None:
-                    continue
-                if has_content_diff(detail.content_diff):
-                    pages_with_content_changes += 1
-                if has_link_issues(detail.links_diff):
-                    pages_with_link_issues += 1
-                if has_attachment_issues(detail.attachments_diff):
-                    pages_with_attachment_issues += 1
-
-                file_stem = _path_hash(path)
-                (pages_dir / f"{file_stem}.json").write_text(detail.model_dump_json(indent=2), encoding="utf-8")
-                page_details[path] = file_stem
+        # --- Raw per-page content snapshots --------------------------------
+        # Full HTML/text/links/attachments for every crawled page on each
+        # site, saved so a later step can diff any page's content on demand.
+        # Cheap to build — no extra network requests, just serializing data
+        # already gathered by the crawl.
+        pages_dir = RESULTS_DIR / result_id / "pages"
+        pages_dir.mkdir(parents=True, exist_ok=True)
+        old_snapshot = _build_raw_snapshot(old_report, old_content)
+        new_snapshot = _build_raw_snapshot(new_report, new_content)
+        (pages_dir / "old.json").write_text(old_snapshot.model_dump_json(indent=2), encoding="utf-8")
+        (pages_dir / "new.json").write_text(new_snapshot.model_dump_json(indent=2), encoding="utf-8")
 
         # --- Site-wide file (attachment) comparison ------------------------
-        # Independent of per-page detail: every file discovered anywhere on
-        # either site, compared by name/size/reachability. Powers the
-        # Dashboard's flat file list.
+        # Every file discovered anywhere on either site, compared by
+        # name/size/reachability. Powers the Dashboard's flat file list.
         file_diffs: list[FileDiffEntry] = []
         if both_reachable and req.scope.attachments:
             file_diffs = await build_file_diffs(client, old_content, new_content, req.timeout_seconds)
+
+        # --- Site-wide link comparison ---------------------------------
+        # Every link discovered anywhere on either site, compared by
+        # reachability/existence. Powers the report's "Porównanie linków".
+        link_diffs: list[LinkDiffEntry] = []
+        if both_reachable and req.scope.links:
+            link_diffs = await build_link_diffs(client, old_content, new_content, req.timeout_seconds)
 
     duration_ms = (time.perf_counter() - started) * 1000
 
@@ -354,11 +364,8 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         missing_in_new=missing_in_new,
         extra_in_new=extra_in_new,
         unchanged_paths=unchanged,
-        page_details=page_details,
-        pages_with_content_changes=pages_with_content_changes,
-        pages_with_link_issues=pages_with_link_issues,
-        pages_with_attachment_issues=pages_with_attachment_issues,
         file_diffs=file_diffs,
+        link_diffs=link_diffs,
     )
 
     _save_result(result)
@@ -388,11 +395,10 @@ def _to_summary(result: ComparisonResult) -> ReportSummary:
         extra_count=len(result.extra_in_new),
         unchanged_count=len(result.unchanged_paths),
         scope=result.scope,
-        pages_with_content_changes=result.pages_with_content_changes,
-        pages_with_link_issues=result.pages_with_link_issues,
-        pages_with_attachment_issues=result.pages_with_attachment_issues,
         file_count=len(result.file_diffs),
         file_issue_count=sum(1 for f in result.file_diffs if f.status != "ok"),
+        link_count=len(result.link_diffs),
+        link_issue_count=sum(1 for l in result.link_diffs if l.status != "ok"),
     )
 
 
@@ -403,19 +409,15 @@ def load_result(result_id: str) -> ComparisonResult | None:
     return ComparisonResult.model_validate_json(path.read_text(encoding="utf-8"))
 
 
-def load_page_detail(result_id: str, path: str) -> PageDetail | None:
-    """Loads one page's detailed diff, looked up by its original site path
-    (e.g. "/o-nas") via the summary's ``page_details`` hash mapping."""
-    result = load_result(result_id)
-    if result is None:
+def load_raw_snapshot(result_id: str, side: str) -> RawSiteSnapshot | None:
+    """Loads the full raw per-page content snapshot for one side ("old" or
+    "new") of a saved comparison."""
+    if side not in ("old", "new"):
         return None
-    file_stem = result.page_details.get(path)
-    if file_stem is None:
+    path = RESULTS_DIR / result_id / "pages" / f"{side}.json"
+    if not path.exists():
         return None
-    detail_path = RESULTS_DIR / result_id / "pages" / f"{file_stem}.json"
-    if not detail_path.exists():
-        return None
-    return PageDetail.model_validate_json(detail_path.read_text(encoding="utf-8"))
+    return RawSiteSnapshot.model_validate_json(path.read_text(encoding="utf-8"))
 
 
 def list_result_summaries() -> list[ReportSummary]:

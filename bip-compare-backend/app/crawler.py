@@ -54,9 +54,10 @@ SAFETY_MAX_PAGES = 5000
 
 @dataclass
 class PageContent:
-    """Everything extracted from one successfully fetched HTML page, used
-    later to build its detailed content/links/attachments diff."""
+    """Everything extracted from one successfully fetched HTML page, saved
+    to results/{id}/pages/{old,new}.json for later content comparison."""
 
+    html: str = ""
     text: str = ""
     structure: Dict[str, int] = field(default_factory=dict)
     links: List[Dict[str, str]] = field(default_factory=list)         # non-asset <a href>
@@ -166,7 +167,7 @@ def _extract_page_content(html: str, page_url: str, host: str) -> PageContent:
         else:
             links.append({"href": absolute, "text": link_text, "key": key})
 
-    return PageContent(text=text, structure=structure, links=links, attachments=attachments)
+    return PageContent(html=html, text=text, structure=structure, links=links, attachments=attachments)
 
 
 async def crawl_site(

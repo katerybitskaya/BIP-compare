@@ -67,3 +67,4 @@ skrócenia czasu niezbędnego na ręczną weryfikację poprawności migracji,
 zwiększenia pewności, że serwis BIP po migracji prezentuje informacje zgodne z serwisem źródłowym.
 
 Więcej informacji na powyższych wizualizacjach.
+![alt text](image-2.png)
