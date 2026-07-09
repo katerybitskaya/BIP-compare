@@ -21,7 +21,7 @@ class CompareScope(BaseModel):
 class CompareRequestPayload(BaseModel):
     old_url: str
     new_url: str
-    max_pages: int = 200
+    max_pages: int = 0
     timeout_seconds: int = 30
     scope: Optional[CompareScope] = None
 

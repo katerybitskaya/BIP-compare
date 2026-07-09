@@ -73,7 +73,7 @@ def _attachment_key(href: str) -> str:
 def crawl_site(
     base_url: str,
     *,
-    max_pages: int = 10000,
+    max_pages: int = 0,
     timeout: int = 15,
     collect_raw: bool = False,
 ) -> Tuple[SiteReport, Optional[Dict[str, RawPageEntry]]]:
@@ -139,7 +139,7 @@ def crawl_site(
     pages: List[PageStatus] = []
     raw_pages: Dict[str, RawPageEntry] = {} if collect_raw else None  # type: ignore[assignment]
 
-    while queue and len(pages) < max_pages:
+    while queue and (max_pages == 0 or len(pages) < max_pages):
         url = queue.popleft()
         if url in visited:
             continue
