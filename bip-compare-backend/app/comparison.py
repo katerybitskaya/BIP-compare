@@ -323,6 +323,23 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
                     )
                 )
 
+        # --- Content comparison summary (cheap, in-memory) ------------------
+        # How many of the common (unchanged-path) pages actually have
+        # identical content -- just an equality check on strings the crawl
+        # already fetched, no extra requests. Powers the Dashboard's
+        # "X / Y stron zmienionych" tile and the report's content overview.
+        content_checked_count = 0
+        content_changed_count = 0
+        if both_reachable and req.scope.content:
+            for path in unchanged:
+                old_page = old_content.get(path)
+                new_page = new_content.get(path)
+                if old_page is None or new_page is None:
+                    continue
+                content_checked_count += 1
+                if old_page.html != new_page.html or old_page.text != new_page.text:
+                    content_changed_count += 1
+
         # --- Raw per-page content snapshots --------------------------------
         # Full HTML/text/links/attachments for every crawled page on each
         # site, saved so a later step can diff any page's content on demand.
@@ -366,6 +383,8 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         unchanged_paths=unchanged,
         file_diffs=file_diffs,
         link_diffs=link_diffs,
+        content_checked_count=content_checked_count,
+        content_changed_count=content_changed_count,
     )
 
     _save_result(result)
@@ -399,6 +418,8 @@ def _to_summary(result: ComparisonResult) -> ReportSummary:
         file_issue_count=sum(1 for f in result.file_diffs if f.status != "ok"),
         link_count=len(result.link_diffs),
         link_issue_count=sum(1 for l in result.link_diffs if l.status != "ok"),
+        content_checked_count=result.content_checked_count,
+        content_changed_count=result.content_changed_count,
     )
 
 

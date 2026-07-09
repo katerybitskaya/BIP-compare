@@ -4,16 +4,16 @@ import TopBar from './components/TopBar';
 import PageHeader from './components/PageHeader';
 import ComparisonForm from './components/ComparisonForm';
 import StatCards from './components/StatCards';
-import FileResultsTable from './components/FileResultsTable';
-import FileDetailPanel from './components/FileDetailPanel';
+import CategoryOverviewTable from './components/CategoryOverviewTable';
+import CategoryDetailPanel from './components/CategoryDetailPanel';
 import SettingsTab from './components/SettingsTab';
 import ReportsTab from './components/ReportsTab';
 import ErrorBoundary from './components/ErrorBoundary';
 import { runCompare, listReports, getReport, ApiError } from './api/compareApi';
 import type { CompareScope, ComparisonResult } from './api/types';
-import { buildFileRows, buildFileStatItems } from './utils/fileRows';
+import { buildOverviewStatItems, buildCategoryOverview } from './utils/overviewRows';
 import { formatDateTime } from './utils/format';
-import type { FileComparison, NavKey } from './types';
+import type { CategoryId, CategoryOverviewRow, NavKey } from './types';
 
 function App() {
   const [activeNav, setActiveNav] = useState<NavKey>('dashboard');
@@ -25,7 +25,7 @@ function App() {
 
   const [currentReport, setCurrentReport] = useState<ComparisonResult | null>(null);
   const [loadingInitialReport, setLoadingInitialReport] = useState(true);
-  const [selectedFile, setSelectedFile] = useState<FileComparison | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null);
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
@@ -66,9 +66,24 @@ function App() {
     };
   }, []);
 
-  const fileRows = useMemo(() => (currentReport ? buildFileRows(currentReport) : []), [currentReport]);
-  const statItems = useMemo(() => (currentReport ? buildFileStatItems(currentReport) : []), [currentReport]);
+  const overviewStatItems = useMemo(() => (currentReport ? buildOverviewStatItems(currentReport) : []), [currentReport]);
+  const categoryEntries = useMemo(() => (currentReport ? buildCategoryOverview(currentReport) : []), [currentReport]);
+  const categoryRows: CategoryOverviewRow[] = useMemo(() => categoryEntries.map((e) => e.row), [categoryEntries]);
+  const selectedCategoryEntry = useMemo(
+    () => categoryEntries.find((e) => e.row.id === selectedCategory) ?? null,
+    [categoryEntries, selectedCategory]
+  );
   const lastRunLabel = currentReport ? formatDateTime(currentReport.generated_at) : 'Brak dotychczasowych porównań';
+
+  function handleSelectCategory(row: CategoryOverviewRow) {
+    setSelectedCategory(row.id);
+  }
+
+  function handleViewFullReport() {
+    if (!currentReport) return;
+    setSelectedReportId(currentReport.id);
+    setActiveNav('reports');
+  }
 
   async function handleRun(oldUrl: string, newUrl: string, scope: CompareScope) {
     setIsRunning(true);
@@ -76,7 +91,7 @@ function App() {
     try {
       const result = await runCompare({ old_url: oldUrl, new_url: newUrl, scope });
       setCurrentReport(result);
-      setSelectedFile(null);
+      setSelectedCategory(null);
       setReportsRefreshKey((k) => k + 1);
     } catch (err) {
       setRunError(err instanceof ApiError ? err.message : 'Nie udało się uruchomić porównania.');
@@ -126,17 +141,23 @@ function App() {
                 <ComparisonForm onRun={handleRun} isRunning={isRunning} error={runError} />
 
                 <ErrorBoundary what="wyników ostatniego porównania">
-                  {currentReport && (
+                  {currentReport && !currentReport.both_reachable && (
+                    <div className="flex items-start gap-2.5 rounded-2xl border border-rose-300 dark:border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-700 dark:text-rose-300">
+                      Co najmniej jedna ze stron jest niedostępna, więc pełne porównanie nie zostało wykonane. Zobacz pełny raport, aby sprawdzić szczegóły.
+                    </div>
+                  )}
+
+                  {currentReport && currentReport.both_reachable && (
                     <div className="space-y-6">
-                      <StatCards items={statItems} />
+                      <StatCards items={overviewStatItems} />
 
                       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-                        <FileResultsTable
-                          files={fileRows}
-                          selectedId={selectedFile?.id ?? null}
-                          onSelect={setSelectedFile}
+                        <CategoryOverviewTable
+                          rows={categoryRows}
+                          selectedId={selectedCategory}
+                          onSelect={handleSelectCategory}
                         />
-                        <FileDetailPanel file={selectedFile} onClose={() => setSelectedFile(null)} />
+                        <CategoryDetailPanel entry={selectedCategoryEntry} onViewFullReport={handleViewFullReport} />
                       </div>
                     </div>
                   )}

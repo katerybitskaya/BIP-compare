@@ -31,7 +31,7 @@ class CompareRequest(BaseModel):
             "generujących nieskończoną liczbę adresów)."
         ),
     )
-    timeout_seconds: float = Field(10.0, ge=1.0, le=60.0, description="Limit czasu pojedynczego żądania HTTP")
+    timeout_seconds: float = Field(30.0, ge=1.0, le=120.0, description="Limit czasu pojedynczego żądania HTTP")
     scope: CompareScope = Field(default_factory=CompareScope, description="Które opcjonalne sprawdzenia wykonać")
 
 
@@ -187,6 +187,12 @@ class ComparisonResult(BaseModel):
         default_factory=list,
         description="Porównanie WSZYSTKICH linków znalezionych na obu witrynach, nie tylko z jednej podstrony",
     )
+    content_checked_count: int = Field(
+        0, description="Ile wspólnych podstron udało się porównać pod względem treści (HTML/tekst)"
+    )
+    content_changed_count: int = Field(
+        0, description="Ile z porównanych wspólnych podstron ma inną treść (HTML lub tekst) między starą a nową wersją"
+    )
 
 
 class ReportSummary(BaseModel):
@@ -211,3 +217,5 @@ class ReportSummary(BaseModel):
     file_issue_count: int = 0
     link_count: int = 0
     link_issue_count: int = 0
+    content_checked_count: int = 0
+    content_changed_count: int = 0
