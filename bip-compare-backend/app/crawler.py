@@ -275,6 +275,14 @@ async def crawl_site(
     frontier: Set[str] = {"/"}
     pages: list[PageStatus] = []
 
+    # Some sites link to the same physical page under more than one URL
+    # (redirects, legacy aliases, "/" vs "/index.html", ...). ``visited``
+    # only stops the *same* requested path from being fetched twice; this
+    # tracks the *final* (post-redirect) normalized path of every page
+    # actually recorded, so a page reached via a different alias doesn't
+    # get listed a second (or third) time under a different path.
+    resolved_paths_seen: Dict[str, str] = {}
+
     async def fetch_one(path: str) -> tuple[PageStatus, Set[str], Optional[PageContent]]:
         full_url = urljoin(base, path)
         try:
@@ -305,6 +313,23 @@ async def crawl_site(
 
         next_frontier: Set[str] = set()
         for page, links, content in results:
+            # A successful fetch may have landed here after a redirect --
+            # check under the *resolved* path whether this physical page has
+            # already been recorded under a different alias before adding it
+            # again. Failed fetches have no resolved URL to compare, so they
+            # always get recorded as-is.
+            resolved_path = _normalize_path(page.url) if page.ok else page.path
+            already_recorded_as = resolved_paths_seen.get(resolved_path)
+            if already_recorded_as is not None and already_recorded_as != page.path:
+                # Same page, different alias -- still worth following its
+                # links (they might lead somewhere new), just don't list it
+                # a second time.
+                for link in links:
+                    if link not in visited:
+                        next_frontier.add(link)
+                continue
+            resolved_paths_seen[resolved_path] = page.path
+
             pages.append(page)
             if content is not None:
                 content_by_path[page.path] = content
