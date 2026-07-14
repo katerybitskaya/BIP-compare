@@ -1,2 +1,1 @@
-# Ten plik istnieje tylko po to, żeby folder results/ był śledzony przez git.
-# Faktyczne raporty JSON są ignorowane przez .gitignore.
+# ten katalog przechowuje wyniki JSON z crawlera

@@ -1,5 +1,5 @@
 """
-Pydantic models — mirrors of the TypeScript interfaces in src/api/types.ts.
+Pydantic models — mirrors of the TypeScript interfaces in the frontend.
 """
 from __future__ import annotations
 
@@ -61,98 +61,6 @@ class PageDiffEntry(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Raw per-page content snapshot
-# ---------------------------------------------------------------------------
-
-class RawPageEntry(BaseModel):
-    url: str
-    status_code: Optional[int] = None
-    ok: bool
-    error: Optional[str] = None
-    html: Optional[str] = None
-    text: Optional[str] = None
-    structure: Optional[Dict[str, int]] = None
-    links: Optional[List[Dict[str, str]]] = None
-    attachments: Optional[List[Dict[str, str]]] = None
-
-
-class RawSiteSnapshot(BaseModel):
-    base_url: str
-    reachable: bool
-    root_status_code: Optional[int] = None
-    root_error: Optional[str] = None
-    pages: Dict[str, RawPageEntry] = {}
-
-
-# ---------------------------------------------------------------------------
-# File comparison
-# ---------------------------------------------------------------------------
-
-class FileEntry(BaseModel):
-    filename: str
-    href: str
-    status_code: Optional[int] = None
-    ok: bool
-    size_bytes: Optional[int] = None
-    content_type: Optional[str] = None
-    source_path: str
-
-
-class FileDiffEntry(BaseModel):
-    key: str
-    filename: str
-    old: Optional[FileEntry] = None
-    new: Optional[FileEntry] = None
-    status: str  # "ok" | "different" | "error404" | "new" | "removed"
-
-
-# ---------------------------------------------------------------------------
-# Link comparison
-# ---------------------------------------------------------------------------
-
-class LinkEntry(BaseModel):
-    href: str
-    text: str
-    status_code: Optional[int] = None
-    ok: bool
-    source_path: str
-
-
-class LinkDiffEntry(BaseModel):
-    key: str
-    text: str
-    old: Optional[LinkEntry] = None
-    new: Optional[LinkEntry] = None
-    status: str  # "ok" | "broken" | "new" | "removed"
-
-
-# ---------------------------------------------------------------------------
-# Content diff (on-demand)
-# ---------------------------------------------------------------------------
-
-class ContentDiffLine(BaseModel):
-    kind: str  # "same" | "del" | "ins"
-    text: str
-
-
-class StructureDiffRow(BaseModel):
-    tag: str
-    old: Optional[int] = None
-    new: Optional[int] = None
-    changed: bool
-
-
-class PageContentDiff(BaseModel):
-    path: str
-    status: str  # "same" | "changed" | "removed" | "added"
-    old_url: Optional[str] = None
-    new_url: Optional[str] = None
-    text_diff: List[ContentDiffLine] = []
-    structure_diff: List[StructureDiffRow] = []
-    html_diff: List[ContentDiffLine] = []
-
-
-# ---------------------------------------------------------------------------
 # Comparison result & report summary
 # ---------------------------------------------------------------------------
 
@@ -169,10 +77,6 @@ class ComparisonResult(BaseModel):
     missing_in_new: List[PageDiffEntry] = []
     extra_in_new: List[PageDiffEntry] = []
     unchanged_paths: List[str] = []
-    file_diffs: Optional[List[FileDiffEntry]] = None
-    link_diffs: Optional[List[LinkDiffEntry]] = None
-    content_checked_count: Optional[int] = None
-    content_changed_count: Optional[int] = None
 
 
 class ReportSummary(BaseModel):
@@ -190,9 +94,3 @@ class ReportSummary(BaseModel):
     extra_count: int
     unchanged_count: int
     scope: Optional[CompareScope] = None
-    file_count: Optional[int] = None
-    file_issue_count: Optional[int] = None
-    link_count: Optional[int] = None
-    link_issue_count: Optional[int] = None
-    content_checked_count: Optional[int] = None
-    content_changed_count: Optional[int] = None

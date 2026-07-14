@@ -1,1 +1,1 @@
-# BIP Compare backend package
+# BIP Compare Backend

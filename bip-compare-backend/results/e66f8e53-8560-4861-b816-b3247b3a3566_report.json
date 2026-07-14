@@ -1,0 +1,44 @@
+{
+  "id": "e66f8e53-8560-4861-b816-b3247b3a3566",
+  "generated_at": "2026-07-14T07:47:47.756232+00:00",
+  "duration_ms": 4116,
+  "old_url": "http://example.com",
+  "new_url": "http://example.org",
+  "old_site": {
+    "base_url": "http://example.com",
+    "reachable": true,
+    "root_status_code": 200,
+    "root_error": null,
+    "pages": [
+      {
+        "path": "/",
+        "url": "http://example.com",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      }
+    ],
+    "page_count": 1
+  },
+  "new_site": {
+    "base_url": "http://example.org",
+    "reachable": true,
+    "root_status_code": 200,
+    "root_error": null,
+    "pages": [
+      {
+        "path": "/",
+        "url": "http://example.org",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      }
+    ],
+    "page_count": 1
+  },
+  "both_reachable": true,
+  "scope": null,
+  "missing_in_new": [],
+  "extra_in_new": [],
+  "unchanged_paths": []
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "path": "/",
+    "url": "http://example.com",
+    "status_code": 200,
+    "ok": true,
+    "error": null
+  }
+]

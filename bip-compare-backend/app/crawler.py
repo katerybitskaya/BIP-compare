@@ -1,23 +1,32 @@
 """
-Site crawler — BFS crawl of a BIP website.
+Async crawler — BFS crawl of a BIP website using aiohttp for speed.
 
-Discovers all internal HTML pages, records their HTTP status,
-and optionally collects raw content (HTML, text, links, attachments)
-needed for deeper comparison.
+Uses asyncio.Semaphore to run up to N requests concurrently, dramatically
+reducing total crawl time compared to sequential requests.
+Each discovered subpage is saved into a JSON file (one per site).
 """
 from __future__ import annotations
 
-import hashlib
+import asyncio
+import json
 from collections import deque
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse, urlunparse
 
-import requests
+import aiohttp
 from bs4 import BeautifulSoup
 
-from .models import PageStatus, RawPageEntry, RawSiteSnapshot, SiteReport
+from .models import PageStatus, SiteReport
 
-# File extensions treated as attachments (not crawled as pages)
+# ---------------------------------------------------------------------------
+# Constants
+# ---------------------------------------------------------------------------
+
+# Max concurrent HTTP requests (keeps things fast but polite)
+MAX_CONCURRENT = 20
+
+# File extensions treated as attachments — skip these during crawl
 _ATTACHMENT_EXTENSIONS = frozenset({
     ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
     ".odt", ".ods", ".odp",
@@ -29,10 +38,14 @@ _ATTACHMENT_EXTENSIONS = frozenset({
 })
 
 _SESSION_HEADERS = {
-    "User-Agent": "BIP-Compare/1.0 (automated site comparison tool)",
+    "User-Agent": "BIP-Compare/2.0 (automated site comparison tool)",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "pl,en;q=0.5",
 }
+
+# Where to store JSON crawl results
+RESULTS_DIR = Path(__file__).parent.parent / "results"
+RESULTS_DIR.mkdir(exist_ok=True)
 
 
 # ---------------------------------------------------------------------------
@@ -42,6 +55,11 @@ _SESSION_HEADERS = {
 def _is_attachment(url: str) -> bool:
     path = urlparse(url).path.lower()
     return any(path.endswith(ext) for ext in _ATTACHMENT_EXTENSIONS)
+
+
+def _is_history_page(url: str) -> bool:
+    """Return True for 'pełna historia zmian' pages (pattern: /ID/historia/ID)."""
+    return "/historia/" in urlparse(url).path
 
 
 def _normalize_url(url: str) -> str:
@@ -58,213 +76,195 @@ def _page_path(url: str) -> str:
     return f"{path}?{p.query}" if p.query else path
 
 
-def _link_key(href: str, text: str) -> str:
-    return hashlib.md5(f"{href}|{text}".encode()).hexdigest()[:12]
+# ---------------------------------------------------------------------------
+# Core: fetch a single page
+# ---------------------------------------------------------------------------
 
-
-def _attachment_key(href: str) -> str:
-    return hashlib.md5(href.encode()).hexdigest()[:12]
+async def _fetch_page(
+    session: aiohttp.ClientSession,
+    url: str,
+    sem: asyncio.Semaphore,
+    timeout: int,
+) -> Tuple[str, Optional[int], bool, Optional[str], Optional[str]]:
+    """
+    Fetch a single URL.
+    Returns (url, status_code, ok, error, html_or_none).
+    """
+    async with sem:
+        try:
+            async with session.get(
+                url,
+                timeout=aiohttp.ClientTimeout(total=timeout),
+                allow_redirects=True,
+                ssl=False,
+            ) as resp:
+                status_code = resp.status
+                ok = 200 <= status_code < 400
+                html_content = None
+                if ok and "html" in resp.headers.get("content-type", ""):
+                    html_content = await resp.text(errors="replace")
+                return url, status_code, ok, None, html_content
+        except asyncio.TimeoutError:
+            return url, None, False, "Timeout", None
+        except aiohttp.ClientError as exc:
+            return url, None, False, str(exc)[:120], None
+        except Exception as exc:  # noqa: BLE001
+            return url, None, False, str(exc)[:120], None
 
 
 # ---------------------------------------------------------------------------
-# Main crawl function
+# Main crawl
 # ---------------------------------------------------------------------------
 
-def crawl_site(
+async def crawl_site(
     base_url: str,
     *,
     max_pages: int = 0,
-    timeout: int = 15,
-    collect_raw: bool = False,
-) -> Tuple[SiteReport, Optional[Dict[str, RawPageEntry]]]:
+    timeout: int = 30,
+) -> SiteReport:
     """
-    BFS-crawl *base_url* and every internal HTML link found on the pages.
+    Async BFS crawl of *base_url*.
+    Discovers all internal HTML links, records each page, and writes the
+    full list to a JSON file in RESULTS_DIR.
 
-    Parameters
-    ----------
-    base_url    : Starting URL.
-    max_pages   : Hard limit on the number of pages to visit.
-    timeout     : Per-request timeout in seconds.
-    collect_raw : Whether to collect full HTML/text/links/attachments.
-
-    Returns
-    -------
-    (SiteReport, raw_pages | None)
-        raw_pages is a dict keyed by page path and is only returned when
-        collect_raw=True.
+    Returns a SiteReport with page_count set.
     """
-    session = requests.Session()
-    session.headers.update(_SESSION_HEADERS)
-
     base_netloc = urlparse(base_url).netloc
+    sem = asyncio.Semaphore(MAX_CONCURRENT)
 
-    # ------------------------------------------------------------------
-    # 1. Check root reachability
-    # ------------------------------------------------------------------
-    root_status_code: Optional[int] = None
-    root_error: Optional[str] = None
-    reachable = False
+    connector = aiohttp.TCPConnector(limit=MAX_CONCURRENT, ssl=False)
+    async with aiohttp.ClientSession(
+        headers=_SESSION_HEADERS,
+        connector=connector,
+    ) as session:
 
-    try:
-        resp = session.get(base_url, timeout=timeout, allow_redirects=True)
-        root_status_code = resp.status_code
-        reachable = resp.ok
-        if not resp.ok:
-            root_error = f"HTTP {resp.status_code}"
-    except requests.exceptions.ConnectionError as exc:
-        root_error = f"Błąd połączenia: {str(exc)[:120]}"
-    except requests.exceptions.Timeout:
-        root_error = "Timeout"
-    except Exception as exc:  # noqa: BLE001
-        root_error = str(exc)[:120]
+        # --- 1. Check root reachability ---
+        root_url, root_status, root_ok, root_error, root_html = await _fetch_page(
+            session, base_url, sem, timeout
+        )
 
-    if not reachable:
-        return (
-            SiteReport(
+        if not root_ok:
+            return SiteReport(
                 base_url=base_url,
                 reachable=False,
-                root_status_code=root_status_code,
+                root_status_code=root_status,
                 root_error=root_error,
                 pages=[],
                 page_count=0,
-            ),
-            None,
-        )
-
-    # ------------------------------------------------------------------
-    # 2. BFS crawl
-    # ------------------------------------------------------------------
-    visited: set[str] = set()
-    queue: deque[str] = deque([_normalize_url(base_url)])
-    pages: List[PageStatus] = []
-    raw_pages: Dict[str, RawPageEntry] = {} if collect_raw else None  # type: ignore[assignment]
-
-    while queue and (max_pages == 0 or len(pages) < max_pages):
-        url = queue.popleft()
-        if url in visited:
-            continue
-        visited.add(url)
-
-        path = _page_path(url)
-        status_code: Optional[int] = None
-        ok = False
-        error: Optional[str] = None
-        html_content: Optional[str] = None
-
-        try:
-            resp = session.get(url, timeout=timeout, allow_redirects=True)
-            status_code = resp.status_code
-            ok = resp.ok
-            if not resp.ok:
-                error = f"HTTP {resp.status_code}"
-            else:
-                ct = resp.headers.get("content-type", "")
-                if "html" in ct:
-                    html_content = resp.text
-        except requests.exceptions.ConnectionError as exc:
-            error = f"Błąd połączenia: {str(exc)[:80]}"
-        except requests.exceptions.Timeout:
-            error = "Timeout"
-        except Exception as exc:  # noqa: BLE001
-            error = str(exc)[:80]
-
-        pages.append(
-            PageStatus(path=path, url=url, status_code=status_code, ok=ok, error=error)
-        )
-
-        # ---- Parse HTML --------------------------------------------------
-        soup: Optional[BeautifulSoup] = None
-        if html_content:
-            soup = BeautifulSoup(html_content, "html.parser")
-
-        # ---- Collect raw data (if requested) -----------------------------
-        if collect_raw:
-            text: Optional[str] = None
-            structure: Optional[Dict[str, int]] = None
-            links_list: Optional[List[Dict[str, str]]] = None
-            attachments_list: Optional[List[Dict[str, str]]] = None
-
-            if soup is not None:
-                text = soup.get_text(separator="\n", strip=True)
-
-                structure = {}
-                for tag in soup.find_all(True):
-                    structure[tag.name] = structure.get(tag.name, 0) + 1
-
-                links_list = []
-                attachments_list = []
-                seen_link_keys: set[str] = set()
-                seen_att_keys: set[str] = set()
-
-                for a in soup.find_all("a", href=True):
-                    raw_href: str = a["href"].strip()
-                    if not raw_href or raw_href.startswith(("#", "javascript:", "mailto:", "tel:")):
-                        continue
-                    abs_href = urljoin(url, raw_href)
-                    link_text = a.get_text(strip=True)
-
-                    if _is_attachment(abs_href):
-                        filename = urlparse(abs_href).path.split("/")[-1]
-                        key = _attachment_key(abs_href)
-                        if key not in seen_att_keys:
-                            seen_att_keys.add(key)
-                            attachments_list.append(
-                                {"href": abs_href, "filename": filename, "key": key}
-                            )
-                    else:
-                        key = _link_key(abs_href, link_text)
-                        if key not in seen_link_keys:
-                            seen_link_keys.add(key)
-                            links_list.append(
-                                {"href": abs_href, "text": link_text, "key": key}
-                            )
-
-            raw_pages[path] = RawPageEntry(
-                url=url,
-                status_code=status_code,
-                ok=ok,
-                error=error,
-                html=html_content,
-                text=text,
-                structure=structure,
-                links=links_list,
-                attachments=attachments_list,
             )
 
-        # ---- Discover new internal links for the queue -------------------
-        if soup is not None:
-            for a in soup.find_all("a", href=True):
-                raw_href = a["href"].strip()
-                if not raw_href or raw_href.startswith(("#", "javascript:", "mailto:", "tel:")):
-                    continue
-                abs_href = urljoin(url, raw_href)
-                p = urlparse(abs_href)
-                if p.netloc == base_netloc and not _is_attachment(abs_href):
-                    norm = _normalize_url(abs_href)
-                    if norm not in visited:
-                        queue.append(norm)
+        # --- 2. BFS crawl (batch-parallel) ---
+        visited: set[str] = set()
+        start_norm = _normalize_url(base_url)
+        visited.add(start_norm)
 
-    return (
-        SiteReport(
-            base_url=base_url,
-            reachable=True,
-            root_status_code=root_status_code,
-            root_error=None,
-            pages=pages,
-            page_count=len(pages),
-        ),
-        raw_pages,
+        pages: List[PageStatus] = []
+
+        # Seed with root page
+        pages.append(PageStatus(
+            path=_page_path(root_url),
+            url=root_url,
+            status_code=root_status,
+            ok=root_ok,
+            error=root_error,
+        ))
+
+        # Extract links from root
+        frontier: deque[str] = deque()
+        if root_html:
+            _extract_links(root_html, root_url, base_netloc, visited, frontier)
+
+        while frontier and (max_pages == 0 or len(pages) < max_pages):
+            # Take a batch from the frontier
+            batch_size = MAX_CONCURRENT
+            if max_pages > 0:
+                batch_size = min(batch_size, max_pages - len(pages))
+            batch: List[str] = []
+            while frontier and len(batch) < batch_size:
+                batch.append(frontier.popleft())
+
+            # Fetch all pages in batch concurrently
+            tasks = [
+                _fetch_page(session, url, sem, timeout)
+                for url in batch
+            ]
+            results = await asyncio.gather(*tasks)
+
+            for url, status_code, ok, error, html_content in results:
+                if max_pages > 0 and len(pages) >= max_pages:
+                    break
+
+                path = _page_path(url)
+                pages.append(PageStatus(
+                    path=path,
+                    url=url,
+                    status_code=status_code,
+                    ok=ok,
+                    error=error,
+                ))
+
+                # Discover new links from this page
+                if html_content:
+                    _extract_links(html_content, url, base_netloc, visited, frontier)
+
+    return SiteReport(
+        base_url=base_url,
+        reachable=True,
+        root_status_code=root_status,
+        root_error=None,
+        pages=pages,
+        page_count=len(pages),
     )
 
 
-def build_raw_snapshot(
-    site: SiteReport,
-    raw_pages: Optional[Dict[str, RawPageEntry]],
-) -> RawSiteSnapshot:
-    return RawSiteSnapshot(
-        base_url=site.base_url,
-        reachable=site.reachable,
-        root_status_code=site.root_status_code,
-        root_error=site.root_error,
-        pages=raw_pages or {},
-    )
+def _extract_links(
+    html: str,
+    current_url: str,
+    base_netloc: str,
+    visited: set[str],
+    frontier: deque[str],
+) -> None:
+    """Parse HTML and add unseen internal links to the frontier."""
+    soup = BeautifulSoup(html, "lxml")
+    for a in soup.find_all("a", href=True):
+        raw_href: str = a["href"].strip()
+        if not raw_href or raw_href.startswith(("#", "javascript:", "mailto:", "tel:")):
+            continue
+        abs_href = urljoin(current_url, raw_href)
+        p = urlparse(abs_href)
+        if p.netloc == base_netloc and not _is_attachment(abs_href) and not _is_history_page(abs_href):
+            norm = _normalize_url(abs_href)
+            if norm not in visited:
+                visited.add(norm)
+                frontier.append(norm)
+
+
+# ---------------------------------------------------------------------------
+# JSON persistence
+# ---------------------------------------------------------------------------
+
+def save_pages_to_json(report: SiteReport, label: str, report_id: str) -> Path:
+    """
+    Save all crawled pages of a SiteReport to a JSON file.
+    Duplicates (same path) are removed — only the first occurrence is kept.
+    Returns the path to the created file.
+    """
+    out_path = RESULTS_DIR / f"{report_id}_{label}.json"
+
+    seen_paths: set[str] = set()
+    unique_pages = []
+    for p in report.pages:
+        if p.path not in seen_paths:
+            seen_paths.add(p.path)
+            unique_pages.append(p.model_dump())
+
+    with open(out_path, "w", encoding="utf-8") as fh:
+        json.dump(unique_pages, fh, ensure_ascii=False, indent=2)
+    return out_path
+
+
+def count_pages_from_json(json_path: Path) -> int:
+    """Read a JSON pages file and return the number of subpages it contains."""
+    with open(json_path, encoding="utf-8") as fh:
+        data = json.load(fh)
+    return len(data)

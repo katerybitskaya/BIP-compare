@@ -1,0 +1,1812 @@
+{
+  "id": "ff0a77d6-af26-4f79-9832-63d473fbcb34",
+  "generated_at": "2026-07-14T07:55:16.767416+00:00",
+  "duration_ms": 216812,
+  "old_url": "https://biptomek2.rekord.com.pl/",
+  "new_url": "https://biptomek2.rekord.com.pl/",
+  "old_site": {
+    "base_url": "https://biptomek2.rekord.com.pl/",
+    "reachable": true,
+    "root_status_code": 200,
+    "root_error": null,
+    "pages": [
+      {
+        "path": "/",
+        "url": "https://biptomek2.rekord.com.pl/",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/polityka-cookies",
+        "url": "https://biptomek2.rekord.com.pl/polityka-cookies",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/7116",
+        "url": "https://biptomek2.rekord.com.pl/7116",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7205",
+        "url": "https://biptomek2.rekord.com.pl/7205",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7207",
+        "url": "https://biptomek2.rekord.com.pl/7207",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7192",
+        "url": "https://biptomek2.rekord.com.pl/7192",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7218",
+        "url": "https://biptomek2.rekord.com.pl/7218",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7204",
+        "url": "https://biptomek2.rekord.com.pl/7204",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7201",
+        "url": "https://biptomek2.rekord.com.pl/7201",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7194",
+        "url": "https://biptomek2.rekord.com.pl/7194",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7189",
+        "url": "https://biptomek2.rekord.com.pl/7189",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7022",
+        "url": "https://biptomek2.rekord.com.pl/7022",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7018",
+        "url": "https://biptomek2.rekord.com.pl/7018",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7020",
+        "url": "https://biptomek2.rekord.com.pl/7020",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7130",
+        "url": "https://biptomek2.rekord.com.pl/7130",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7114",
+        "url": "https://biptomek2.rekord.com.pl/7114",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7032",
+        "url": "https://biptomek2.rekord.com.pl/7032",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5677",
+        "url": "https://biptomek2.rekord.com.pl/5677",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7011",
+        "url": "https://biptomek2.rekord.com.pl/7011",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7110",
+        "url": "https://biptomek2.rekord.com.pl/7110",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7108",
+        "url": "https://biptomek2.rekord.com.pl/7108",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6994",
+        "url": "https://biptomek2.rekord.com.pl/6994",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5857",
+        "url": "https://biptomek2.rekord.com.pl/5857",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7013",
+        "url": "https://biptomek2.rekord.com.pl/7013",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7003",
+        "url": "https://biptomek2.rekord.com.pl/7003",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7007",
+        "url": "https://biptomek2.rekord.com.pl/7007",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6008",
+        "url": "https://biptomek2.rekord.com.pl/6008",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6974",
+        "url": "https://biptomek2.rekord.com.pl/6974",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6999",
+        "url": "https://biptomek2.rekord.com.pl/6999",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5577",
+        "url": "https://biptomek2.rekord.com.pl/5577",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6011",
+        "url": "https://biptomek2.rekord.com.pl/6011",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7028",
+        "url": "https://biptomek2.rekord.com.pl/7028",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6965",
+        "url": "https://biptomek2.rekord.com.pl/6965",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6975",
+        "url": "https://biptomek2.rekord.com.pl/6975",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6986",
+        "url": "https://biptomek2.rekord.com.pl/6986",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6988",
+        "url": "https://biptomek2.rekord.com.pl/6988",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6014",
+        "url": "https://biptomek2.rekord.com.pl/6014",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6649",
+        "url": "https://biptomek2.rekord.com.pl/6649",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6863",
+        "url": "https://biptomek2.rekord.com.pl/6863",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6016",
+        "url": "https://biptomek2.rekord.com.pl/6016",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6017",
+        "url": "https://biptomek2.rekord.com.pl/6017",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6019",
+        "url": "https://biptomek2.rekord.com.pl/6019",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6021",
+        "url": "https://biptomek2.rekord.com.pl/6021",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6657",
+        "url": "https://biptomek2.rekord.com.pl/6657",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6658",
+        "url": "https://biptomek2.rekord.com.pl/6658",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6025",
+        "url": "https://biptomek2.rekord.com.pl/6025",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6646",
+        "url": "https://biptomek2.rekord.com.pl/6646",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6039",
+        "url": "https://biptomek2.rekord.com.pl/6039",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6043",
+        "url": "https://biptomek2.rekord.com.pl/6043",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6076",
+        "url": "https://biptomek2.rekord.com.pl/6076",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6078",
+        "url": "https://biptomek2.rekord.com.pl/6078",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6079",
+        "url": "https://biptomek2.rekord.com.pl/6079",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6652",
+        "url": "https://biptomek2.rekord.com.pl/6652",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6470",
+        "url": "https://biptomek2.rekord.com.pl/6470",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6471",
+        "url": "https://biptomek2.rekord.com.pl/6471",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6983",
+        "url": "https://biptomek2.rekord.com.pl/6983",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6654",
+        "url": "https://biptomek2.rekord.com.pl/6654",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6071",
+        "url": "https://biptomek2.rekord.com.pl/6071",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6073",
+        "url": "https://biptomek2.rekord.com.pl/6073",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6868",
+        "url": "https://biptomek2.rekord.com.pl/6868",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6423",
+        "url": "https://biptomek2.rekord.com.pl/6423",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6424",
+        "url": "https://biptomek2.rekord.com.pl/6424",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6425",
+        "url": "https://biptomek2.rekord.com.pl/6425",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6464",
+        "url": "https://biptomek2.rekord.com.pl/6464",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6851",
+        "url": "https://biptomek2.rekord.com.pl/6851",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6465",
+        "url": "https://biptomek2.rekord.com.pl/6465",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6466",
+        "url": "https://biptomek2.rekord.com.pl/6466",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6468",
+        "url": "https://biptomek2.rekord.com.pl/6468",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6469",
+        "url": "https://biptomek2.rekord.com.pl/6469",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6655",
+        "url": "https://biptomek2.rekord.com.pl/6655",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6656",
+        "url": "https://biptomek2.rekord.com.pl/6656",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6430",
+        "url": "https://biptomek2.rekord.com.pl/6430",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6497",
+        "url": "https://biptomek2.rekord.com.pl/6497",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7079",
+        "url": "https://biptomek2.rekord.com.pl/7079",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6947",
+        "url": "https://biptomek2.rekord.com.pl/6947",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6882",
+        "url": "https://biptomek2.rekord.com.pl/6882",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6843",
+        "url": "https://biptomek2.rekord.com.pl/6843",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6867",
+        "url": "https://biptomek2.rekord.com.pl/6867",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6480",
+        "url": "https://biptomek2.rekord.com.pl/6480",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6481",
+        "url": "https://biptomek2.rekord.com.pl/6481",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6483",
+        "url": "https://biptomek2.rekord.com.pl/6483",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6484",
+        "url": "https://biptomek2.rekord.com.pl/6484",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7133",
+        "url": "https://biptomek2.rekord.com.pl/7133",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7198",
+        "url": "https://biptomek2.rekord.com.pl/7198",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7135",
+        "url": "https://biptomek2.rekord.com.pl/7135",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7021",
+        "url": "https://biptomek2.rekord.com.pl/7021",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7137",
+        "url": "https://biptomek2.rekord.com.pl/7137",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7138",
+        "url": "https://biptomek2.rekord.com.pl/7138",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7139",
+        "url": "https://biptomek2.rekord.com.pl/7139",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7140",
+        "url": "https://biptomek2.rekord.com.pl/7140",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7141",
+        "url": "https://biptomek2.rekord.com.pl/7141",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7142",
+        "url": "https://biptomek2.rekord.com.pl/7142",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7144",
+        "url": "https://biptomek2.rekord.com.pl/7144",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7145",
+        "url": "https://biptomek2.rekord.com.pl/7145",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7191",
+        "url": "https://biptomek2.rekord.com.pl/7191",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7190",
+        "url": "https://biptomek2.rekord.com.pl/7190",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7146",
+        "url": "https://biptomek2.rekord.com.pl/7146",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7148",
+        "url": "https://biptomek2.rekord.com.pl/7148",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7149",
+        "url": "https://biptomek2.rekord.com.pl/7149",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7150",
+        "url": "https://biptomek2.rekord.com.pl/7150",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7151",
+        "url": "https://biptomek2.rekord.com.pl/7151",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7152",
+        "url": "https://biptomek2.rekord.com.pl/7152",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7153",
+        "url": "https://biptomek2.rekord.com.pl/7153",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7154",
+        "url": "https://biptomek2.rekord.com.pl/7154",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7155",
+        "url": "https://biptomek2.rekord.com.pl/7155",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7156",
+        "url": "https://biptomek2.rekord.com.pl/7156",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7157",
+        "url": "https://biptomek2.rekord.com.pl/7157",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7158",
+        "url": "https://biptomek2.rekord.com.pl/7158",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7159",
+        "url": "https://biptomek2.rekord.com.pl/7159",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7161",
+        "url": "https://biptomek2.rekord.com.pl/7161",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7162",
+        "url": "https://biptomek2.rekord.com.pl/7162",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7163",
+        "url": "https://biptomek2.rekord.com.pl/7163",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7164",
+        "url": "https://biptomek2.rekord.com.pl/7164",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7165",
+        "url": "https://biptomek2.rekord.com.pl/7165",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7166",
+        "url": "https://biptomek2.rekord.com.pl/7166",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7167",
+        "url": "https://biptomek2.rekord.com.pl/7167",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7168",
+        "url": "https://biptomek2.rekord.com.pl/7168",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7169",
+        "url": "https://biptomek2.rekord.com.pl/7169",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5571",
+        "url": "https://biptomek2.rekord.com.pl/5571",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5573",
+        "url": "https://biptomek2.rekord.com.pl/5573",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5572",
+        "url": "https://biptomek2.rekord.com.pl/5572",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5570",
+        "url": "https://biptomek2.rekord.com.pl/5570",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5612",
+        "url": "https://biptomek2.rekord.com.pl/5612",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7210",
+        "url": "https://biptomek2.rekord.com.pl/7210",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/bip@bip.testowy-bip-pl.pl",
+        "url": "https://biptomek2.rekord.com.pl/bip@bip.testowy-bip-pl.pl",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5677/historia/77",
+        "url": "https://biptomek2.rekord.com.pl/5677/historia/77",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/deklaracja-dostepnosci",
+        "url": "https://biptomek2.rekord.com.pl/deklaracja-dostepnosci",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      }
+    ],
+    "page_count": 127
+  },
+  "new_site": {
+    "base_url": "https://biptomek2.rekord.com.pl/",
+    "reachable": true,
+    "root_status_code": 200,
+    "root_error": null,
+    "pages": [
+      {
+        "path": "/",
+        "url": "https://biptomek2.rekord.com.pl/",
+        "status_code": 200,
+        "ok": true,
+        "error": null
+      },
+      {
+        "path": "/polityka-cookies",
+        "url": "https://biptomek2.rekord.com.pl/polityka-cookies",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7116",
+        "url": "https://biptomek2.rekord.com.pl/7116",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7205",
+        "url": "https://biptomek2.rekord.com.pl/7205",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7207",
+        "url": "https://biptomek2.rekord.com.pl/7207",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7192",
+        "url": "https://biptomek2.rekord.com.pl/7192",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7218",
+        "url": "https://biptomek2.rekord.com.pl/7218",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7204",
+        "url": "https://biptomek2.rekord.com.pl/7204",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7201",
+        "url": "https://biptomek2.rekord.com.pl/7201",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7194",
+        "url": "https://biptomek2.rekord.com.pl/7194",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7189",
+        "url": "https://biptomek2.rekord.com.pl/7189",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7022",
+        "url": "https://biptomek2.rekord.com.pl/7022",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7018",
+        "url": "https://biptomek2.rekord.com.pl/7018",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7020",
+        "url": "https://biptomek2.rekord.com.pl/7020",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7130",
+        "url": "https://biptomek2.rekord.com.pl/7130",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7114",
+        "url": "https://biptomek2.rekord.com.pl/7114",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7032",
+        "url": "https://biptomek2.rekord.com.pl/7032",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5677",
+        "url": "https://biptomek2.rekord.com.pl/5677",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7011",
+        "url": "https://biptomek2.rekord.com.pl/7011",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7110",
+        "url": "https://biptomek2.rekord.com.pl/7110",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7108",
+        "url": "https://biptomek2.rekord.com.pl/7108",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6994",
+        "url": "https://biptomek2.rekord.com.pl/6994",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5857",
+        "url": "https://biptomek2.rekord.com.pl/5857",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7013",
+        "url": "https://biptomek2.rekord.com.pl/7013",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7003",
+        "url": "https://biptomek2.rekord.com.pl/7003",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7007",
+        "url": "https://biptomek2.rekord.com.pl/7007",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6008",
+        "url": "https://biptomek2.rekord.com.pl/6008",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6974",
+        "url": "https://biptomek2.rekord.com.pl/6974",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6999",
+        "url": "https://biptomek2.rekord.com.pl/6999",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5577",
+        "url": "https://biptomek2.rekord.com.pl/5577",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6011",
+        "url": "https://biptomek2.rekord.com.pl/6011",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7028",
+        "url": "https://biptomek2.rekord.com.pl/7028",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6965",
+        "url": "https://biptomek2.rekord.com.pl/6965",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6975",
+        "url": "https://biptomek2.rekord.com.pl/6975",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6986",
+        "url": "https://biptomek2.rekord.com.pl/6986",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6988",
+        "url": "https://biptomek2.rekord.com.pl/6988",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6014",
+        "url": "https://biptomek2.rekord.com.pl/6014",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6649",
+        "url": "https://biptomek2.rekord.com.pl/6649",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6863",
+        "url": "https://biptomek2.rekord.com.pl/6863",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6016",
+        "url": "https://biptomek2.rekord.com.pl/6016",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6017",
+        "url": "https://biptomek2.rekord.com.pl/6017",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6019",
+        "url": "https://biptomek2.rekord.com.pl/6019",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6021",
+        "url": "https://biptomek2.rekord.com.pl/6021",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6657",
+        "url": "https://biptomek2.rekord.com.pl/6657",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6658",
+        "url": "https://biptomek2.rekord.com.pl/6658",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6025",
+        "url": "https://biptomek2.rekord.com.pl/6025",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6646",
+        "url": "https://biptomek2.rekord.com.pl/6646",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6039",
+        "url": "https://biptomek2.rekord.com.pl/6039",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6043",
+        "url": "https://biptomek2.rekord.com.pl/6043",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6076",
+        "url": "https://biptomek2.rekord.com.pl/6076",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6078",
+        "url": "https://biptomek2.rekord.com.pl/6078",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6079",
+        "url": "https://biptomek2.rekord.com.pl/6079",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6652",
+        "url": "https://biptomek2.rekord.com.pl/6652",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6470",
+        "url": "https://biptomek2.rekord.com.pl/6470",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6471",
+        "url": "https://biptomek2.rekord.com.pl/6471",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6983",
+        "url": "https://biptomek2.rekord.com.pl/6983",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6654",
+        "url": "https://biptomek2.rekord.com.pl/6654",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6071",
+        "url": "https://biptomek2.rekord.com.pl/6071",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6073",
+        "url": "https://biptomek2.rekord.com.pl/6073",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6868",
+        "url": "https://biptomek2.rekord.com.pl/6868",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6423",
+        "url": "https://biptomek2.rekord.com.pl/6423",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6424",
+        "url": "https://biptomek2.rekord.com.pl/6424",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6425",
+        "url": "https://biptomek2.rekord.com.pl/6425",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6464",
+        "url": "https://biptomek2.rekord.com.pl/6464",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6851",
+        "url": "https://biptomek2.rekord.com.pl/6851",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6465",
+        "url": "https://biptomek2.rekord.com.pl/6465",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6466",
+        "url": "https://biptomek2.rekord.com.pl/6466",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6468",
+        "url": "https://biptomek2.rekord.com.pl/6468",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6469",
+        "url": "https://biptomek2.rekord.com.pl/6469",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6655",
+        "url": "https://biptomek2.rekord.com.pl/6655",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6656",
+        "url": "https://biptomek2.rekord.com.pl/6656",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6430",
+        "url": "https://biptomek2.rekord.com.pl/6430",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6497",
+        "url": "https://biptomek2.rekord.com.pl/6497",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7079",
+        "url": "https://biptomek2.rekord.com.pl/7079",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6947",
+        "url": "https://biptomek2.rekord.com.pl/6947",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6882",
+        "url": "https://biptomek2.rekord.com.pl/6882",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6843",
+        "url": "https://biptomek2.rekord.com.pl/6843",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6867",
+        "url": "https://biptomek2.rekord.com.pl/6867",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6480",
+        "url": "https://biptomek2.rekord.com.pl/6480",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6481",
+        "url": "https://biptomek2.rekord.com.pl/6481",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6483",
+        "url": "https://biptomek2.rekord.com.pl/6483",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/6484",
+        "url": "https://biptomek2.rekord.com.pl/6484",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7133",
+        "url": "https://biptomek2.rekord.com.pl/7133",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7198",
+        "url": "https://biptomek2.rekord.com.pl/7198",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7135",
+        "url": "https://biptomek2.rekord.com.pl/7135",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7021",
+        "url": "https://biptomek2.rekord.com.pl/7021",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7137",
+        "url": "https://biptomek2.rekord.com.pl/7137",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7138",
+        "url": "https://biptomek2.rekord.com.pl/7138",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7139",
+        "url": "https://biptomek2.rekord.com.pl/7139",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7140",
+        "url": "https://biptomek2.rekord.com.pl/7140",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7141",
+        "url": "https://biptomek2.rekord.com.pl/7141",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7142",
+        "url": "https://biptomek2.rekord.com.pl/7142",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7144",
+        "url": "https://biptomek2.rekord.com.pl/7144",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7145",
+        "url": "https://biptomek2.rekord.com.pl/7145",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7191",
+        "url": "https://biptomek2.rekord.com.pl/7191",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7190",
+        "url": "https://biptomek2.rekord.com.pl/7190",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7146",
+        "url": "https://biptomek2.rekord.com.pl/7146",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7148",
+        "url": "https://biptomek2.rekord.com.pl/7148",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7149",
+        "url": "https://biptomek2.rekord.com.pl/7149",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7150",
+        "url": "https://biptomek2.rekord.com.pl/7150",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7151",
+        "url": "https://biptomek2.rekord.com.pl/7151",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7152",
+        "url": "https://biptomek2.rekord.com.pl/7152",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7153",
+        "url": "https://biptomek2.rekord.com.pl/7153",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7154",
+        "url": "https://biptomek2.rekord.com.pl/7154",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7155",
+        "url": "https://biptomek2.rekord.com.pl/7155",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7156",
+        "url": "https://biptomek2.rekord.com.pl/7156",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7157",
+        "url": "https://biptomek2.rekord.com.pl/7157",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7158",
+        "url": "https://biptomek2.rekord.com.pl/7158",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7159",
+        "url": "https://biptomek2.rekord.com.pl/7159",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7161",
+        "url": "https://biptomek2.rekord.com.pl/7161",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7162",
+        "url": "https://biptomek2.rekord.com.pl/7162",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7163",
+        "url": "https://biptomek2.rekord.com.pl/7163",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7164",
+        "url": "https://biptomek2.rekord.com.pl/7164",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7165",
+        "url": "https://biptomek2.rekord.com.pl/7165",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7166",
+        "url": "https://biptomek2.rekord.com.pl/7166",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7167",
+        "url": "https://biptomek2.rekord.com.pl/7167",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7168",
+        "url": "https://biptomek2.rekord.com.pl/7168",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7169",
+        "url": "https://biptomek2.rekord.com.pl/7169",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5571",
+        "url": "https://biptomek2.rekord.com.pl/5571",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5573",
+        "url": "https://biptomek2.rekord.com.pl/5573",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5572",
+        "url": "https://biptomek2.rekord.com.pl/5572",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5570",
+        "url": "https://biptomek2.rekord.com.pl/5570",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5612",
+        "url": "https://biptomek2.rekord.com.pl/5612",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/7210",
+        "url": "https://biptomek2.rekord.com.pl/7210",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/bip@bip.testowy-bip-pl.pl",
+        "url": "https://biptomek2.rekord.com.pl/bip@bip.testowy-bip-pl.pl",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/5677/historia/77",
+        "url": "https://biptomek2.rekord.com.pl/5677/historia/77",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      },
+      {
+        "path": "/deklaracja-dostepnosci",
+        "url": "https://biptomek2.rekord.com.pl/deklaracja-dostepnosci",
+        "status_code": null,
+        "ok": false,
+        "error": "Timeout"
+      }
+    ],
+    "page_count": 127
+  },
+  "both_reachable": true,
+  "scope": {
+    "content": true,
+    "links": true,
+    "attachments": true
+  },
+  "missing_in_new": [],
+  "extra_in_new": [],
+  "unchanged_paths": []
+}
