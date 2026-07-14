@@ -50,20 +50,20 @@ export function buildLinkStatItems(result: ComparisonResult): StatDefinition[] {
       icon: 'link',
     },
     {
-      id: 'broken',
-      label: 'Uszkodzone linki',
-      value: String(brokenCount),
-      helper: `${pct(brokenCount)} z linków`,
-      tone: 'red',
-      icon: 'alert',
-    },
-    {
       id: 'ok',
       label: 'Linki OK',
       value: String(okCount),
       helper: `${pct(okCount)} z linków`,
       tone: 'green',
       icon: 'check',
+    },
+    {
+      id: 'broken',
+      label: 'Uszkodzone linki',
+      value: String(brokenCount),
+      helper: `${pct(brokenCount)} z linków`,
+      tone: 'red',
+      icon: 'alert',
     },
     {
       id: 'changed',

@@ -61,20 +61,20 @@ export function buildFileStatItems(result: ComparisonResult): StatDefinition[] {
       icon: 'files',
     },
     {
-      id: 'diffs',
-      label: 'Różnice',
-      value: String(diffCount),
-      helper: `${pct(diffCount)} z plików`,
-      tone: 'amber',
-      icon: 'diff',
-    },
-    {
       id: 'ok',
       label: 'Pliki OK',
       value: String(okCount),
       helper: `${pct(okCount)} z plików`,
       tone: 'green',
       icon: 'check',
+    },
+    {
+      id: 'diffs',
+      label: 'Różnice',
+      value: String(diffCount),
+      helper: `${pct(diffCount)} z plików`,
+      tone: 'amber',
+      icon: 'diff',
     },
     {
       id: 'errors',

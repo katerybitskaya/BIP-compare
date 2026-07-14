@@ -36,20 +36,20 @@ export function buildContentStatItems(result: ComparisonResult): StatDefinition[
       icon: 'code',
     },
     {
-      id: 'content-changed',
-      label: 'Zmienione',
-      value: String(changed),
-      helper: `${pct(changed)} ze wspólnych`,
-      tone: 'amber',
-      icon: 'diff',
-    },
-    {
       id: 'content-unchanged',
       label: 'Bez zmian',
       value: String(unchanged),
       helper: `${pct(unchanged)} ze wspólnych`,
       tone: 'green',
       icon: 'check',
+    },
+    {
+      id: 'content-changed',
+      label: 'Zmienione',
+      value: String(changed),
+      helper: `${pct(changed)} ze wspólnych`,
+      tone: 'amber',
+      icon: 'diff',
     },
     {
       id: 'content-per-site',
