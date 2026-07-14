@@ -45,6 +45,9 @@ export function buildFileStatItems(result: ComparisonResult): StatDefinition[] {
   const diffCount = entries.filter((e) => e.status === 'different').length;
   const okCount = entries.filter((e) => e.status === 'ok').length;
   const errorCount = entries.filter((e) => e.status === 'error404').length;
+  const newCount = entries.filter((e) => e.status === 'new').length;
+  const removedCount = entries.filter((e) => e.status === 'removed').length;
+  const newRemovedCount = newCount + removedCount;
 
   const pct = (n: number) => (total > 0 ? `${((n / total) * 100).toFixed(1).replace('.', ',')}%` : '–');
 
@@ -80,6 +83,14 @@ export function buildFileStatItems(result: ComparisonResult): StatDefinition[] {
       helper: `${pct(errorCount)} z plików`,
       tone: 'red',
       icon: 'alert',
+    },
+    {
+      id: 'new-removed',
+      label: 'Nowe / usunięte',
+      value: `${newCount} / ${removedCount}`,
+      helper: `${pct(newRemovedCount)} z plików`,
+      tone: 'blue',
+      icon: 'globe',
     },
   ];
 }

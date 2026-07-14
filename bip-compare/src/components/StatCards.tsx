@@ -39,8 +39,13 @@ const TONE_STYLES: Record<StatDefinition['tone'], { bg: string; text: string; gl
 };
 
 export default function StatCards({ items }: { items: StatDefinition[] }) {
+  // Fit all cards on one row at wide screens regardless of how many there
+  // are (3 for Zawartość, 4 for Linki, 5 for Pliki, ...) instead of always
+  // wrapping past 4.
+  const xlCols =
+    items.length >= 5 ? 'xl:grid-cols-5' : items.length === 3 ? 'xl:grid-cols-3' : 'xl:grid-cols-4';
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${xlCols}`}>
       {items.map((stat) => {
         const Icon = ICONS[stat.icon];
         const tone = TONE_STYLES[stat.tone];
