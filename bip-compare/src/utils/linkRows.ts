@@ -45,7 +45,7 @@ export function buildLinkStatItems(result: ComparisonResult): StatDefinition[] {
       id: 'links',
       label: 'Porównane linki',
       value: String(total),
-      helper: `${pct(total)} z zaplanowanego`,
+      helper: 'łącznie w raporcie',
       tone: 'blue',
       icon: 'files',
     },
