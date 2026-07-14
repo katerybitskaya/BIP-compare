@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
 from urllib.parse import urljoin, urlparse, urlunparse
@@ -182,14 +183,52 @@ def _normalize_path(url: str) -> str:
     return path or "/"
 
 
-def _is_asset(path: str) -> bool:
-    lower = path.lower()
-    return any(lower.endswith(ext) for ext in ASSET_EXTENSIONS)
+def _first_text_line(text: str) -> str:
+    """First line of a link's visible text, with any trailing "(1,23 MB)"
+    style size annotation stripped off -- this is normally just the
+    filename, e.g. "raport.pdf" or "raport-pdf" (BIP sites sometimes show
+    the format as a "-pdf" suffix with no dot, when there's no real
+    filename extension to display)."""
+    if not text:
+        return ""
+    stripped = text.strip()
+    if not stripped:
+        return ""
+    first_line = stripped.splitlines()[0]
+    return re.sub(r"\s*\([^()]*\)\s*$", "", first_line).strip()
 
 
-def _is_attachment(path: str) -> bool:
+def _extension_from_text(text: str) -> Optional[str]:
+    """Best-effort fallback for file-download links whose URL has no
+    extension at all, e.g. "/dokument/api/download/file?id=1234". Many BIP
+    sites route every attachment through such an opaque endpoint, but the
+    visible link text almost always ends with the real filename (see
+    _first_text_line). Returns the extension including the leading dot
+    (e.g. ".pdf"), or None if nothing recognizable is found.
+    """
+    cleaned = _first_text_line(text).lower()
+    if not cleaned:
+        return None
+    for ext in ASSET_EXTENSIONS:
+        bare = ext.lstrip(".")
+        if cleaned.endswith(ext) or cleaned.endswith(f"-{bare}"):
+            return ext
+    return None
+
+
+def _is_asset(path: str, text: str = "") -> bool:
     lower = path.lower()
-    return any(lower.endswith(ext) for ext in ATTACHMENT_EXTENSIONS)
+    if any(lower.endswith(ext) for ext in ASSET_EXTENSIONS):
+        return True
+    return _extension_from_text(text) is not None
+
+
+def _is_attachment(path: str, text: str = "") -> bool:
+    lower = path.lower()
+    if any(lower.endswith(ext) for ext in ATTACHMENT_EXTENSIONS):
+        return True
+    ext = _extension_from_text(text)
+    return ext is not None and ext in ATTACHMENT_EXTENSIONS
 
 
 def _filename_from_href(href: str) -> str:
@@ -224,10 +263,11 @@ def _extract_links(html: str, page_url: str, host: str) -> tuple[Set[str], Set[s
         if absolute_parsed.netloc != host:
             continue  # stay within the same site
         path = _normalize_path(absolute)
-        if _is_asset(path):
+        link_text = tag.get_text(strip=True)
+        if _is_asset(path, link_text):
             continue
         found.add(path)
-        if _is_meta_page_link(tag.get_text(strip=True)):
+        if _is_meta_page_link(link_text):
             meta.add(path)
     return found, meta
 
@@ -283,8 +323,17 @@ def _extract_page_content(html: str, page_url: str, host: str, extract_links: bo
             path = absolute_parsed.path or "/"
             same_host = absolute_parsed.netloc == host
             key = _normalize_path(absolute) if same_host else absolute
-            if _is_attachment(path):
-                attachments.append({"href": absolute, "filename": _filename_from_href(absolute), "key": key})
+            if _is_attachment(path, link_text):
+                filename = _filename_from_href(absolute)
+                if not _is_attachment(path):
+                    # The URL itself has no real extension (e.g. an opaque
+                    # /dokument/api/download/file?id=... endpoint) -- its
+                    # basename would just be "file" or similar, so use the
+                    # real filename from the visible link text instead.
+                    text_name = _first_text_line(link_text)
+                    if text_name:
+                        filename = text_name
+                attachments.append({"href": absolute, "filename": filename, "key": key})
             else:
                 links.append({"href": absolute, "text": link_text, "key": key})
 
