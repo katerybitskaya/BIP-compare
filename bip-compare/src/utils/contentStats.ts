@@ -11,10 +11,9 @@ import type { StatDefinition } from '../types';
  * strony) themselves is included too; only what's found INSIDE them is
  * excluded, and that exclusion happens at the crawler/podstrony level, not
  * here. "Zmienione"/"Bez zmian" only apply to common pages, since content
- * can only be diffed where both versions exist. A 4th tile shows the
- * per-site page total (old vs. new), built the same way as everywhere else
- * in the report -- common + only-on-that-side -- rather than the crawler's
- * raw page_count, which can include failed fetch attempts. */
+ * can only be diffed where both versions exist. A 4th tile shows how many
+ * pages exist on only one of the two sites (missing + extra), excluding
+ * anything common to both. */
 export function buildContentStatItems(result: ComparisonResult): StatDefinition[] {
   const checked = result.content_checked_count ?? 0;
   const changed = result.content_changed_count ?? 0;
@@ -54,9 +53,9 @@ export function buildContentStatItems(result: ComparisonResult): StatDefinition[
     },
     {
       id: 'content-per-site',
-      label: 'Podstrony: stary / nowy',
-      value: `${common + missing} / ${common + extra}`,
-      helper: 'wspólne + tylko na tym adresie',
+      label: 'Podstrony różniące się',
+      value: String(missing + extra),
+      helper: 'tylko na starym/nowym adresie',
       tone: 'red',
       icon: 'globe',
     },

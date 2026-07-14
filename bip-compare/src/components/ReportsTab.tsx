@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, Inbox, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import type { ReportSummary } from '../api/types';
-import { clearAllReports, listReports } from '../api/compareApi';
+import { clearAllReports, deleteReport, listReports } from '../api/compareApi';
 import ReportCard from './ReportCard';
 import ReportDetail from './ReportDetail';
 import ConfirmDialog from './ConfirmDialog';
@@ -21,6 +21,9 @@ export default function ReportsTab({ refreshKey, selectedId, onSelect, onCleared
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [clearError, setClearError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ReportSummary | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   function load() {
     setLoading(true);
@@ -49,6 +52,22 @@ export default function ReportsTab({ refreshKey, selectedId, onSelect, onCleared
       setClearError(err instanceof Error ? err.message : 'Nie udało się wyczyścić raportów.');
     } finally {
       setClearing(false);
+    }
+  }
+
+  async function handleDeleteOne() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteReport(deleteTarget.id);
+      setDeleteTarget(null);
+      if (selectedId === deleteTarget.id) onSelect(null);
+      load();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Nie udało się usunąć raportu.');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -95,6 +114,13 @@ export default function ReportsTab({ refreshKey, selectedId, onSelect, onCleared
         </div>
       )}
 
+      {deleteError && (
+        <div className="flex items-start gap-2.5 rounded-2xl border border-rose-300 dark:border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-700 dark:text-rose-300">
+          <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+          <p>{deleteError}</p>
+        </div>
+      )}
+
       {loading && (
         <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-10 text-sm text-slate-500 dark:text-slate-400">
           <Loader2 size={16} className="animate-spin" />
@@ -119,7 +145,15 @@ export default function ReportsTab({ refreshKey, selectedId, onSelect, onCleared
       {!loading && !error && reports.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {reports.map((report) => (
-            <ReportCard key={report.id} report={report} onClick={() => onSelect(report.id)} />
+            <ReportCard
+              key={report.id}
+              report={report}
+              onClick={() => onSelect(report.id)}
+              onDelete={() => {
+                setDeleteError(null);
+                setDeleteTarget(report);
+              }}
+            />
           ))}
         </div>
       )}
@@ -132,6 +166,20 @@ export default function ReportsTab({ refreshKey, selectedId, onSelect, onCleared
         busy={clearing}
         onConfirm={handleClearAll}
         onCancel={() => setConfirmOpen(false)}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Usunąć ten raport?"
+        message={
+          deleteTarget
+            ? `Ta operacja trwale usunie porównanie "${deleteTarget.old_url}" → "${deleteTarget.new_url}" wraz ze szczegółami podstron. Nie da się tego cofnąć.`
+            : ''
+        }
+        confirmLabel="Usuń raport"
+        busy={deleting}
+        onConfirm={handleDeleteOne}
+        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );

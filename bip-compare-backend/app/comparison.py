@@ -639,6 +639,19 @@ def list_result_summaries() -> list[ReportSummary]:
     return summaries
 
 
+def delete_result(result_id: str) -> bool:
+    """Deletes one saved comparison report (summary.json + pages/) by id.
+    Returns False if no report with that id exists, so the caller can
+    respond with 404 instead of silently pretending it succeeded."""
+    if "/" in result_id or "\\" in result_id or result_id in ("", ".", ".."):
+        return False  # reject anything that isn't a plain report-id path segment
+    result_dir = RESULTS_DIR / result_id
+    if not result_dir.is_dir():
+        return False
+    shutil.rmtree(result_dir)
+    return True
+
+
 def clear_all_results() -> int:
     """Deletes every saved comparison report. Returns how many were removed.
 
