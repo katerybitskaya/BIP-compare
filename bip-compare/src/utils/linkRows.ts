@@ -47,7 +47,7 @@ export function buildLinkStatItems(result: ComparisonResult): StatDefinition[] {
       value: String(total),
       helper: 'łącznie w raporcie',
       tone: 'blue',
-      icon: 'files',
+      icon: 'link',
     },
     {
       id: 'broken',
@@ -71,7 +71,7 @@ export function buildLinkStatItems(result: ComparisonResult): StatDefinition[] {
       value: `${newCount} / ${removedCount}`,
       helper: `${pct(changedCount)} z linków`,
       tone: 'amber',
-      icon: 'diff',
+      icon: 'swap',
     },
   ];
 }

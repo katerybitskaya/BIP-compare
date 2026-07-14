@@ -57,7 +57,7 @@ export function buildContentStatItems(result: ComparisonResult): StatDefinition[
       value: String(missing + extra),
       helper: 'tylko na starym/nowym adresie',
       tone: 'red',
-      icon: 'globe',
+      icon: 'alert',
     },
   ];
 }

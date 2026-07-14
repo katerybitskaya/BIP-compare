@@ -90,7 +90,7 @@ export function buildFileStatItems(result: ComparisonResult): StatDefinition[] {
       value: `${newCount} / ${removedCount}`,
       helper: `${pct(newRemovedCount)} z plików`,
       tone: 'blue',
-      icon: 'globe',
+      icon: 'swap',
     },
   ];
 }
