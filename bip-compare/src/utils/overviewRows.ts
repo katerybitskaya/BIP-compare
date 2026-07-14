@@ -23,7 +23,16 @@ function rowStatus(scopeEnabled: boolean, issues: number): CategoryStatus {
 /** Builds the four Dashboard tiles — one per comparison category — each
  * showing only how many checked items in that category differ. Each
  * category keeps a fixed color (not tied to whether it happens to have
- * issues right now), so the four tiles stay visually distinct at a glance. */
+ * issues right now), so the four tiles stay visually distinct at a glance.
+ *
+ * "Differ" means a genuine old-vs-new change, not just "currently broken":
+ * a link or file that returns an error on BOTH the old and new site is not
+ * a difference between the two versions (it was equally broken before) --
+ * only a link/file that worked on old and broke on new (a regression) counts
+ * here. "new"/"removed" (present on only one side) and "different" (file
+ * size changed) are unambiguous differences either way. This only affects
+ * these four tiles -- the detailed per-category analysis (CategoryOverview,
+ * link/file tables) keeps showing the full broken/error counts as before. */
 export function buildOverviewStatItems(report: ComparisonResult): StatDefinition[] {
   const scopeContent = report.scope?.content ?? true;
   const scopeLinks = report.scope?.links ?? true;
@@ -31,8 +40,16 @@ export function buildOverviewStatItems(report: ComparisonResult): StatDefinition
 
   const pagesIssues = report.missing_in_new.length + report.extra_in_new.length;
   const contentChanged = report.content_changed_count ?? 0;
-  const linkIssues = (report.link_diffs ?? []).filter((l) => l.status !== 'ok').length;
-  const fileIssues = (report.file_diffs ?? []).filter((f) => f.status !== 'ok').length;
+  const linkIssues = (report.link_diffs ?? []).filter(
+    (l) => l.status === 'new' || l.status === 'removed' || (l.status === 'broken' && l.old?.ok === true)
+  ).length;
+  const fileIssues = (report.file_diffs ?? []).filter(
+    (f) =>
+      f.status === 'new' ||
+      f.status === 'removed' ||
+      f.status === 'different' ||
+      (f.status === 'error404' && f.old?.ok === true)
+  ).length;
 
   function tileValue(scopeEnabled: boolean, issues: number): string {
     return scopeEnabled ? String(issues) : '—';
