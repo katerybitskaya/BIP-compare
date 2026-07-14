@@ -73,6 +73,20 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
   }, [reportId]);
 
   const contentStatItems = useMemo(() => (report ? buildContentStatItems(report) : []), [report]);
+  // Raw page_count counts every fetch attempt during the crawl (including
+  // ones that failed, or turned out to be noise like audit-history pages) --
+  // it can be far bigger than what the report actually analyzed. Summing
+  // the same fields the tiles below use (unchanged/missing/extra) instead
+  // keeps this number consistent with the rest of the report, with no extra
+  // data loading since it's all already part of the loaded report.
+  const oldAnalyzedCount = useMemo(
+    () => (report ? report.unchanged_paths.length + report.missing_in_new.length : 0),
+    [report]
+  );
+  const newAnalyzedCount = useMemo(
+    () => (report ? report.unchanged_paths.length + report.extra_in_new.length : 0),
+    [report]
+  );
   const linkRows = useMemo(() => (report ? buildLinkRows(report) : []), [report]);
   const linkStatItems = useMemo(() => (report ? buildLinkStatItems(report) : []), [report]);
   const fileRows = useMemo(() => (report ? buildFileRows(report) : []), [report]);
@@ -142,7 +156,7 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
 
             <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
               {report.both_reachable
-                ? `Obie strony odpowiadają. Przeszukano ${report.old_site.page_count} podstron starego adresu i ${report.new_site.page_count} podstron nowego adresu w ${formatDuration(report.duration_ms)}.`
+                ? `Obie strony odpowiadają. Przeanalizowano ${oldAnalyzedCount} podstron starego adresu i ${newAnalyzedCount} podstron nowego adresu w ${formatDuration(report.duration_ms)}.`
                 : 'Co najmniej jedna ze stron jest niedostępna, więc pełne porównanie podstron nie zostało wykonane.'}
             </p>
             <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">

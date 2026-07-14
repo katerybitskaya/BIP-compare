@@ -41,6 +41,47 @@ ATTACHMENT_EXTENSIONS = {
 
 SKIPPED_SCHEMES = {"mailto", "tel", "javascript", "data"}
 
+# Link text (lowercased, matched as a substring) that marks a page as a
+# site-level "meta" page -- a changelog/audit-history listing or a sitemap --
+# rather than ordinary content. These pages are still crawled and recorded
+# as existing (so missing/extra detection still works for them), but
+# whatever THEY link to is not: a "historia zmian" page routinely lists
+# links that used to exist on the site and deliberately no longer work (that
+# is the whole point of a changelog), and a sitemap can link to the entire
+# site including old/removed pages. Following or comparing those would
+# produce false "broken link"/"missing page" noise that has nothing to do
+# with a real difference between the old and new site.
+META_PAGE_LABELS = {
+    # historia / zmiany (audit trail, changelog)
+    "historia zmian",
+    "pełna historia zmian",
+    "wszystkie zmiany",
+    "rejestr zmian",
+    "dziennik zmian",
+    "archiwum zmian",
+    "historia strony",
+    "historia publikacji",
+    "historia dokumentu",
+    "historia edycji",
+    "historia wersji",
+    "log zmian",
+    # mapa strony (sitemap)
+    "mapa strony",
+    "mapa serwisu",
+    "mapa witryny",
+    "mapa bip",
+    "mapa biuletynu",
+    "sitemap",
+}
+
+
+def _is_meta_page_link(text: str) -> bool:
+    """True if a link's visible text marks its target as a changelog/sitemap
+    page (see META_PAGE_LABELS)."""
+    lower = text.lower().strip()
+    return any(label in lower for label in META_PAGE_LABELS)
+
+
 # Tags whose counts form a lightweight "structure signature" of a page, used
 # to flag layout/formatting differences without doing a full DOM diff.
 STRUCTURE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "table", "img", "ul", "ol", "a"]
@@ -156,10 +197,19 @@ def _filename_from_href(href: str) -> str:
     return name or href
 
 
-def _extract_links(html: str, page_url: str, host: str) -> Set[str]:
-    """Same-host, non-asset links only — feeds the BFS crawl frontier."""
+def _extract_links(html: str, page_url: str, host: str) -> tuple[Set[str], Set[str]]:
+    """Same-host, non-asset links only — feeds the BFS crawl frontier.
+
+    Returns ``(paths, meta_paths)`` where ``meta_paths`` is the subset of
+    ``paths`` whose link text identifies them as a changelog/sitemap page
+    (see META_PAGE_LABELS). Meta paths are still included in ``paths`` --
+    their own existence is tracked like any other page -- callers just need
+    to know which ones they are so nothing found *on* them gets crawled or
+    compared further.
+    """
     soup = BeautifulSoup(html, "lxml")
     found: Set[str] = set()
+    meta: Set[str] = set()
     for tag in soup.find_all("a", href=True):
         href = tag["href"].strip()
         if not href or href.startswith("#"):
@@ -177,10 +227,12 @@ def _extract_links(html: str, page_url: str, host: str) -> Set[str]:
         if _is_asset(path):
             continue
         found.add(path)
-    return found
+        if _is_meta_page_link(tag.get_text(strip=True)):
+            meta.add(path)
+    return found, meta
 
 
-def _extract_page_content(html: str, page_url: str, host: str) -> PageContent:
+def _extract_page_content(html: str, page_url: str, host: str, extract_links: bool = True) -> PageContent:
     """Full extraction for the detailed per-page diff: visible text,
     structure signature, and every link on the page (any host), split into
     plain links vs. attachments. Runs on HTML already fetched by the crawl,
@@ -193,6 +245,11 @@ def _extract_page_content(html: str, page_url: str, host: str) -> PageContent:
     would otherwise never match between versions. For links to a different
     (external/third-party) host, the key is the full absolute URL, since
     there's no "same site" normalization to apply.
+
+    ``extract_links=False`` skips the link/attachment pass entirely (used
+    for changelog/sitemap "meta" pages, see META_PAGE_LABELS -- their own
+    text/structure is still captured, but nothing they link to should feed
+    the site-wide link/file comparison).
     """
     soup = BeautifulSoup(html, "lxml")
 
@@ -204,31 +261,32 @@ def _extract_page_content(html: str, page_url: str, host: str) -> PageContent:
 
     links: List[Dict[str, str]] = []
     attachments: List[Dict[str, str]] = []
-    seen_hrefs: Set[str] = set()
 
-    for tag in soup.find_all("a", href=True):
-        href = tag["href"].strip()
-        if not href or href.startswith("#"):
-            continue
-        parsed = urlparse(href)
-        if parsed.scheme in SKIPPED_SCHEMES:
-            continue
-        absolute = urljoin(page_url, href)
-        absolute_parsed = urlparse(absolute)
-        if absolute_parsed.scheme not in ("http", "https"):
-            continue
-        if absolute in seen_hrefs:
-            continue
-        seen_hrefs.add(absolute)
+    if extract_links:
+        seen_hrefs: Set[str] = set()
+        for tag in soup.find_all("a", href=True):
+            href = tag["href"].strip()
+            if not href or href.startswith("#"):
+                continue
+            parsed = urlparse(href)
+            if parsed.scheme in SKIPPED_SCHEMES:
+                continue
+            absolute = urljoin(page_url, href)
+            absolute_parsed = urlparse(absolute)
+            if absolute_parsed.scheme not in ("http", "https"):
+                continue
+            if absolute in seen_hrefs:
+                continue
+            seen_hrefs.add(absolute)
 
-        link_text = tag.get_text(strip=True)
-        path = absolute_parsed.path or "/"
-        same_host = absolute_parsed.netloc == host
-        key = _normalize_path(absolute) if same_host else absolute
-        if _is_attachment(path):
-            attachments.append({"href": absolute, "filename": _filename_from_href(absolute), "key": key})
-        else:
-            links.append({"href": absolute, "text": link_text, "key": key})
+            link_text = tag.get_text(strip=True)
+            path = absolute_parsed.path or "/"
+            same_host = absolute_parsed.netloc == host
+            key = _normalize_path(absolute) if same_host else absolute
+            if _is_attachment(path):
+                attachments.append({"href": absolute, "filename": _filename_from_href(absolute), "key": key})
+            else:
+                links.append({"href": absolute, "text": link_text, "key": key})
 
     return PageContent(html=html, text=text, structure=structure, links=links, attachments=attachments)
 
@@ -238,7 +296,7 @@ async def crawl_site(
     base_url: str,
     max_pages: Optional[int],
     timeout_seconds: float,
-) -> tuple[SiteReport, Dict[str, PageContent]]:
+) -> tuple[SiteReport, Dict[str, PageContent], Set[str]]:
     """Breadth-first crawl of every reachable HTML subpage on ``base_url``.
 
     Pages are fetched in same-depth batches (concurrently, bounded by the
@@ -249,7 +307,10 @@ async def crawl_site(
 
     Returns the usual ``SiteReport`` plus a ``path -> PageContent`` map for
     every page that was fetched successfully as HTML, so the caller can build
-    detailed content/links/attachments diffs without re-fetching.
+    detailed content/links/attachments diffs without re-fetching -- plus the
+    set of paths identified as changelog/sitemap "meta" pages (see
+    META_PAGE_LABELS), so the caller can exclude them from content-diff
+    counting too.
     """
     base = _normalize_base(base_url)
     host = urlparse(base).netloc
@@ -257,6 +318,7 @@ async def crawl_site(
 
     report = SiteReport(base_url=base, reachable=False)
     content_by_path: Dict[str, PageContent] = {}
+    meta_paths: Set[str] = set()
 
     # 1) Reachability probe on the root URL.
     try:
@@ -267,21 +329,13 @@ async def crawl_site(
         report.reachable = False
         report.root_error = str(exc)
         report.page_count = 0
-        return report, content_by_path
+        return report, content_by_path, meta_paths
 
     # 2) Breadth-first traversal, restricted to the same host, one "layer"
     #    (frontier) of pages fetched concurrently at a time.
     visited: Set[str] = set()
     frontier: Set[str] = {"/"}
     pages: list[PageStatus] = []
-
-    # Some sites link to the same physical page under more than one URL
-    # (redirects, legacy aliases, "/" vs "/index.html", ...). ``visited``
-    # only stops the *same* requested path from being fetched twice; this
-    # tracks the *final* (post-redirect) normalized path of every page
-    # actually recorded, so a page reached via a different alias doesn't
-    # get listed a second (or third) time under a different path.
-    resolved_paths_seen: Dict[str, str] = {}
 
     async def fetch_one(path: str) -> tuple[PageStatus, Set[str], Optional[PageContent]]:
         full_url = urljoin(base, path)
@@ -294,8 +348,16 @@ async def crawl_site(
             content: Optional[PageContent] = None
             content_type = resp.headers.get("content-type", "")
             if ok and "text/html" in content_type:
-                links = _extract_links(resp.text, str(resp.url), host)
-                content = _extract_page_content(resp.text, str(resp.url), host)
+                if path in meta_paths:
+                    # A changelog/sitemap page: keep its own text/structure
+                    # (so it can still be shown as existing/unchanged), but
+                    # don't follow or collect anything it links to.
+                    content = _extract_page_content(resp.text, str(resp.url), host, extract_links=False)
+                else:
+                    new_links, new_meta = _extract_links(resp.text, str(resp.url), host)
+                    meta_paths.update(new_meta)
+                    links = new_links
+                    content = _extract_page_content(resp.text, str(resp.url), host)
             return page, links, content
         except httpx.HTTPError as exc:
             return PageStatus(path=path, url=full_url, status_code=None, ok=False, error=str(exc)), set(), None
@@ -313,23 +375,6 @@ async def crawl_site(
 
         next_frontier: Set[str] = set()
         for page, links, content in results:
-            # A successful fetch may have landed here after a redirect --
-            # check under the *resolved* path whether this physical page has
-            # already been recorded under a different alias before adding it
-            # again. Failed fetches have no resolved URL to compare, so they
-            # always get recorded as-is.
-            resolved_path = _normalize_path(page.url) if page.ok else page.path
-            already_recorded_as = resolved_paths_seen.get(resolved_path)
-            if already_recorded_as is not None and already_recorded_as != page.path:
-                # Same page, different alias -- still worth following its
-                # links (they might lead somewhere new), just don't list it
-                # a second time.
-                for link in links:
-                    if link not in visited:
-                        next_frontier.add(link)
-                continue
-            resolved_paths_seen[resolved_path] = page.path
-
             pages.append(page)
             if content is not None:
                 content_by_path[page.path] = content
@@ -340,7 +385,7 @@ async def crawl_site(
 
     report.pages = pages
     report.page_count = len(pages)
-    return report, content_by_path
+    return report, content_by_path, meta_paths
 
 
 async def probe_path(
