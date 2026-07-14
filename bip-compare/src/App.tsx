@@ -109,6 +109,11 @@ function App() {
     }
   }
 
+  function handleReportsCleared() {
+    setCurrentReport(null);
+    setSelectedCategory(null);
+  }
+
   return (
     <div className="relative flex min-h-screen overflow-hidden bg-slate-50 dark:bg-[#0b0e18] text-slate-900 dark:text-slate-200">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -195,6 +200,7 @@ function App() {
                 refreshKey={reportsRefreshKey}
                 selectedId={selectedReportId}
                 onSelect={setSelectedReportId}
+                onCleared={handleReportsCleared}
               />
             )}
 

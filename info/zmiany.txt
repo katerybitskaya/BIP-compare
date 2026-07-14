@@ -1,0 +1,3 @@
+1. zawartość podstron - sprawdzenie
+2. strony
+3. reset dashborda po wykonaniu porównania

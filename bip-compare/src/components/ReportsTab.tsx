@@ -11,9 +11,10 @@ interface ReportsTabProps {
   refreshKey: number;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  onCleared?: () => void;
 }
 
-export default function ReportsTab({ refreshKey, selectedId, onSelect }: ReportsTabProps) {
+export default function ReportsTab({ refreshKey, selectedId, onSelect, onCleared }: ReportsTabProps) {
   const [reports, setReports] = useState<ReportSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export default function ReportsTab({ refreshKey, selectedId, onSelect }: Reports
       setConfirmOpen(false);
       onSelect(null);
       load();
+      if (onCleared) onCleared();
     } catch (err) {
       setClearError(err instanceof Error ? err.message : 'Nie udało się wyczyścić raportów.');
     } finally {
