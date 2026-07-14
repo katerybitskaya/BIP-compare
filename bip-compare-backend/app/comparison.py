@@ -487,8 +487,6 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         content_changed_count = 0
         if both_reachable and req.scope.content and not same_site:
             for path in unchanged:
-                if path in meta_paths:
-                    continue  # changelog/sitemap page -- its own content isn't worth diffing
                 old_page = old_content.get(path)
                 new_page = new_content.get(path)
                 if old_page is None or new_page is None:
@@ -497,7 +495,7 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
                 if old_page.html != new_page.html or old_page.text != new_page.text:
                     content_changed_count += 1
         elif both_reachable and req.scope.content and same_site:
-            content_checked_count = len([p for p in unchanged if p not in meta_paths])
+            content_checked_count = len(unchanged)
             content_changed_count = 0
 
         # --- Raw per-page content snapshot -----------------------------------

@@ -1,3 +1,4 @@
 1. zawartość podstron - sprawdzenie
 2. strony
 3. reset dashborda po wykonaniu porównania
+4. sprawdzenie niedziałających podstron dla nowej i starej strony i wypisanie w osobnym bloku w raporcie
