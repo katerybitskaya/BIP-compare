@@ -3,22 +3,36 @@ import type { StatDefinition } from '../types';
 
 /** Builds the report stat cards summarizing the on-demand content (HTML)
  * comparison, mirroring buildLinkStatItems/buildFileStatItems so all three
- * report sections (Zawartość/Linki/Pliki) show a consistent stat-card row. */
+ * report sections (Zawartość/Linki/Pliki) show a consistent stat-card row.
+ *
+ * "Sprawdzone strony" shows every page from the Podstrony analysis with no
+ * exceptions (common pages + pages found only on old + pages found only on
+ * new) -- content comparison of the meta pages (historia zmian, mapa
+ * strony) themselves is included too; only what's found INSIDE them is
+ * excluded, and that exclusion happens at the crawler/podstrony level, not
+ * here. "Zmienione"/"Bez zmian" only apply to common pages, since content
+ * can only be diffed where both versions exist. A 4th tile shows the
+ * per-site page total (old vs. new), built the same way as everywhere else
+ * in the report -- common + only-on-that-side -- rather than the crawler's
+ * raw page_count, which can include failed fetch attempts. */
 export function buildContentStatItems(result: ComparisonResult): StatDefinition[] {
   const checked = result.content_checked_count ?? 0;
   const changed = result.content_changed_count ?? 0;
   const unchanged = Math.max(checked - changed, 0);
-  const planned = result.unchanged_paths?.length ?? 0;
+
+  const missing = result.missing_in_new?.length ?? 0;
+  const extra = result.extra_in_new?.length ?? 0;
+  const common = result.unchanged_paths?.length ?? 0;
+  const totalPages = common + missing + extra;
 
   const pct = (n: number) => (checked > 0 ? `${((n / checked) * 100).toFixed(1).replace('.', ',')}%` : '–');
-  const pctPlanned = (n: number) => (planned > 0 ? `${((n / planned) * 100).toFixed(1).replace('.', ',')}%` : '–');
 
   return [
     {
-      id: 'content-checked',
+      id: 'content-total',
       label: 'Sprawdzone strony',
-      value: String(checked),
-      helper: `${pctPlanned(checked)} z zaplanowanego`,
+      value: String(totalPages),
+      helper: 'łącznie w raporcie',
       tone: 'blue',
       icon: 'code',
     },
@@ -26,7 +40,7 @@ export function buildContentStatItems(result: ComparisonResult): StatDefinition[
       id: 'content-changed',
       label: 'Zmienione',
       value: String(changed),
-      helper: `${pct(changed)} ze sprawdzonych`,
+      helper: `${pct(changed)} ze wspólnych`,
       tone: 'amber',
       icon: 'diff',
     },
@@ -34,9 +48,17 @@ export function buildContentStatItems(result: ComparisonResult): StatDefinition[
       id: 'content-unchanged',
       label: 'Bez zmian',
       value: String(unchanged),
-      helper: `${pct(unchanged)} ze sprawdzonych`,
+      helper: `${pct(unchanged)} ze wspólnych`,
       tone: 'green',
       icon: 'check',
+    },
+    {
+      id: 'content-per-site',
+      label: 'Podstrony: stary / nowy',
+      value: `${common + missing} / ${common + extra}`,
+      helper: 'wspólne + tylko na tym adresie',
+      tone: 'red',
+      icon: 'globe',
     },
   ];
 }

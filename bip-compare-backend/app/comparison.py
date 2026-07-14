@@ -395,10 +395,13 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         # --- Step 1: full BFS crawl of both sites --------------------------
         # Besides the page list and raw content, each crawl also returns the
         # set of paths identified as changelog/sitemap "meta" pages (see
-        # crawler.META_PAGE_LABELS) -- their existence is tracked like any
-        # other page, but they're excluded below from content-diff counting,
-        # and whatever THEY link to was never crawled or aggregated in the
-        # first place (handled inside crawl_site itself).
+        # crawler.META_PAGE_LABELS). Their existence is tracked like any
+        # other page and their own content IS diffed like any other page --
+        # the only thing special about them is that whatever THEY link to
+        # was never crawled or aggregated in the first place (handled
+        # entirely inside crawl_site). meta_paths itself isn't used for
+        # content-diff filtering (see below) -- kept here in case a future
+        # feature needs to know which pages these are.
         if same_site:
             old_report, old_content, old_meta_paths = await crawl_site(
                 client, str(req.old_url), req.max_pages, req.timeout_seconds
@@ -483,6 +486,13 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         # identical content -- just an equality check on strings the crawl
         # already fetched, no extra requests. Powers the Dashboard's
         # "X / Y stron zmienionych" tile and the report's content overview.
+        #
+        # Every common page is diffed here, changelog/sitemap "meta" pages
+        # (historia zmian, mapa strony) included -- their own content is
+        # compared like any other page. The meta-page exclusion only applies
+        # to the crawler (not following/collecting links found INSIDE those
+        # pages, see crawler.META_PAGE_LABELS) -- that's a "podstrony"-level
+        # concern, unaffected by this.
         content_checked_count = 0
         content_changed_count = 0
         if both_reachable and req.scope.content and not same_site:

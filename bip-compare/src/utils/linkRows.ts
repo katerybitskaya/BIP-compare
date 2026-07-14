@@ -34,7 +34,9 @@ export function buildLinkStatItems(result: ComparisonResult): StatDefinition[] {
   const total = entries.length;
   const brokenCount = entries.filter((e) => e.status === 'broken').length;
   const okCount = entries.filter((e) => e.status === 'ok').length;
-  const changedCount = entries.filter((e) => e.status === 'new' || e.status === 'removed').length;
+  const newCount = entries.filter((e) => e.status === 'new').length;
+  const removedCount = entries.filter((e) => e.status === 'removed').length;
+  const changedCount = newCount + removedCount;
 
   const pct = (n: number) => (total > 0 ? `${((n / total) * 100).toFixed(1).replace('.', ',')}%` : '–');
 
@@ -66,7 +68,7 @@ export function buildLinkStatItems(result: ComparisonResult): StatDefinition[] {
     {
       id: 'changed',
       label: 'Nowe / usunięte',
-      value: String(changedCount),
+      value: `${newCount} / ${removedCount}`,
       helper: `${pct(changedCount)} z linków`,
       tone: 'amber',
       icon: 'diff',
