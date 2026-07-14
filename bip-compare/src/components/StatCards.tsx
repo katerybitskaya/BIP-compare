@@ -39,8 +39,12 @@ const TONE_STYLES: Record<StatDefinition['tone'], { bg: string; text: string; gl
 };
 
 export default function StatCards({ items }: { items: StatDefinition[] }) {
+  const gridCols = items.length === 5 
+    ? "grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5"
+    : "grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4";
+  
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className={`grid ${gridCols}`}>
       {items.map((stat) => {
         const Icon = ICONS[stat.icon];
         const tone = TONE_STYLES[stat.tone];

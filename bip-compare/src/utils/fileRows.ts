@@ -46,6 +46,9 @@ export function buildFileStatItems(result: ComparisonResult): StatDefinition[] {
   const okCount = entries.filter((e) => e.status === 'ok').length;
   const errorCount = entries.filter((e) => e.status === 'error404').length;
 
+  const newCount = entries.filter((e) => e.status === 'new').length;
+  const removedCount = entries.filter((e) => e.status === 'removed').length;
+
   const pct = (n: number) => (total > 0 ? `${((n / total) * 100).toFixed(1).replace('.', ',')}%` : '–');
 
   return [
@@ -79,6 +82,14 @@ export function buildFileStatItems(result: ComparisonResult): StatDefinition[] {
       value: String(errorCount),
       helper: `${pct(errorCount)} z plików`,
       tone: 'red',
+      icon: 'alert',
+    },
+    {
+      id: 'only_one_side',
+      label: 'Braki na jednym adresie',
+      value: String(newCount + removedCount),
+      helper: `${removedCount} brak na nowym, ${newCount} brak na starym`,
+      tone: 'amber',
       icon: 'alert',
     },
   ];
