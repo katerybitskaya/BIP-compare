@@ -56,11 +56,28 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
   }
 
   const pageNumbers = useMemo(() => {
-    const nums: number[] = [];
-    const max = Math.min(totalPages, 5);
-    for (let i = 1; i <= max; i++) nums.push(i);
-    return nums;
-  }, [totalPages]);
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (safePage <= 4) {
+        for (let i = 1; i <= 5; i++) pages.push(i);
+        pages.push('ellipsis-end');
+        pages.push(totalPages);
+      } else if (safePage >= totalPages - 3) {
+        pages.push(1);
+        pages.push('ellipsis-start');
+        for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push('ellipsis-start');
+        for (let i = safePage - 1; i <= safePage + 1; i++) pages.push(i);
+        pages.push('ellipsis-end');
+        pages.push(totalPages);
+      }
+    }
+    return pages;
+  }, [totalPages, safePage]);
 
   return (
     <section className="flex min-w-0 flex-1 flex-col rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur">
@@ -180,34 +197,25 @@ export default function FileResultsTable({ files, selectedId, onSelect }: FileRe
           >
             <ChevronLeft size={15} />
           </button>
-          {pageNumbers.map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => setPage(n)}
-              className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium ${
-                n === safePage
-                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-900/40'
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
-              }`}
-            >
-              {n}
-            </button>
-          ))}
-          {totalPages > 5 && <span className="px-1 text-slate-400 dark:text-slate-500">…</span>}
-          {totalPages > 5 && (
-            <button
-              type="button"
-              onClick={() => setPage(totalPages)}
-              className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium ${
-                safePage === totalPages
-                  ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-900/40'
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
-              }`}
-            >
-              {totalPages}
-            </button>
-          )}
+          {pageNumbers.map((n) => {
+            if (typeof n === 'string') {
+              return <span key={n} className="px-1 text-slate-400 dark:text-slate-500">…</span>;
+            }
+            return (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setPage(n as number)}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium ${
+                  n === safePage
+                    ? 'bg-gradient-to-r from-violet-500 to-blue-500 text-white shadow-md shadow-violet-900/40'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
+                }`}
+              >
+                {n}
+              </button>
+            );
+          })}
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
