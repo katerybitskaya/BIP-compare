@@ -8,15 +8,17 @@ export function buildContentStatItems(result: ComparisonResult): StatDefinition[
   const checked = result.content_checked_count ?? 0;
   const changed = result.content_changed_count ?? 0;
   const unchanged = Math.max(checked - changed, 0);
+  const planned = result.unchanged_paths?.length ?? 0;
 
   const pct = (n: number) => (checked > 0 ? `${((n / checked) * 100).toFixed(1).replace('.', ',')}%` : '–');
+  const pctPlanned = (n: number) => (planned > 0 ? `${((n / planned) * 100).toFixed(1).replace('.', ',')}%` : '–');
 
   return [
     {
       id: 'content-checked',
       label: 'Sprawdzone strony',
       value: String(checked),
-      helper: `${pct(checked)} z zaplanowanego`,
+      helper: `${pctPlanned(checked)} z zaplanowanego`,
       tone: 'blue',
       icon: 'code',
     },
