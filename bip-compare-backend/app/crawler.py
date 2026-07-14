@@ -290,6 +290,14 @@ def _extract_page_content(html: str, page_url: str, host: str, extract_links: bo
     for changelog/sitemap "meta" pages, see META_PAGE_LABELS -- their own
     text/structure is still captured, but nothing they link to should feed
     the site-wide link/file comparison).
+
+    Same-host, non-attachment links (ordinary internal navigation, e.g. a
+    link from /6009 to /6277) are NOT added to ``links`` -- every subpage is
+    already tracked in full by the page crawl itself (missing/extra/
+    unchanged), so re-listing internal nav links here would just duplicate
+    that with extra noise. Only links that leave the site (a different host)
+    are collected, since those aren't covered anywhere else in the report.
+    Attachments are unaffected -- files are collected regardless of host.
     """
     soup = BeautifulSoup(html, "lxml")
 
@@ -334,7 +342,7 @@ def _extract_page_content(html: str, page_url: str, host: str, extract_links: bo
                     if text_name:
                         filename = text_name
                 attachments.append({"href": absolute, "filename": filename, "key": key})
-            else:
+            elif not same_host:
                 links.append({"href": absolute, "text": link_text, "key": key})
 
     return PageContent(html=html, text=text, structure=structure, links=links, attachments=attachments)
