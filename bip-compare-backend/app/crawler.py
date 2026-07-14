@@ -37,7 +37,7 @@ ASSET_EXTENSIONS = {
 # icons) nobody would call a "document attached to the page".
 ATTACHMENT_EXTENSIONS = {
     ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".zip", ".rar",
-    ".7z", ".jpg", ".jpeg", ".png", ".gif", ".webp", ".csv",
+    ".7z", ".jpg", ".jpeg", ".png", ".gif", ".webp", ".csv", ".txt",
 }
 
 SKIPPED_SCHEMES = {"mailto", "tel", "javascript", "data"}
