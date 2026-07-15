@@ -25,7 +25,14 @@ from typing import List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from .comparison import clear_all_results, compare_sites, list_result_summaries, load_raw_snapshot, load_result
+from .comparison import (
+    clear_all_results,
+    compare_sites,
+    delete_result,
+    list_result_summaries,
+    load_raw_snapshot,
+    load_result,
+)
 from .content_diff import build_page_content_diff
 from .models import CompareRequest, ComparisonResult, PageContentDiff, RawSiteSnapshot, ReportSummary
 
@@ -76,6 +83,14 @@ async def get_result(result_id: str) -> ComparisonResult:
     if result is None:
         raise HTTPException(status_code=404, detail="Nie znaleziono raportu o podanym id.")
     return result
+
+
+@app.delete("/api/compare/{result_id}")
+async def delete_one_result(result_id: str) -> dict:
+    deleted = delete_result(result_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Nie znaleziono raportu o podanym id.")
+    return {"deleted": True}
 
 
 @app.get("/api/compare/{result_id}/raw/{side}", response_model=RawSiteSnapshot)

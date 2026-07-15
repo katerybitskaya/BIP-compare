@@ -1,10 +1,11 @@
-import { CheckCircle2, XCircle, ArrowRight, Clock } from 'lucide-react';
+import { CheckCircle2, XCircle, ArrowRight, Clock, Trash2 } from 'lucide-react';
 import type { ReportSummary } from '../api/types';
 import { formatDateTime } from '../utils/format';
 
 interface ReportCardProps {
   report: ReportSummary;
   onClick: () => void;
+  onDelete: () => void;
 }
 
 function ReachabilityBadge({ reachable }: { reachable: boolean }) {
@@ -19,27 +20,48 @@ function ReachabilityBadge({ reachable }: { reachable: boolean }) {
   );
 }
 
-export default function ReportCard({ report, onClick }: ReportCardProps) {
+export default function ReportCard({ report, onClick, onDelete }: ReportCardProps) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className="flex w-full flex-col gap-4 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 text-left shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur transition-colors hover:border-violet-400 dark:hover:border-violet-500/40"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className="flex w-full cursor-pointer flex-col gap-4 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 text-left shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur transition-colors hover:border-violet-400 dark:hover:border-violet-500/40"
     >
       <div className="flex items-center justify-between gap-2 text-xs text-slate-400 dark:text-slate-500">
         <span className="flex items-center gap-1.5">
           <Clock size={12} />
           {formatDateTime(report.generated_at)}
         </span>
-        {report.both_reachable ? (
-          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-medium text-emerald-600 dark:text-emerald-400">
-            Obie strony działają
-          </span>
-        ) : (
-          <span className="rounded-full bg-rose-500/15 px-2 py-0.5 font-medium text-rose-600 dark:text-rose-400">
-            Problem z dostępnością
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {report.both_reachable ? (
+            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-medium text-emerald-600 dark:text-emerald-400">
+              Obie strony działają
+            </span>
+          ) : (
+            <span className="rounded-full bg-rose-500/15 px-2 py-0.5 font-medium text-rose-600 dark:text-rose-400">
+              Problem z dostępnością
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            aria-label="Usuń raport"
+            title="Usuń raport"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-1.5 text-sm">
@@ -74,6 +96,6 @@ export default function ReportCard({ report, onClick }: ReportCardProps) {
           <p className="text-[11px] text-slate-400 dark:text-slate-500">zbędne</p>
         </div>
       </div>
-    </button>
+    </div>
   );
 }

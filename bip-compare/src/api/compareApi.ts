@@ -83,3 +83,7 @@ export function getContentDiff(resultId: string, path: string): Promise<PageCont
 export function clearAllReports(): Promise<{ removed: number }> {
   return request<{ removed: number }>('/api/compare', { method: 'DELETE' });
 }
+
+export function deleteReport(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/api/compare/${id}`, { method: 'DELETE' });
+}

@@ -45,17 +45,9 @@ export function buildLinkStatItems(result: ComparisonResult): StatDefinition[] {
       id: 'links',
       label: 'Porównane linki',
       value: String(total),
-      helper: `${pct(total)} z zaplanowanego`,
+      helper: 'łącznie w raporcie',
       tone: 'blue',
-      icon: 'files',
-    },
-    {
-      id: 'broken',
-      label: 'Uszkodzone linki',
-      value: String(brokenCount),
-      helper: `${pct(brokenCount)} z linków`,
-      tone: 'red',
-      icon: 'alert',
+      icon: 'link',
     },
     {
       id: 'ok',
@@ -66,12 +58,20 @@ export function buildLinkStatItems(result: ComparisonResult): StatDefinition[] {
       icon: 'check',
     },
     {
+      id: 'broken',
+      label: 'Uszkodzone linki',
+      value: String(brokenCount),
+      helper: `${pct(brokenCount)} z linków`,
+      tone: 'red',
+      icon: 'alert',
+    },
+    {
       id: 'changed',
       label: 'Nowe / usunięte',
       value: `${newCount} / ${removedCount}`,
       helper: `${pct(changedCount)} z linków`,
       tone: 'amber',
-      icon: 'diff',
+      icon: 'swap',
     },
   ];
 }

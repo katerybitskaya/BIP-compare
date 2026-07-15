@@ -142,6 +142,11 @@ export function buildCategoryOverview(report: ComparisonResult): CategoryOvervie
         { label: 'Sprawdzone strony', value: checked, tone: 'default' },
         { label: 'Zmienione', value: changed, tone: 'warning' },
         { label: 'Bez zmian', value: checked - changed, tone: 'success' },
+        {
+          label: 'Tylko na starym/nowym adresie',
+          value: report.missing_in_new.length + report.extra_in_new.length,
+          tone: 'danger',
+        },
       ];
     }
     entries.push({ row, breakdown, emptyMessage });

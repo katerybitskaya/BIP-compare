@@ -56,17 +56,9 @@ export function buildFileStatItems(result: ComparisonResult): StatDefinition[] {
       id: 'files',
       label: 'Porównane pliki',
       value: String(total),
-      helper: `${pct(total)} z zaplanowanego`,
+      helper: 'łącznie w raporcie',
       tone: 'blue',
       icon: 'files',
-    },
-    {
-      id: 'diffs',
-      label: 'Różnice',
-      value: String(diffCount),
-      helper: `${pct(diffCount)} z porównanych`,
-      tone: 'amber',
-      icon: 'diff',
     },
     {
       id: 'ok',
@@ -75,6 +67,14 @@ export function buildFileStatItems(result: ComparisonResult): StatDefinition[] {
       helper: `${pct(okCount)} z plików`,
       tone: 'green',
       icon: 'check',
+    },
+    {
+      id: 'diffs',
+      label: 'Różnice',
+      value: String(diffCount),
+      helper: `${pct(diffCount)} z plików`,
+      tone: 'amber',
+      icon: 'diff',
     },
     {
       id: 'errors',
@@ -90,7 +90,7 @@ export function buildFileStatItems(result: ComparisonResult): StatDefinition[] {
       value: `${newCount} / ${removedCount}`,
       helper: `${pct(newRemovedCount)} z plików`,
       tone: 'blue',
-      icon: 'globe',
+      icon: 'swap',
     },
   ];
 }

@@ -1,4 +1,15 @@
-import { FileStack, Scale, CheckCircle2, AlertTriangle, Globe, FileCode, Link2 } from 'lucide-react';
+import {
+  FileStack,
+  Scale,
+  CheckCircle2,
+  AlertTriangle,
+  Globe,
+  FileCode,
+  Link2,
+  FileX,
+  FilePlus,
+  ArrowLeftRight,
+} from 'lucide-react';
 import type { StatDefinition } from '../types';
 
 const ICONS = {
@@ -9,6 +20,9 @@ const ICONS = {
   globe: Globe,
   code: FileCode,
   link: Link2,
+  'file-x': FileX,
+  'file-plus': FilePlus,
+  swap: ArrowLeftRight,
 };
 
 const TONE_STYLES: Record<StatDefinition['tone'], { bg: string; text: string; glow: string; ring: string }> = {
