@@ -111,7 +111,7 @@ export default function ComparisonForm({
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={isRunning || noScopeSelected}
+          disabled={isRunning}
           className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-violet-500 to-blue-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition-transform hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isRunning ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
@@ -120,9 +120,9 @@ export default function ComparisonForm({
       </div>
 
       {noScopeSelected && !isRunning && (
-        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-700 ring-1 ring-amber-400/20 dark:text-amber-300">
+        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-blue-500/10 p-3 text-xs text-blue-700 ring-1 ring-blue-400/20 dark:text-blue-300">
           <AlertCircle size={16} className="mt-0.5 shrink-0" />
-          <p>Wybierz co najmniej jeden element zakresu testu (zawartość, linki lub pliki).</p>
+          <p>Żaden element zakresu nie jest zaznaczony — porównane zostaną tylko podstrony (bez zawartości, linków i plików).</p>
         </div>
       )}
 
