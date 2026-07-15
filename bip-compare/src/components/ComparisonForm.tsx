@@ -122,7 +122,7 @@ export default function ComparisonForm({
       {noScopeSelected && !isRunning && (
         <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-blue-500/10 p-3 text-xs text-blue-700 ring-1 ring-blue-400/20 dark:text-blue-300">
           <AlertCircle size={16} className="mt-0.5 shrink-0" />
-          <p>Żaden element zakresu nie jest zaznaczony — porównane zostaną tylko podstrony (bez zawartości, linków i plików).</p>
+          <p>Żaden element zakresu nie jest zaznaczony — porównane zostaną tylko podstrony</p>
         </div>
       )}
 
@@ -133,11 +133,6 @@ export default function ComparisonForm({
         </div>
       )}
 
-      <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
-        Podstrony obu witryn są zawsze w pełni przeszukiwane (żeby wykryć brakujące/zbędne adresy). Zakres testu określa,
-        które dodatkowe szczegóły są sprawdzane dla podstron wspólnych dla obu wersji. Zrzuty ekranu to funkcja
-        zarezerwowana na przyszłość — checkbox jest na razie tylko informacyjny.
-      </p>
     </section>
   );
 }

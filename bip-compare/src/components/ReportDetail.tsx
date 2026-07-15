@@ -36,11 +36,10 @@ interface ReportDetailProps {
 function ScopeChip({ label, active }: { label: string; active: boolean }) {
   return (
     <span
-      className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
-        active
+      className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${active
           ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
           : 'bg-slate-500/10 text-slate-500 dark:text-slate-400'
-      }`}
+        }`}
     >
       {label}: {active ? 'porównywane' : 'pominięte'}
     </span>
@@ -234,7 +233,7 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
                   <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/5 p-4">
                     <FilePlus size={16} className="text-amber-500" />
                     <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      Podstrony zbędne — tylko na nowym adresie ({report.extra_in_new.length})
+                      Podstrony tylko na nowym adresie ({report.extra_in_new.length})
                     </h3>
                   </div>
                   <div className="max-h-80 overflow-y-auto p-4">
@@ -345,11 +344,11 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
             <div className="p-4">
               {!scopeLinks ? (
                 <p className="text-sm text-slate-400 dark:text-slate-500">
-                  Linki nie były porównywane dla tego raportu — zakres „Linki” był odznaczony przy uruchamianiu porównania.
+                  Linki nie były porównywane dla tego raportu.
                 </p>
               ) : !report.both_reachable ? (
                 <p className="text-sm text-slate-400 dark:text-slate-500">
-                  Co najmniej jedna ze stron jest niedostępna, więc porównanie linków nie jest możliwe.
+                  Co najmniej jedna ze stron jest niedostępna.
                 </p>
               ) : linkRows.length === 0 ? (
                 <p className="text-sm text-slate-400 dark:text-slate-500">Nie znaleziono żadnych linków do porównania.</p>
@@ -377,11 +376,11 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
             <div className="p-4">
               {!scopeAttachments ? (
                 <p className="text-sm text-slate-400 dark:text-slate-500">
-                  Pliki nie były porównywane dla tego raportu — zakres „Pliki” był odznaczony przy uruchamianiu porównania.
+                  Pliki nie były porównywane dla tego raportu.
                 </p>
               ) : !report.both_reachable ? (
                 <p className="text-sm text-slate-400 dark:text-slate-500">
-                  Co najmniej jedna ze stron jest niedostępna, więc porównanie plików nie jest możliwe.
+                  Co najmniej jedna ze stron jest niedostępna.
                 </p>
               ) : fileRows.length === 0 ? (
                 <p className="text-sm text-slate-400 dark:text-slate-500">Nie znaleziono żadnych plików do porównania.</p>

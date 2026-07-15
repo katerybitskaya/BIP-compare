@@ -19,9 +19,9 @@ export default function SettingsTab({ theme, onThemeChange }: SettingsTabProps) 
         <div className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 className="text-sm font-medium text-slate-900 dark:text-slate-200">Tryb jasny / ciemny</h3>
+              <h3 className="text-sm font-medium text-slate-900 dark:text-slate-200">Motyw aplikacji</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Wybierz motyw, który najlepiej odpowiada Twoim preferencjom.
+                Wybierz motyw.
               </p>
             </div>
 
@@ -29,11 +29,10 @@ export default function SettingsTab({ theme, onThemeChange }: SettingsTabProps) 
               <button
                 type="button"
                 onClick={() => onThemeChange('light')}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                  theme === 'light'
-                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${theme === 'light'
+                  ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
               >
                 <Sun size={16} className={theme === 'light' ? 'text-amber-500' : ''} />
                 Jasny
@@ -41,11 +40,10 @@ export default function SettingsTab({ theme, onThemeChange }: SettingsTabProps) 
               <button
                 type="button"
                 onClick={() => onThemeChange('dark')}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                  theme === 'dark'
-                    ? 'bg-[#1a2133] text-white shadow-sm ring-1 ring-white/10'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${theme === 'dark'
+                  ? 'bg-[#1a2133] text-white shadow-sm ring-1 ring-white/10'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                  }`}
               >
                 <Moon size={16} className={theme === 'dark' ? 'text-violet-400' : ''} />
                 Ciemny
