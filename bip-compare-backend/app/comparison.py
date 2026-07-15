@@ -43,7 +43,6 @@ from .crawler import (
     _timeout,
     check_reachable,
     crawl_site,
-    probe_path,
 )
 from .models import (
     CompareRequest,
@@ -432,52 +431,42 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         extra_in_new: list[PageDiffEntry] = []
 
         if both_reachable and not same_site:
-            # A path only *looks* missing if the other site's own crawl never
-            # found a link to it. Before declaring it gone, probe the exact
-            # same path directly on the new site — it might exist but just be
-            # unlinked, in which case it isn't really "missing".
-            probe_sem = asyncio.Semaphore(PROBE_CONCURRENCY)
+            # NOTE: this used to probe each candidate path directly on the
+            # other site before declaring it missing/extra, on the theory
+            # that it might exist but just be unlinked. Dropped: some sites
+            # (e.g. bip2.k8s.rekord.com.pl) respond with a "soft" success to
+            # literally any path -- including ones that plainly don't exist
+            # -- so that probe could never tell the difference and silently
+            # hid every real missing/extra page behind a false "still
+            # exists". If a path's own crawl found it working on one site
+            # but the other site's own crawl never did, that's the answer:
+            # straight into missing/extra, no second-guessing.
+            old_base = _normalize_base(str(req.old_url))
+            new_base = _normalize_base(str(req.new_url))
 
-            async def _probe_missing(path: str):
-                async with probe_sem:
-                    return await probe_path(client, str(req.new_url), path, req.timeout_seconds)
-
-            async def _probe_extra(path: str):
-                async with probe_sem:
-                    return await probe_path(client, str(req.old_url), path, req.timeout_seconds)
-
-            missing_probes, extra_probes = await asyncio.gather(
-                asyncio.gather(*[_probe_missing(p) for p in candidate_missing]),
-                asyncio.gather(*[_probe_extra(p) for p in candidate_extra]),
-            )
-
-            for path, probe in zip(candidate_missing, missing_probes):
-                if probe.ok:
-                    continue  # exists on new site, just unlinked — not missing
+            for path in candidate_missing:
                 old_status = old_status_by_path.get(path)
                 missing_in_new.append(
                     PageDiffEntry(
                         path=path,
                         reference_url=old_status.url if old_status else str(req.old_url),
                         reference_status_code=old_status.status_code if old_status else None,
-                        checked_url=probe.url,
-                        checked_status_code=probe.status_code,
-                        reason=probe.error or f"HTTP {probe.status_code}" if probe.status_code else (probe.error or "niedostępna"),
+                        checked_url=new_base + path,
+                        checked_status_code=None,
+                        reason="nie znaleziono podczas przeszukiwania nowego adresu",
                     )
                 )
 
-            for path, probe in zip(candidate_extra, extra_probes):
-                if probe.ok:
-                    continue  # exists on old site too, just unlinked — not really "extra"
+            for path in candidate_extra:
                 new_status = new_status_by_path.get(path)
                 extra_in_new.append(
                     PageDiffEntry(
                         path=path,
                         reference_url=new_status.url if new_status else str(req.new_url),
                         reference_status_code=new_status.status_code if new_status else None,
-                        checked_url=probe.url,
-                        checked_status_code=probe.status_code,
-                        reason=probe.error or (f"HTTP {probe.status_code}" if probe.status_code else "niedostępna na starym adresie"),
+                        checked_url=old_base + path,
+                        checked_status_code=None,
+                        reason="nie znaleziono podczas przeszukiwania starego adresu",
                     )
                 )
 
