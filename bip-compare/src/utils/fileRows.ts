@@ -26,6 +26,8 @@ export function buildFileRows(result: ComparisonResult): FileComparison[] {
     kind: kindFromFilename(entry.filename),
     oldSizeKb: bytesToKb(entry.old?.size_bytes),
     newSizeKb: bytesToKb(entry.new?.size_bytes),
+    oldHref: entry.old?.href ?? null,
+    newHref: entry.new?.href ?? null,
     oldHttp: entry.old?.status_code ?? null,
     newHttp: entry.new?.status_code ?? null,
     oldType: entry.old?.content_type ?? 'application/octet-stream',

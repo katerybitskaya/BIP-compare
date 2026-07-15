@@ -1,4 +1,4 @@
-import { X, Info, CheckCircle2, AlertTriangle, FileWarning } from 'lucide-react';
+import { X, Info, CheckCircle2, AlertTriangle, FileWarning, ExternalLink } from 'lucide-react';
 import type { FileComparison } from '../types';
 import FileIcon from './FileIcon';
 import StatusBadge from './StatusBadge';
@@ -115,6 +115,19 @@ export default function FileDetailPanel({ file, onClose }: FileDetailPanelProps)
                   {file.oldDownloadOk ? 'Działa' : 'Niedostępne'}
                 </dd>
               </div>
+              {file.oldHref && (
+                <div>
+                  <a
+                    href={file.oldHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 transition-colors"
+                  >
+                    <ExternalLink size={12} />
+                    Otwórz plik
+                  </a>
+                </div>
+              )}
               <div>
                 <dt className="text-slate-500 dark:text-slate-400">Ostatnia modyfikacja</dt>
                 <dd className="mt-0.5 font-medium text-slate-900 dark:text-slate-200">{file.oldModified ?? '–'}</dd>
@@ -147,6 +160,19 @@ export default function FileDetailPanel({ file, onClose }: FileDetailPanelProps)
                   {file.newDownloadOk ? 'Działa' : 'Niedostępne'}
                 </dd>
               </div>
+              {file.newHref && (
+                <div>
+                  <a
+                    href={file.newHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                  >
+                    <ExternalLink size={12} />
+                    Otwórz plik
+                  </a>
+                </div>
+              )}
               <div>
                 <dt className="text-slate-500 dark:text-slate-400">Ostatnia modyfikacja</dt>
                 <dd className="mt-0.5 font-medium text-slate-900 dark:text-slate-200">{file.newModified ?? '–'}</dd>
