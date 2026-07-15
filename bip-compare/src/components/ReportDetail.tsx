@@ -132,7 +132,14 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
             <div className="mt-3 space-y-2 text-sm">
               <p className="flex flex-wrap items-center gap-2">
                 <span className="text-slate-400 dark:text-slate-500">Stary adres:</span>
-                <span className="font-medium text-slate-900 dark:text-slate-100 break-all">{report.old_url}</span>
+                <a
+                  href={report.old_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-slate-900 dark:text-slate-100 break-all underline decoration-slate-400/40 underline-offset-2 hover:text-violet-600 dark:hover:text-violet-400"
+                >
+                  {report.old_url}
+                </a>
                 {report.old_site.reachable ? (
                   <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                     <CheckCircle2 size={14} /> działa (HTTP {report.old_site.root_status_code ?? '?'})
@@ -145,7 +152,14 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
               </p>
               <p className="flex flex-wrap items-center gap-2">
                 <span className="text-slate-400 dark:text-slate-500">Nowy adres:</span>
-                <span className="font-medium text-slate-900 dark:text-slate-100 break-all">{report.new_url}</span>
+                <a
+                  href={report.new_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-slate-900 dark:text-slate-100 break-all underline decoration-slate-400/40 underline-offset-2 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  {report.new_url}
+                </a>
                 {report.new_site.reachable ? (
                   <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                     <CheckCircle2 size={14} /> działa (HTTP {report.new_site.root_status_code ?? '?'})
