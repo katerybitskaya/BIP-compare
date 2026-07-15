@@ -43,6 +43,7 @@ from .crawler import (
     _timeout,
     check_reachable,
     crawl_site,
+    probe_path,
 )
 from .models import (
     CompareRequest,
@@ -431,42 +432,68 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         extra_in_new: list[PageDiffEntry] = []
 
         if both_reachable and not same_site:
-            # NOTE: this used to probe each candidate path directly on the
-            # other site before declaring it missing/extra, on the theory
-            # that it might exist but just be unlinked. Dropped: some sites
+            # A path that one site's own crawl found working but the other
+            # site's own crawl never discovered is reported as missing/extra
+            # -- no exceptions. We still probe it directly on the other site
+            # too (second chance), purely to record what that direct check
+            # actually returns (checked_url/checked_status_code) -- useful
+            # diagnostic info, e.g. showing that a "soft 200" site really
+            # did respond even though we're still counting it as missing.
+            # The probe result does NOT decide inclusion anymore: some sites
             # (e.g. bip2.k8s.rekord.com.pl) respond with a "soft" success to
             # literally any path -- including ones that plainly don't exist
-            # -- so that probe could never tell the difference and silently
-            # hid every real missing/extra page behind a false "still
-            # exists". If a path's own crawl found it working on one site
-            # but the other site's own crawl never did, that's the answer:
-            # straight into missing/extra, no second-guessing.
-            old_base = _normalize_base(str(req.old_url))
-            new_base = _normalize_base(str(req.new_url))
+            # -- so trusting "probe says ok" to skip an entry silently hid
+            # every real missing/extra page behind a false "still exists".
+            probe_sem = asyncio.Semaphore(PROBE_CONCURRENCY)
 
-            for path in candidate_missing:
+            async def _probe_missing(path: str):
+                async with probe_sem:
+                    return await probe_path(client, str(req.new_url), path, req.timeout_seconds)
+
+            async def _probe_extra(path: str):
+                async with probe_sem:
+                    return await probe_path(client, str(req.old_url), path, req.timeout_seconds)
+
+            missing_probes, extra_probes = await asyncio.gather(
+                asyncio.gather(*[_probe_missing(p) for p in candidate_missing]),
+                asyncio.gather(*[_probe_extra(p) for p in candidate_extra]),
+            )
+
+            def _probe_reason(probe: "PageStatus", not_found_text: str) -> str:
+                # If the direct second-chance check itself failed (an actual
+                # error status, or no response at all), that's more useful
+                # to show than the generic "not found during crawl" text --
+                # it tells you exactly why the page is missing/extra. Only
+                # when the probe came back ok (e.g. a "soft 200") do we fall
+                # back to the generic text, since in that case the status
+                # code alone ("200") wouldn't explain anything.
+                if not probe.ok:
+                    return f"HTTP {probe.status_code}" if probe.status_code is not None else "brak odpowiedzi"
+                return not_found_text
+
+            for path, probe in zip(candidate_missing, missing_probes):
                 old_status = old_status_by_path.get(path)
                 missing_in_new.append(
                     PageDiffEntry(
                         path=path,
                         reference_url=old_status.url if old_status else str(req.old_url),
                         reference_status_code=old_status.status_code if old_status else None,
-                        checked_url=new_base + path,
-                        checked_status_code=None,
-                        reason="nie znaleziono podczas przeszukiwania nowego adresu",
+                        checked_url=probe.url,
+                        checked_status_code=probe.status_code,
+                        reason=_probe_reason(probe, "nie znaleziono podczas przeszukiwania nowego adresu"),
                     )
                 )
 
-            for path in candidate_extra:
+            for path, probe in zip(candidate_extra, extra_probes):
                 new_status = new_status_by_path.get(path)
                 extra_in_new.append(
                     PageDiffEntry(
                         path=path,
                         reference_url=new_status.url if new_status else str(req.new_url),
                         reference_status_code=new_status.status_code if new_status else None,
-                        checked_url=old_base + path,
-                        checked_status_code=None,
-                        reason="nie znaleziono podczas przeszukiwania starego adresu",
+                        checked_url=probe.url,
+                        checked_status_code=probe.status_code,
+                        reason=_probe_reason(probe, "nie znaleziono podczas przeszukiwania starego adresu"),
                     )
                 )
 
