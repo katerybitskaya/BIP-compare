@@ -11,6 +11,7 @@ import {
   Link2,
   FileStack,
   Globe,
+  ExternalLink,
 } from 'lucide-react';
 import type { ComparisonResult } from '../api/types';
 import { getReport } from '../api/compareApi';
@@ -197,7 +198,16 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
                       <ul className="space-y-2 text-sm">
                         {report.missing_in_new.map((entry) => (
                           <li key={entry.path} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-rose-500/5 px-3 py-2">
-                            <span className="font-medium text-slate-800 dark:text-slate-200 break-all">{entry.path}</span>
+                            <a
+                              href={entry.reference_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200 break-all hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                              title={`Otwórz ${entry.path} na starym adresie`}
+                            >
+                              {entry.path}
+                              <ExternalLink size={13} className="shrink-0 opacity-50" />
+                            </a>
                             <span className="text-xs text-rose-600 dark:text-rose-400">{entry.reason}</span>
                           </li>
                         ))}
@@ -220,7 +230,16 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
                       <ul className="space-y-2 text-sm">
                         {report.extra_in_new.map((entry) => (
                           <li key={entry.path} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-amber-500/5 px-3 py-2">
-                            <span className="font-medium text-slate-800 dark:text-slate-200 break-all">{entry.path}</span>
+                            <a
+                              href={entry.reference_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 font-medium text-slate-800 dark:text-slate-200 break-all hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                              title={`Otwórz ${entry.path} na nowym adresie`}
+                            >
+                              {entry.path}
+                              <ExternalLink size={13} className="shrink-0 opacity-50" />
+                            </a>
                             <span className="text-xs text-amber-600 dark:text-amber-400">{entry.reason}</span>
                           </li>
                         ))}
@@ -241,14 +260,38 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
                       <p className="text-sm text-slate-400 dark:text-slate-500">Brak wspólnych podstron.</p>
                     ) : (
                       <div className="flex flex-wrap gap-2">
-                        {report.unchanged_paths.map((path) => (
-                          <span
-                            key={path}
-                            className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300"
-                          >
-                            {path}
-                          </span>
-                        ))}
+                        {report.unchanged_paths.map((path) => {
+                          const oldBase = report.old_url.replace(/\/$/, '');
+                          const newBase = report.new_url.replace(/\/$/, '');
+                          return (
+                            <span
+                              key={path}
+                              className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300"
+                            >
+                              {path}
+                              <a
+                                href={`${oldBase}${path}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                                title="Otwórz na starym adresie"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <ExternalLink size={11} />
+                              </a>
+                              <a
+                                href={`${newBase}${path}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                title="Otwórz na nowym adresie"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <ExternalLink size={11} />
+                              </a>
+                            </span>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

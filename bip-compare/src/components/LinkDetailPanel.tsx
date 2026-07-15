@@ -1,4 +1,4 @@
-import { X, Info, CheckCircle2, AlertTriangle, Link2Off } from 'lucide-react';
+import { X, Info, CheckCircle2, AlertTriangle, Link2Off, ExternalLink } from 'lucide-react';
 import type { LinkComparison, LinkStatus } from '../types';
 import LinkStatusBadge from './LinkStatusBadge';
 
@@ -101,6 +101,19 @@ export default function LinkDetailPanel({ link, onClose }: LinkDetailPanelProps)
                 <dt className="text-slate-500 dark:text-slate-400">Znaleziony na</dt>
                 <dd className="mt-0.5 break-all font-medium text-slate-900 dark:text-slate-200">{link.oldSourcePath ?? '–'}</dd>
               </div>
+              {link.oldHref && (
+                <div>
+                  <a
+                    href={link.oldHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 transition-colors"
+                  >
+                    <ExternalLink size={12} />
+                    Otwórz link
+                  </a>
+                </div>
+              )}
             </dl>
           </div>
 
@@ -123,6 +136,19 @@ export default function LinkDetailPanel({ link, onClose }: LinkDetailPanelProps)
                 <dt className="text-slate-500 dark:text-slate-400">Znaleziony na</dt>
                 <dd className="mt-0.5 break-all font-medium text-slate-900 dark:text-slate-200">{link.newSourcePath ?? '–'}</dd>
               </div>
+              {link.newHref && (
+                <div>
+                  <a
+                    href={link.newHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                  >
+                    <ExternalLink size={12} />
+                    Otwórz link
+                  </a>
+                </div>
+              )}
             </dl>
           </div>
         </div>

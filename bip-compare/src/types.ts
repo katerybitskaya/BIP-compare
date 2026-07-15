@@ -9,6 +9,8 @@ export interface FileComparison {
   kind: FileKind;
   oldSizeKb: number | null;
   newSizeKb: number | null;
+  oldHref: string | null;
+  newHref: string | null;
   oldHttp: number | null;
   newHttp: number | null;
   oldType: string;
