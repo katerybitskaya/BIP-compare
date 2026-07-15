@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check, X } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import PageHeader from './components/PageHeader';
@@ -169,6 +169,29 @@ function App() {
                 />
 
                 <ErrorBoundary what="wyników ostatniego porównania">
+                  {currentReport && (
+                    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-4 text-sm shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+                      <span className="text-xs text-slate-400 dark:text-slate-500">Porównywane strony:</span>
+                      <span className="inline-flex items-center gap-1.5 min-w-0">
+                        {currentReport.old_site.reachable ? (
+                          <Check size={13} className="shrink-0 text-emerald-500 dark:text-emerald-400" strokeWidth={3} />
+                        ) : (
+                          <X size={13} className="shrink-0 text-rose-500 dark:text-rose-400" strokeWidth={3} />
+                        )}
+                        <span className="truncate font-medium text-slate-900 dark:text-slate-100">{currentReport.old_url}</span>
+                      </span>
+                      <ArrowRight size={14} className="shrink-0 text-slate-400 dark:text-slate-500" />
+                      <span className="inline-flex items-center gap-1.5 min-w-0">
+                        {currentReport.new_site.reachable ? (
+                          <Check size={13} className="shrink-0 text-emerald-500 dark:text-emerald-400" strokeWidth={3} />
+                        ) : (
+                          <X size={13} className="shrink-0 text-rose-500 dark:text-rose-400" strokeWidth={3} />
+                        )}
+                        <span className="truncate font-medium text-slate-900 dark:text-slate-100">{currentReport.new_url}</span>
+                      </span>
+                    </div>
+                  )}
+
                   {currentReport && !currentReport.both_reachable && (
                     <div className="flex items-start gap-2.5 rounded-2xl border border-rose-300 dark:border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-700 dark:text-rose-300">
                       Co najmniej jedna ze stron jest niedostępna, więc pełne porównanie nie zostało wykonane. Zobacz pełny raport, aby sprawdzić szczegóły.
