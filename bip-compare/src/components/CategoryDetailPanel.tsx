@@ -1,4 +1,4 @@
-import { Info, ArrowRight, Files, FileCode, Link2, FileStack } from 'lucide-react';
+import { Info, Files, FileCode, Link2, FileStack } from 'lucide-react';
 import type { CategoryId, CategoryOverviewEntry } from '../types';
 
 const PAGE_ICONS: Record<CategoryId, typeof Files> = {
@@ -17,10 +17,9 @@ const TONE_CLASSES: Record<string, string> = {
 
 interface CategoryDetailPanelProps {
   entry: CategoryOverviewEntry | null;
-  onViewFullReport: () => void;
 }
 
-export default function CategoryDetailPanel({ entry, onViewFullReport }: CategoryDetailPanelProps) {
+export default function CategoryDetailPanel({ entry }: CategoryDetailPanelProps) {
   if (!entry) {
     return (
       <aside className="hidden w-full shrink-0 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-6 shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur lg:flex lg:w-96 lg:flex-col lg:items-center lg:justify-center">
@@ -54,17 +53,6 @@ export default function CategoryDetailPanel({ entry, onViewFullReport }: Categor
             ))}
           </dl>
         )}
-      </div>
-
-      <div className="border-t border-slate-200 dark:border-white/5 p-4">
-        <button
-          type="button"
-          onClick={onViewFullReport}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-500 to-blue-500 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-violet-900/30 hover:opacity-90"
-        >
-          Zobacz pełny raport
-          <ArrowRight size={15} />
-        </button>
       </div>
     </aside>
   );

@@ -530,10 +530,20 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         # sites, saved as pages/old.json + pages/new.json (see
         # _write_snapshots) via asyncio.to_thread so the JSON serialisation
         # (potentially several MB for large sites) doesn't block the event loop.
-        old_snapshot = _build_raw_snapshot(old_report, old_content)
-        new_snapshot = old_snapshot if same_site else _build_raw_snapshot(new_report, new_content)
-        pages_dir = result_dir / "pages"
-        pages_dir.mkdir(parents=True, exist_ok=True)
+        #
+        # Only needed when the "Zawartość" scope is on -- these files exist
+        # solely to power the on-demand /content-diff endpoint. Links/files
+        # are fully self-contained in link_diffs/file_diffs (saved straight
+        # into summary.json), so when content is off there's no reason to
+        # pay the (potentially large) disk-write cost for pages/*.json.
+        async def _write_snapshots_if_needed():
+            if not req.scope.content:
+                return
+            old_snapshot = _build_raw_snapshot(old_report, old_content)
+            new_snapshot = old_snapshot if same_site else _build_raw_snapshot(new_report, new_content)
+            pages_dir = result_dir / "pages"
+            pages_dir.mkdir(parents=True, exist_ok=True)
+            await asyncio.to_thread(_write_snapshots, pages_dir, old_snapshot, new_snapshot, same_site)
 
         # --- Site-wide file (attachment) and link comparisons ---------------
         # Run snapshot writing and the two probe-heavy comparisons in parallel
@@ -551,7 +561,7 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         file_diffs, link_diffs, _ = await asyncio.gather(
             _run_file_diffs(),
             _run_link_diffs(),
-            asyncio.to_thread(_write_snapshots, pages_dir, old_snapshot, new_snapshot, same_site),
+            _write_snapshots_if_needed(),
         )
 
     duration_ms = (time.perf_counter() - started) * 1000
