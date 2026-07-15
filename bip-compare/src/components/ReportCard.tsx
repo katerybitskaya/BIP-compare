@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle, ArrowRight, Clock, Trash2 } from 'lucide-react';
+import { Check, X, ArrowRight, Clock, Trash2, Globe, FileCode, Link2, FileStack } from 'lucide-react';
 import type { ReportSummary } from '../api/types';
 import { formatDateTime } from '../utils/format';
 
@@ -8,43 +8,28 @@ interface ReportCardProps {
   onDelete: () => void;
 }
 
-function ReachabilityBadge({ reachable }: { reachable: boolean }) {
+function ReachabilityMark({ reachable }: { reachable: boolean }) {
   return reachable ? (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-600 ring-1 ring-emerald-400/20 dark:text-emerald-400">
-      <CheckCircle2 size={12} /> Działa
-    </span>
+    <Check size={13} className="shrink-0 text-emerald-500 dark:text-emerald-400" strokeWidth={3} />
   ) : (
-    <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2.5 py-1 text-xs font-medium text-rose-600 ring-1 ring-rose-400/20 dark:text-rose-400">
-      <XCircle size={12} /> Niedostępna
-    </span>
+    <X size={13} className="shrink-0 text-rose-500 dark:text-rose-400" strokeWidth={3} />
   );
 }
 
-// Same per-category colors as the Dashboard tiles (buildOverviewStatItems in
-// overviewRows.ts) -- Podstrony/Zawartość/Linki/Pliki each keep one fixed
-// color everywhere in the app, so a category is recognizable at a glance.
-const CATEGORY_TAG_STYLES: Record<string, string> = {
-  pages: 'bg-blue-500/10 text-blue-600 dark:text-blue-300',
-  content: 'bg-amber-500/10 text-amber-600 dark:text-amber-300',
-  links: 'bg-red-500/10 text-red-600 dark:text-red-300',
-  attachments: 'bg-violet-500/10 text-violet-600 dark:text-violet-300',
-};
-
-const CATEGORY_TAGS: Array<{ key: 'content' | 'links' | 'attachments'; label: string }> = [
-  { key: 'content', label: 'Zawartość' },
-  { key: 'links', label: 'Linki' },
-  { key: 'attachments', label: 'Pliki' },
+// Color is reserved for status (works / broken) -- categories are told apart
+// by icon + label only, all sharing one neutral, low-contrast style. Same
+// icons used for these categories elsewhere in the app (ReportDetail section
+// headers), so a category is recognizable by shape everywhere, not by hue.
+const CATEGORY_TAGS: Array<{ key: 'content' | 'links' | 'attachments' | null; label: string; Icon: typeof Globe }> = [
+  { key: null, label: 'Podstrony', Icon: Globe },
+  { key: 'content', label: 'Zawartość', Icon: FileCode },
+  { key: 'links', label: 'Linki', Icon: Link2 },
+  { key: 'attachments', label: 'Pliki', Icon: FileStack },
 ];
 
 export default function ReportCard({ report, onClick, onDelete }: ReportCardProps) {
   const scope = report.scope;
-  const activeCategories: Array<{ label: string; className: string }> = [
-    { label: 'Podstrony', className: CATEGORY_TAG_STYLES.pages },
-    ...CATEGORY_TAGS.filter((c) => (scope?.[c.key] ?? true)).map((c) => ({
-      label: c.label,
-      className: CATEGORY_TAG_STYLES[c.key],
-    })),
-  ];
+  const activeCategories = CATEGORY_TAGS.filter((c) => c.key === null || (scope?.[c.key] ?? true));
 
   return (
     <div
@@ -57,7 +42,11 @@ export default function ReportCard({ report, onClick, onDelete }: ReportCardProp
           onClick();
         }
       }}
-      className="flex w-full cursor-pointer flex-col gap-4 rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] p-5 text-left shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur transition-colors hover:border-violet-400 dark:hover:border-violet-500/40"
+      className={`flex w-full cursor-pointer flex-col gap-4 rounded-2xl border bg-white dark:bg-white/[0.03] p-5 text-left shadow-lg shadow-slate-200/50 dark:shadow-black/20 backdrop-blur transition-colors hover:border-violet-400 dark:hover:border-violet-500/40 ${
+        report.both_reachable
+          ? 'border-slate-300 dark:border-white/10'
+          : 'border-rose-300 dark:border-rose-500/20'
+      }`}
     >
       <div className="flex items-center justify-between gap-2 text-xs text-slate-400 dark:text-slate-500">
         <span className="flex items-center gap-1.5">
@@ -66,11 +55,13 @@ export default function ReportCard({ report, onClick, onDelete }: ReportCardProp
         </span>
         <div className="flex items-center gap-2">
           {report.both_reachable ? (
-            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="flex items-center gap-1 font-medium text-slate-400 dark:text-slate-500">
+              <Check size={13} className="text-emerald-500 dark:text-emerald-400" strokeWidth={3} />
               Obie strony działają
             </span>
           ) : (
-            <span className="rounded-full bg-rose-500/15 px-2 py-0.5 font-medium text-rose-600 dark:text-rose-400">
+            <span className="flex items-center gap-1 font-medium text-rose-600 dark:text-rose-400">
+              <X size={13} strokeWidth={3} />
               Problem z dostępnością
             </span>
           )}
@@ -91,27 +82,33 @@ export default function ReportCard({ report, onClick, onDelete }: ReportCardProp
 
       <div className="flex flex-col gap-1.5 text-sm">
         <div className="flex items-center gap-2 min-w-0">
+          <ReachabilityMark reachable={report.old_reachable} />
           <span className="truncate font-medium text-slate-900 dark:text-slate-100" title={report.old_url}>
             {report.old_url}
           </span>
-          <ReachabilityBadge reachable={report.old_reachable} />
+          {!report.old_reachable && <span className="shrink-0 text-[11px] text-rose-500 dark:text-rose-400">niedostępna</span>}
         </div>
         <div className="flex items-center gap-2 pl-1 text-slate-400 dark:text-slate-500">
           <ArrowRight size={14} />
         </div>
         <div className="flex items-center gap-2 min-w-0">
+          <ReachabilityMark reachable={report.new_reachable} />
           <span className="truncate font-medium text-slate-900 dark:text-slate-100" title={report.new_url}>
             {report.new_url}
           </span>
-          <ReachabilityBadge reachable={report.new_reachable} />
+          {!report.new_reachable && <span className="shrink-0 text-[11px] text-rose-500 dark:text-rose-400">niedostępna</span>}
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-200 dark:border-white/5 pt-3">
         <span className="text-[11px] text-slate-400 dark:text-slate-500">Zakres:</span>
-        {activeCategories.map((cat) => (
-          <span key={cat.label} className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${cat.className}`}>
-            {cat.label}
+        {activeCategories.map(({ label, Icon }) => (
+          <span
+            key={label}
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300/70 dark:border-white/10 bg-slate-100/60 dark:bg-white/[0.03] px-2 py-0.5 text-[11px] text-slate-500 dark:text-slate-400"
+          >
+            <Icon size={11} />
+            {label}
           </span>
         ))}
       </div>
