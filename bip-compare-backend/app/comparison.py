@@ -29,6 +29,7 @@ import json
 import shutil
 import time
 import uuid
+from contextlib import AsyncExitStack
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Optional
@@ -67,10 +68,15 @@ DEFAULT_HEADERS = {
     "User-Agent": "BipCompareBot/1.0 (+https://github.com/; strona porownawcza BIP)",
 }
 
-# Bounds how many requests are ever in flight at once (across crawling both
-# sites and the later file-probing step), regardless of how many pages a
-# site turns out to have — keeps large sites from opening hundreds of
-# simultaneous connections.
+# Bounds how many requests are ever in flight at once *per site*, regardless
+# of how many pages a site turns out to have — keeps large sites from opening
+# hundreds of simultaneous connections. Applied per-site (see compare_sites:
+# old_client/new_client are two separate httpx.AsyncClient instances, each
+# with their own pool) so comparing two different hosts doesn't have them
+# competing for one shared budget -- each site gets the full limit to itself.
+# When both addresses are the same site, only one client is created and used
+# for both "sides" (see same_site below), so that site still only sees one
+# pool's worth of concurrent load, not double.
 CLIENT_LIMITS = httpx.Limits(max_connections=20, max_keepalive_connections=10)
 
 # Caps how many unique files (attachments) get probed for the site-wide file
@@ -181,7 +187,8 @@ async def _probe_file(
 
 
 async def build_file_diffs(
-    client: httpx.AsyncClient,
+    old_client: httpx.AsyncClient,
+    new_client: httpx.AsyncClient,
     old_content: Dict[str, PageContent],
     new_content: Dict[str, PageContent],
     timeout_seconds: float,
@@ -189,6 +196,11 @@ async def build_file_diffs(
     """Site-wide comparison of every downloadable file (attachment) found
     anywhere on either site — independent of which specific page(s) link to
     it. This is what powers the Dashboard's flat "Wyniki - pliki" table.
+
+    Each side is probed through its own client (old_client/new_client) --
+    two separate connection pools -- so probing files found on the old site
+    doesn't compete for connection slots with probing files found on the new
+    site (see CLIENT_LIMITS / compare_sites).
     """
     old_files = _aggregate_attachments(old_content)
     new_files = _aggregate_attachments(new_content)
@@ -197,7 +209,9 @@ async def build_file_diffs(
     cache: Dict[str, dict] = {}
     semaphore = asyncio.Semaphore(PROBE_CONCURRENCY)
 
-    async def probe_side(files_map: Dict[str, Dict[str, str]], key: str) -> Optional[FileEntry]:
+    async def probe_side(
+        client: httpx.AsyncClient, files_map: Dict[str, Dict[str, str]], key: str
+    ) -> Optional[FileEntry]:
         entry = files_map.get(key)
         if entry is None:
             return None
@@ -213,8 +227,8 @@ async def build_file_diffs(
         )
 
     old_entries, new_entries = await asyncio.gather(
-        asyncio.gather(*[probe_side(old_files, k) for k in all_keys]),
-        asyncio.gather(*[probe_side(new_files, k) for k in all_keys]),
+        asyncio.gather(*[probe_side(old_client, old_files, k) for k in all_keys]),
+        asyncio.gather(*[probe_side(new_client, new_files, k) for k in all_keys]),
     )
 
     diffs: list[FileDiffEntry] = []
@@ -256,7 +270,8 @@ def _aggregate_links(content_by_path: Dict[str, PageContent]) -> Dict[str, Dict[
 
 
 async def build_link_diffs(
-    client: httpx.AsyncClient,
+    old_client: httpx.AsyncClient,
+    new_client: httpx.AsyncClient,
     old_content: Dict[str, PageContent],
     new_content: Dict[str, PageContent],
     timeout_seconds: float,
@@ -264,7 +279,11 @@ async def build_link_diffs(
     """Site-wide comparison of every link found anywhere on either site --
     independent of which specific page(s) point to it. Reuses the same
     HEAD-then-GET probing as the file comparison, since checking "does this
-    href respond" is identical logic either way."""
+    href respond" is identical logic either way.
+
+    Each side is probed through its own client (old_client/new_client), same
+    reasoning as build_file_diffs -- keeps the two sides' probing from
+    competing for one shared connection pool."""
     old_links = _aggregate_links(old_content)
     new_links = _aggregate_links(new_content)
     all_keys = sorted(set(old_links) | set(new_links))[:MAX_LINKS]
@@ -272,7 +291,9 @@ async def build_link_diffs(
     cache: Dict[str, dict] = {}
     semaphore = asyncio.Semaphore(PROBE_CONCURRENCY)
 
-    async def probe_side(links_map: Dict[str, Dict[str, str]], key: str) -> Optional[LinkEntry]:
+    async def probe_side(
+        client: httpx.AsyncClient, links_map: Dict[str, Dict[str, str]], key: str
+    ) -> Optional[LinkEntry]:
         entry = links_map.get(key)
         if entry is None:
             return None
@@ -286,8 +307,8 @@ async def build_link_diffs(
         )
 
     old_entries, new_entries = await asyncio.gather(
-        asyncio.gather(*[probe_side(old_links, k) for k in all_keys]),
-        asyncio.gather(*[probe_side(new_links, k) for k in all_keys]),
+        asyncio.gather(*[probe_side(old_client, old_links, k) for k in all_keys]),
+        asyncio.gather(*[probe_side(new_client, new_links, k) for k in all_keys]),
     )
 
     diffs: list[LinkDiffEntry] = []
@@ -335,7 +356,21 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
     # reuse the result for both "sides" instead.
     same_site = _normalize_base(str(req.old_url)) == _normalize_base(str(req.new_url))
 
-    async with httpx.AsyncClient(headers=DEFAULT_HEADERS, limits=CLIENT_LIMITS) as client:
+    async with AsyncExitStack() as stack:
+        # Two separate clients (each with their own CLIENT_LIMITS connection
+        # pool) so crawling/probing the old site and the new site never
+        # compete for the same pool of connections -- each site gets the
+        # full concurrency budget to itself. When both addresses are the
+        # same site (same_site), reuse a single client for both "sides"
+        # instead, so that one server doesn't see double the load.
+        old_client = await stack.enter_async_context(
+            httpx.AsyncClient(headers=DEFAULT_HEADERS, limits=CLIENT_LIMITS)
+        )
+        new_client = (
+            old_client
+            if same_site
+            else await stack.enter_async_context(httpx.AsyncClient(headers=DEFAULT_HEADERS, limits=CLIENT_LIMITS))
+        )
 
         # --- Step 0: fast reachability probe (early exit) ------------------
         # Check both root URLs BEFORE starting any full crawl. If either site
@@ -343,14 +378,14 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         # instead of waiting for the crawl to time out on every page.
         if same_site:
             old_reachable, old_root_code, old_root_err = await check_reachable(
-                client, str(req.old_url), req.timeout_seconds
+                old_client, str(req.old_url), req.timeout_seconds
             )
             new_reachable, new_root_code, new_root_err = old_reachable, old_root_code, old_root_err
         else:
             (old_reachable, old_root_code, old_root_err), (new_reachable, new_root_code, new_root_err) = (
                 await asyncio.gather(
-                    check_reachable(client, str(req.old_url), req.timeout_seconds),
-                    check_reachable(client, str(req.new_url), req.timeout_seconds),
+                    check_reachable(old_client, str(req.old_url), req.timeout_seconds),
+                    check_reachable(new_client, str(req.new_url), req.timeout_seconds),
                 )
             )
 
@@ -405,14 +440,14 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         # feature needs to know which pages these are.
         if same_site:
             old_report, old_content, old_meta_paths = await crawl_site(
-                client, str(req.old_url), req.max_pages, req.timeout_seconds
+                old_client, str(req.old_url), req.max_pages, req.timeout_seconds
             )
             new_report, new_content, new_meta_paths = old_report, old_content, old_meta_paths
         else:
             (old_report, old_content, old_meta_paths), (new_report, new_content, new_meta_paths) = (
                 await asyncio.gather(
-                    crawl_site(client, str(req.old_url), req.max_pages, req.timeout_seconds),
-                    crawl_site(client, str(req.new_url), req.max_pages, req.timeout_seconds),
+                    crawl_site(old_client, str(req.old_url), req.max_pages, req.timeout_seconds),
+                    crawl_site(new_client, str(req.new_url), req.max_pages, req.timeout_seconds),
                 )
             )
         meta_paths = old_meta_paths | new_meta_paths
@@ -449,11 +484,11 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
 
             async def _probe_missing(path: str):
                 async with probe_sem:
-                    return await probe_path(client, str(req.new_url), path, req.timeout_seconds)
+                    return await probe_path(new_client, str(req.new_url), path, req.timeout_seconds)
 
             async def _probe_extra(path: str):
                 async with probe_sem:
-                    return await probe_path(client, str(req.old_url), path, req.timeout_seconds)
+                    return await probe_path(old_client, str(req.old_url), path, req.timeout_seconds)
 
             missing_probes, extra_probes = await asyncio.gather(
                 asyncio.gather(*[_probe_missing(p) for p in candidate_missing]),
@@ -550,12 +585,12 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         # so the I/O and network work overlap rather than being serialised.
         async def _run_file_diffs():
             if both_reachable and req.scope.attachments:
-                return await build_file_diffs(client, old_content, new_content, req.timeout_seconds)
+                return await build_file_diffs(old_client, new_client, old_content, new_content, req.timeout_seconds)
             return []
 
         async def _run_link_diffs():
             if both_reachable and req.scope.links:
-                return await build_link_diffs(client, old_content, new_content, req.timeout_seconds)
+                return await build_link_diffs(old_client, new_client, old_content, new_content, req.timeout_seconds)
             return []
 
         file_diffs, link_diffs, _ = await asyncio.gather(
