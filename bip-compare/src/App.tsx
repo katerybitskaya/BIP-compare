@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import PageHeader from './components/PageHeader';
@@ -182,7 +183,17 @@ function App() {
                           selectedId={selectedCategory}
                           onSelect={handleSelectCategory}
                         />
-                        <CategoryDetailPanel entry={selectedCategoryEntry} onViewFullReport={handleViewFullReport} />
+                        <div className="flex w-full shrink-0 flex-col gap-3 lg:w-96">
+                          <CategoryDetailPanel entry={selectedCategoryEntry} />
+                          <button
+                            type="button"
+                            onClick={handleViewFullReport}
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-violet-500 to-blue-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/40 transition-transform hover:brightness-110 active:scale-[0.98]"
+                          >
+                            Zobacz pełny raport
+                            <ArrowRight size={15} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
