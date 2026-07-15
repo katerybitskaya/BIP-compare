@@ -9,6 +9,7 @@ import CategoryDetailPanel from './components/CategoryDetailPanel';
 import SettingsTab from './components/SettingsTab';
 import ReportsTab from './components/ReportsTab';
 import ErrorBoundary from './components/ErrorBoundary';
+import ScrollToTop from './components/ScrollToTop';
 import { runCompare, listReports, getReport, ApiError } from './api/compareApi';
 import type { CompareScope, ComparisonResult } from './api/types';
 import { buildOverviewStatItems, buildCategoryOverview } from './utils/overviewRows';
@@ -115,7 +116,7 @@ function App() {
   }
 
   return (
-    <div className="relative flex min-h-screen overflow-hidden bg-slate-50 dark:bg-[#0b0e18] text-slate-900 dark:text-slate-200">
+    <div className="relative flex h-screen overflow-hidden bg-slate-50 dark:bg-[#0b0e18] text-slate-900 dark:text-slate-200">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-fuchsia-600/20 blur-3xl" />
         <div className="absolute right-0 top-1/3 h-[28rem] w-[28rem] rounded-full bg-blue-600/15 blur-3xl" />
@@ -129,7 +130,7 @@ function App() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="relative flex min-w-0 flex-1 flex-col">
+      <div id="main-scroll-container" className="relative flex min-w-0 flex-1 flex-col overflow-y-auto">
         <TopBar onMenuClick={() => setSidebarOpen(true)} lastRunLabel={lastRunLabel} />
 
         <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
@@ -216,6 +217,7 @@ function App() {
             )}
           </div>
         </main>
+        <ScrollToTop />
       </div>
     </div>
   );
