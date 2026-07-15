@@ -53,6 +53,7 @@ from .models import (
     LinkDiffEntry,
     LinkEntry,
     PageDiffEntry,
+    PageStatus,
     RawPageEntry,
     RawSiteSnapshot,
     ReportSummary,
