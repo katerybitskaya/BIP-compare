@@ -104,6 +104,8 @@ function App() {
       setCurrentReport(result);
       setSelectedCategory(null);
       setReportsRefreshKey((k) => k + 1);
+      setOldUrl('');
+      setNewUrl('');
     } catch (err) {
       setRunError(err instanceof ApiError ? err.message : 'Nie udało się uruchomić porównania.');
     } finally {
