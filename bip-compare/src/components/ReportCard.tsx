@@ -20,7 +20,32 @@ function ReachabilityBadge({ reachable }: { reachable: boolean }) {
   );
 }
 
+// Same per-category colors as the Dashboard tiles (buildOverviewStatItems in
+// overviewRows.ts) -- Podstrony/Zawartość/Linki/Pliki each keep one fixed
+// color everywhere in the app, so a category is recognizable at a glance.
+const CATEGORY_TAG_STYLES: Record<string, string> = {
+  pages: 'bg-blue-500/10 text-blue-600 dark:text-blue-300',
+  content: 'bg-amber-500/10 text-amber-600 dark:text-amber-300',
+  links: 'bg-red-500/10 text-red-600 dark:text-red-300',
+  attachments: 'bg-violet-500/10 text-violet-600 dark:text-violet-300',
+};
+
+const CATEGORY_TAGS: Array<{ key: 'content' | 'links' | 'attachments'; label: string }> = [
+  { key: 'content', label: 'Zawartość' },
+  { key: 'links', label: 'Linki' },
+  { key: 'attachments', label: 'Pliki' },
+];
+
 export default function ReportCard({ report, onClick, onDelete }: ReportCardProps) {
+  const scope = report.scope;
+  const activeCategories: Array<{ label: string; className: string }> = [
+    { label: 'Podstrony', className: CATEGORY_TAG_STYLES.pages },
+    ...CATEGORY_TAGS.filter((c) => (scope?.[c.key] ?? true)).map((c) => ({
+      label: c.label,
+      className: CATEGORY_TAG_STYLES[c.key],
+    })),
+  ];
+
   return (
     <div
       role="button"
@@ -82,19 +107,13 @@ export default function ReportCard({ report, onClick, onDelete }: ReportCardProp
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 border-t border-slate-200 dark:border-white/5 pt-3 text-center">
-        <div>
-          <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400">{report.unchanged_count}</p>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500">bez zmian</p>
-        </div>
-        <div>
-          <p className="text-lg font-semibold text-rose-600 dark:text-rose-400">{report.missing_count}</p>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500">brakuje</p>
-        </div>
-        <div>
-          <p className="text-lg font-semibold text-amber-600 dark:text-amber-400">{report.extra_count}</p>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500">zbędne</p>
-        </div>
+      <div className="flex flex-wrap items-center gap-1.5 border-t border-slate-200 dark:border-white/5 pt-3">
+        <span className="text-[11px] text-slate-400 dark:text-slate-500">Zakres:</span>
+        {activeCategories.map((cat) => (
+          <span key={cat.label} className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${cat.className}`}>
+            {cat.label}
+          </span>
+        ))}
       </div>
     </div>
   );
