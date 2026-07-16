@@ -24,12 +24,12 @@ export function buildContentStatItems(result: ComparisonResult): StatDefinition[
   const common = result.unchanged_paths?.length ?? 0;
   const totalPages = common + missing + extra;
 
-  const pct = (n: number) => (checked > 0 ? `${((n / checked) * 100).toFixed(1).replace('.', ',')}%` : '–');
+  const pct = (n: number) => (totalPages > 0 ? `${((n / totalPages) * 100).toFixed(1).replace('.', ',')}%` : '–');
 
   return [
     {
       id: 'content-total',
-      label: 'Sprawdzone strony',
+      label: 'Sprawdzone podstrony',
       value: String(totalPages),
       helper: 'łącznie w raporcie',
       tone: 'blue',
@@ -39,7 +39,7 @@ export function buildContentStatItems(result: ComparisonResult): StatDefinition[
       id: 'content-unchanged',
       label: 'Bez zmian',
       value: String(unchanged),
-      helper: `${pct(unchanged)} ze wspólnych`,
+      helper: `${pct(unchanged)} z podstron`,
       tone: 'green',
       icon: 'check',
     },
@@ -47,15 +47,15 @@ export function buildContentStatItems(result: ComparisonResult): StatDefinition[
       id: 'content-changed',
       label: 'Zmienione',
       value: String(changed),
-      helper: `${pct(changed)} ze wspólnych`,
+      helper: `${pct(changed)} z podstron`,
       tone: 'amber',
       icon: 'diff',
     },
     {
       id: 'content-per-site',
-      label: 'Podstrony różniące się',
+      label: 'Tylko na starym/nowym adresie',
       value: String(missing + extra),
-      helper: 'tylko na starym/nowym adresie',
+      helper: `${pct(missing + extra)} z podstron`,
       tone: 'red',
       icon: 'alert',
     },

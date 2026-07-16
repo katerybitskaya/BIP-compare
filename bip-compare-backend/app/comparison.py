@@ -58,8 +58,11 @@ from .models import (
     RawPageEntry,
     RawSiteSnapshot,
     ReportSummary,
+    ScreenshotDiffEntry,
     SiteReport,
 )
+from .screenshots import capture_screenshots_sync, load_manifest, save_manifest, screenshot_filename
+from .visual_diff import compare_screenshots
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
@@ -593,10 +596,126 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
                 return await build_link_diffs(old_client, new_client, old_content, new_content, req.timeout_seconds)
             return []
 
-        file_diffs, link_diffs, _ = await asyncio.gather(
+        # --- Full-page screenshots (opt-in, off by default) ------------------
+        # Renders every reachable page in a real browser (Playwright/Chromium)
+        # and saves a full-page PNG -- for manual side-by-side visual
+        # comparison, not an automated pixel diff. Only runs when the
+        # "Zrzuty ekranów" scope is checked, since this is much slower and
+        # heavier per page than the plain HTTP fetch everything else uses.
+        async def _capture_screenshots_if_needed() -> tuple[list[ScreenshotDiffEntry], Optional[str]]:
+            if not (both_reachable and req.scope.screenshots):
+                return [], None
+
+            # Both folders are created up front, unconditionally -- before
+            # Playwright is even imported -- so results/{id}/screenshots/old
+            # and .../new always exist on disk once screenshots were enabled
+            # for a run, regardless of whether capture actually succeeds.
+            # Makes a failed run's on-disk state self-explanatory (empty
+            # old/new folders = capture ran but got nothing; folders missing
+            # entirely would mean this step never even started).
+            screenshots_dir = result_dir / "screenshots"
+            old_dir = screenshots_dir / "old"
+            new_dir = screenshots_dir / "new"
+            old_dir.mkdir(parents=True, exist_ok=True)
+            new_dir.mkdir(parents=True, exist_ok=True)
+
+            try:
+                old_targets = [(p.path, p.url) for p in old_report.pages if p.ok]
+                if same_site:
+                    old_paths = await asyncio.to_thread(
+                        capture_screenshots_sync, old_targets, old_dir, req.timeout_seconds
+                    )
+                    # Same site on both sides -- reuse the already-rendered
+                    # images for "new" instead of opening every page twice.
+                    for path in old_paths:
+                        filename = screenshot_filename(path)
+                        shutil.copyfile(old_dir / filename, new_dir / filename)
+                    new_paths = old_paths
+                else:
+                    new_targets = [(p.path, p.url) for p in new_report.pages if p.ok]
+                    old_paths, new_paths = await asyncio.gather(
+                        asyncio.to_thread(capture_screenshots_sync, old_targets, old_dir, req.timeout_seconds),
+                        asyncio.to_thread(capture_screenshots_sync, new_targets, new_dir, req.timeout_seconds),
+                    )
+                save_manifest(screenshots_dir, old_paths, new_paths)
+
+                error: Optional[str] = None
+                if req.scope.screenshots and not old_paths and not new_paths and old_targets:
+                    # Capture ran without raising, but produced literally
+                    # nothing -- every page failed individually (each
+                    # failure is swallowed inside capture_screenshots so the
+                    # whole batch isn't aborted by one bad page). Surface
+                    # that as a visible warning rather than a silent "0
+                    # screenshots" the user has to notice on their own.
+                    error = (
+                        "Nie udało się przechwycić żadnego zrzutu ekranu -- każda podstrona "
+                        "zakończyła się błędem podczas renderowania (timeout, błąd sieci albo "
+                        "przeglądarki)."
+                    )
+
+                # --- Pixel-level diff (pixelmatch) ---------------------------
+                # Only possible for paths captured on BOTH sides -- a path
+                # only present on one side (missing/extra page) has nothing
+                # to diff against. Each comparison is real CPU-bound image
+                # work, so it's offloaded to a thread per path and run
+                # concurrently rather than serially blocking the event loop.
+                common_paths = sorted(set(old_paths) & set(new_paths))
+                diff_dir = screenshots_dir / "diff"
+                diff_errors: list[str] = []
+
+                async def _diff_one(path: str) -> ScreenshotDiffEntry | None:
+                    filename = screenshot_filename(path)
+                    try:
+                        stats = await asyncio.to_thread(
+                            compare_screenshots,
+                            old_dir / filename,
+                            new_dir / filename,
+                            diff_dir / filename,
+                        )
+                    except Exception as exc:
+                        message = f"{type(exc).__name__}: {exc}"
+                        print(f"[screenshots] nie udało się porównać {path}: {message}")
+                        diff_errors.append(message)
+                        return None
+                    status = "identical" if stats["mismatched_pixels"] == 0 else "different"
+                    return ScreenshotDiffEntry(path=path, status=status, **stats)
+
+                diff_results = await asyncio.gather(*[_diff_one(p) for p in common_paths])
+                screenshot_entries = [d for d in diff_results if d is not None]
+
+                if error is None and common_paths and not screenshot_entries and diff_errors:
+                    # Capture worked (both sides have images for these paths)
+                    # but every single pixel-comparison call failed -- almost
+                    # certainly Pillow/pixelmatch aren't installed in this
+                    # environment. Surface the real reason instead of a
+                    # silent "0 zrzutów porównanych" the user has to guess at.
+                    error = (
+                        "Zrzuty ekranów zostały zrobione, ale porównanie pikselowe nie powiodło "
+                        "się dla żadnej wspólnej podstrony -- sprawdź, czy Pillow i pixelmatch są "
+                        "zainstalowane w środowisku backendu (`pip install -r requirements.txt`). "
+                        f"Przykładowy błąd: {diff_errors[0]}"
+                    )
+
+                return screenshot_entries, error
+            except Exception as exc:
+                # Screenshots are optional (opt-in) -- if Playwright isn't
+                # installed (`pip install playwright` + `playwright install
+                # chromium` weren't run) or the browser crashes for some
+                # other reason, that shouldn't take down the entire
+                # comparison. Log AND return the message (screenshot_error)
+                # so it's visible in the report itself, not just the server
+                # console -- continue with no screenshots for this run
+                # rather than failing podstrony/zawartość/linki/pliki too,
+                # which all succeeded independently of this step.
+                message = f"{type(exc).__name__}: {exc}"
+                print(f"[screenshots] pominięto zrzuty ekranów dla {result_id}: {message}")
+                return [], message
+
+        file_diffs, link_diffs, _, (screenshot_diffs, screenshot_error) = await asyncio.gather(
             _run_file_diffs(),
             _run_link_diffs(),
             _write_snapshots_if_needed(),
+            _capture_screenshots_if_needed(),
         )
 
     duration_ms = (time.perf_counter() - started) * 1000
@@ -618,6 +737,8 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
         link_diffs=link_diffs,
         content_checked_count=content_checked_count,
         content_changed_count=content_changed_count,
+        screenshot_diffs=screenshot_diffs,
+        screenshot_error=screenshot_error,
     )
 
     _save_result(result)
@@ -687,6 +808,26 @@ def load_raw_snapshot(result_id: str, side: str) -> RawSiteSnapshot | None:
         return RawSiteSnapshot.model_validate(entry)
 
     return None
+
+
+def load_screenshot_manifest(result_id: str) -> dict[str, list[str]] | None:
+    """Returns {"old": [...], "new": [...]} -- the paths that actually got a
+    screenshot captured for each side of a saved comparison (see
+    screenshots.save_manifest). None if screenshots were never captured for
+    this report (scope.screenshots was off, or it predates this feature)."""
+    return load_manifest(RESULTS_DIR / result_id / "screenshots")
+
+
+def get_screenshot_file(result_id: str, side: str, path: str) -> Path | None:
+    """Resolves a page path to its saved screenshot for one side of a saved
+    comparison -- "old"/"new" for the raw screenshots, "diff" for the
+    pixelmatch visual-diff image (visual_diff.compare_screenshots). None if
+    it doesn't exist (wrong side, path was never captured/diffed, or
+    screenshots weren't enabled for this report)."""
+    if side not in ("old", "new", "diff"):
+        return None
+    file_path = RESULTS_DIR / result_id / "screenshots" / side / screenshot_filename(path)
+    return file_path if file_path.exists() else None
 
 
 def list_result_summaries() -> list[ReportSummary]:

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, SlidersHorizontal, Files, FileCode, Link2, FileStack } from 'lucide-react';
+import { Search, SlidersHorizontal, Files, FileCode, Link2, FileStack, Camera } from 'lucide-react';
 import type { CategoryId, CategoryOverviewRow, CategoryStatus } from '../types';
 
 const PAGE_ICONS: Record<CategoryId, typeof Files> = {
@@ -7,6 +7,7 @@ const PAGE_ICONS: Record<CategoryId, typeof Files> = {
   content: FileCode,
   links: Link2,
   files: FileStack,
+  screenshots: Camera,
 };
 
 const STATUS_CONFIG: Record<CategoryStatus, { label: string; bg: string; text: string; ring: string }> = {

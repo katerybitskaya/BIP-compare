@@ -13,6 +13,7 @@ const CATEGORY_LABELS: Record<CategoryId, string> = {
   content: 'Zawartość',
   links: 'Linki',
   files: 'Pliki',
+  screenshots: 'Zrzuty ekranów',
 };
 
 function rowStatus(scopeEnabled: boolean, issues: number): CategoryStatus {
@@ -37,6 +38,7 @@ export function buildOverviewStatItems(report: ComparisonResult): StatDefinition
   const scopeContent = report.scope?.content ?? true;
   const scopeLinks = report.scope?.links ?? true;
   const scopeAttachments = report.scope?.attachments ?? true;
+  const scopeScreenshots = report.scope?.screenshots ?? false;
 
   const pagesIssues = report.missing_in_new.length + report.extra_in_new.length;
   const contentChanged = report.content_changed_count ?? 0;
@@ -50,6 +52,7 @@ export function buildOverviewStatItems(report: ComparisonResult): StatDefinition
       f.status === 'different' ||
       (f.status === 'error404' && f.old?.ok === true)
   ).length;
+  const screenshotIssues = (report.screenshot_diffs ?? []).filter((s) => s.status === 'different').length;
 
   function tileValue(scopeEnabled: boolean, issues: number): string {
     return scopeEnabled ? String(issues) : '—';
@@ -88,6 +91,14 @@ export function buildOverviewStatItems(report: ComparisonResult): StatDefinition
       tone: 'green',
       icon: 'files',
     },
+    {
+      id: 'screenshots',
+      label: CATEGORY_LABELS.screenshots,
+      value: tileValue(scopeScreenshots, screenshotIssues),
+      helper: scopeScreenshots ? 'zrzutów z różnicą' : 'pominięte w zakresie',
+      tone: 'pink',
+      icon: 'camera',
+    },
   ];
 }
 
@@ -97,6 +108,7 @@ export function buildCategoryOverview(report: ComparisonResult): CategoryOvervie
   const scopeContent = report.scope?.content ?? true;
   const scopeLinks = report.scope?.links ?? true;
   const scopeAttachments = report.scope?.attachments ?? true;
+  const scopeScreenshots = report.scope?.screenshots ?? false;
 
   const entries: CategoryOverviewEntry[] = [];
 
@@ -144,13 +156,14 @@ export function buildCategoryOverview(report: ComparisonResult): CategoryOvervie
     } else if (checked === 0) {
       emptyMessage = 'Brak wspólnych podstron do porównania treści.';
     } else {
+      const onlyOneSide = report.missing_in_new.length + report.extra_in_new.length;
       breakdown = [
-        { label: 'Sprawdzone strony', value: totalPages, tone: 'default' },
+        { label: 'Sprawdzone podstrony', value: totalPages, tone: 'default' },
         { label: 'Zmienione', value: changed, tone: 'warning' },
         { label: 'Bez zmian', value: checked - changed, tone: 'success' },
         {
           label: 'Tylko na starym/nowym adresie',
-          value: report.missing_in_new.length + report.extra_in_new.length,
+          value: onlyOneSide,
           tone: 'danger',
         },
       ];
@@ -223,6 +236,44 @@ export function buildCategoryOverview(report: ComparisonResult): CategoryOvervie
         { label: 'Błąd 404', value: errorCount, tone: 'danger' },
         { label: 'Nowe', value: newCount, tone: 'default' },
         { label: 'Usunięte', value: removedCount, tone: 'default' },
+      ];
+    }
+    entries.push({ row, breakdown, emptyMessage });
+  }
+
+  // --- Zrzuty ekranów ---
+  {
+    const screenshotDiffs = report.screenshot_diffs ?? [];
+    const identicalCount = screenshotDiffs.filter((s) => s.status === 'identical').length;
+    const differentCount = screenshotDiffs.filter((s) => s.status === 'different').length;
+    // Same reasoning as the Zawartość block above: the Dashboard doesn't
+    // load the per-report screenshot manifest (old/new captured paths --
+    // that's only fetched inside an open report), so "wszystkie zrzuty" and
+    // "tylko na starym/nowym adresie" are approximated from the page-level
+    // missing/extra counts -- screenshots are attempted for exactly those
+    // same pages whenever they're reachable, so this matches in practice.
+    const totalPages = report.unchanged_paths.length + report.missing_in_new.length + report.extra_in_new.length;
+    const onlyOneSide = report.missing_in_new.length + report.extra_in_new.length;
+    const issues = differentCount;
+    const row: CategoryOverviewRow = {
+      id: 'screenshots',
+      label: CATEGORY_LABELS.screenshots,
+      checked: totalPages,
+      issues,
+      status: rowStatus(scopeScreenshots, issues),
+    };
+    let breakdown: CategoryBreakdownStat[] = [];
+    let emptyMessage: string | null = null;
+    if (!scopeScreenshots) {
+      emptyMessage = 'Zrzuty ekranów nie były robione dla tego raportu — zakres „Zrzuty ekranów” był odznaczony.';
+    } else if (totalPages === 0) {
+      emptyMessage = 'Nie udało się porównać żadnych zrzutów ekranów.';
+    } else {
+      breakdown = [
+        { label: 'Wszystkie zrzuty', value: totalPages, tone: 'default' },
+        { label: 'Bez zmian', value: identicalCount, tone: 'success' },
+        { label: 'Zmienione', value: differentCount, tone: 'warning' },
+        { label: 'Tylko na starym/nowym adresie', value: onlyOneSide, tone: 'danger' },
       ];
     }
     entries.push({ row, breakdown, emptyMessage });

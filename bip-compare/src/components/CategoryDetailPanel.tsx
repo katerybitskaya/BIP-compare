@@ -1,4 +1,4 @@
-import { Info, Files, FileCode, Link2, FileStack } from 'lucide-react';
+import { Info, Files, FileCode, Link2, FileStack, Camera } from 'lucide-react';
 import type { CategoryId, CategoryOverviewEntry } from '../types';
 
 const PAGE_ICONS: Record<CategoryId, typeof Files> = {
@@ -6,6 +6,7 @@ const PAGE_ICONS: Record<CategoryId, typeof Files> = {
   content: FileCode,
   links: Link2,
   files: FileStack,
+  screenshots: Camera,
 };
 
 const TONE_CLASSES: Record<string, string> = {
@@ -48,7 +49,12 @@ export default function CategoryDetailPanel({ entry }: CategoryDetailPanelProps)
             {entry.breakdown.map((stat) => (
               <div key={stat.label} className="flex items-center justify-between gap-3">
                 <dt className="text-slate-500 dark:text-slate-400">{stat.label}</dt>
-                <dd className={`font-medium ${TONE_CLASSES[stat.tone]}`}>{stat.value}</dd>
+                <dd className="text-right">
+                  <span className={`font-medium ${TONE_CLASSES[stat.tone]}`}>{stat.value}</span>
+                  {stat.helper && (
+                    <span className="ml-1.5 text-xs text-slate-400 dark:text-slate-500">{stat.helper}</span>
+                  )}
+                </dd>
               </div>
             ))}
           </dl>

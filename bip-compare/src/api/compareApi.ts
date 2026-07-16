@@ -80,6 +80,20 @@ export function getContentDiff(resultId: string, path: string): Promise<PageCont
   return request<PageContentDiff>(`/api/compare/${resultId}/content-diff?path=${encodeURIComponent(path)}`);
 }
 
+/** Paths that got a full-page screenshot captured for each side of a saved
+ * comparison (see backend screenshots.py) -- empty lists if the "Zrzuty
+ * ekranów" scope was off, or this report predates the feature. */
+export function getScreenshotManifest(resultId: string): Promise<{ old: string[]; new: string[] }> {
+  return request<{ old: string[]; new: string[] }>(`/api/compare/${resultId}/screenshots`);
+}
+
+/** Direct image URL for one page's screenshot -- "old"/"new" for the raw
+ * screenshot, "diff" for the pixelmatch visual-diff image. Used as an
+ * <img src>, not fetched through request() (that expects a JSON body). */
+export function getScreenshotUrl(resultId: string, side: 'old' | 'new' | 'diff', path: string): string {
+  return `${API_BASE_URL}/api/compare/${resultId}/screenshot/${side}?path=${encodeURIComponent(path)}`;
+}
+
 export function clearAllReports(): Promise<{ removed: number }> {
   return request<{ removed: number }>('/api/compare', { method: 'DELETE' });
 }

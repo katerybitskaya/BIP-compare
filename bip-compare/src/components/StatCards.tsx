@@ -9,6 +9,7 @@ import {
   FileX,
   FilePlus,
   ArrowLeftRight,
+  Camera,
 } from 'lucide-react';
 import type { StatDefinition } from '../types';
 
@@ -23,6 +24,7 @@ const ICONS = {
   'file-x': FileX,
   'file-plus': FilePlus,
   swap: ArrowLeftRight,
+  camera: Camera,
 };
 
 const TONE_STYLES: Record<StatDefinition['tone'], { bg: string; text: string; glow: string; ring: string }> = {
@@ -49,6 +51,12 @@ const TONE_STYLES: Record<StatDefinition['tone'], { bg: string; text: string; gl
     text: 'text-rose-600 dark:text-rose-300',
     glow: 'shadow-[0_0_20px_-4px_rgba(244,63,94,0.5)]',
     ring: 'ring-1 ring-rose-400/20',
+  },
+  pink: {
+    bg: 'bg-gradient-to-br from-pink-500/20 to-fuchsia-400/10',
+    text: 'text-pink-600 dark:text-pink-300',
+    glow: 'shadow-[0_0_20px_-4px_rgba(236,72,153,0.5)]',
+    ring: 'ring-1 ring-pink-400/20',
   },
 };
 
