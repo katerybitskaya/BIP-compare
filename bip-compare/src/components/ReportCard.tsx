@@ -1,4 +1,4 @@
-import { Check, X, ArrowRight, Clock, Trash2, Globe, FileCode, Link2, FileStack } from 'lucide-react';
+import { Check, X, ArrowRight, Clock, Trash2, Globe, FileCode, Link2, FileStack, Camera } from 'lucide-react';
 import type { ReportSummary } from '../api/types';
 import { formatDateTime } from '../utils/format';
 
@@ -20,16 +20,27 @@ function ReachabilityMark({ reachable }: { reachable: boolean }) {
 // by icon + label only, all sharing one neutral, low-contrast style. Same
 // icons used for these categories elsewhere in the app (ReportDetail section
 // headers), so a category is recognizable by shape everywhere, not by hue.
-const CATEGORY_TAGS: Array<{ key: 'content' | 'links' | 'attachments' | null; label: string; Icon: typeof Globe }> = [
-  { key: null, label: 'Podstrony', Icon: Globe },
-  { key: 'content', label: 'Zawartość', Icon: FileCode },
-  { key: 'links', label: 'Linki', Icon: Link2 },
-  { key: 'attachments', label: 'Pliki', Icon: FileStack },
+const CATEGORY_TAGS: Array<{
+  key: 'content' | 'links' | 'attachments' | 'screenshots' | null;
+  label: string;
+  Icon: typeof Globe;
+  // Whether this category counts as "on" for reports saved before its scope
+  // field existed (scope?.[key] is undefined) -- matches each field's real
+  // default (content/links/attachments default to on, screenshots to off),
+  // so an old report that predates the "Zrzuty ekranów" feature doesn't
+  // incorrectly show that chip as active.
+  defaultOn: boolean;
+}> = [
+  { key: null, label: 'Podstrony', Icon: Globe, defaultOn: true },
+  { key: 'content', label: 'Zawartość', Icon: FileCode, defaultOn: true },
+  { key: 'links', label: 'Linki', Icon: Link2, defaultOn: true },
+  { key: 'attachments', label: 'Pliki', Icon: FileStack, defaultOn: true },
+  { key: 'screenshots', label: 'Zrzuty ekranów', Icon: Camera, defaultOn: false },
 ];
 
 export default function ReportCard({ report, onClick, onDelete }: ReportCardProps) {
   const scope = report.scope;
-  const activeCategories = CATEGORY_TAGS.filter((c) => c.key === null || (scope?.[c.key] ?? true));
+  const activeCategories = CATEGORY_TAGS.filter((c) => c.key === null || (scope?.[c.key] ?? c.defaultOn));
 
   return (
     <div
