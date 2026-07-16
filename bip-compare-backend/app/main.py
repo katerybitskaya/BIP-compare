@@ -20,6 +20,19 @@ was enabled for that report.
 """
 from __future__ import annotations
 
+import asyncio
+import sys
+
+# Playwright (used for screenshots, see screenshots.py) launches Chromium as
+# a subprocess. On Windows, asyncio's default SelectorEventLoop does NOT
+# support subprocess creation at all -- any attempt raises NotImplementedError
+# with no useful message pointing at the real cause. This has to run before
+# uvicorn creates its event loop (i.e. at import time, here, before anything
+# else touches asyncio), or it has no effect. See:
+# https://github.com/microsoft/playwright-python/issues/178
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
 from typing import List
 
 from fastapi import FastAPI, HTTPException
@@ -147,8 +160,8 @@ async def get_screenshot(result_id: str, side: str, path: str) -> FileResponse:
     # path segment -- page paths can contain slashes and even a literal "?"
     # (e.g. "/dokument/api/download/file?id=9543"), which would otherwise
     # collide with URL routing.
-    if side not in ("old", "new"):
-        raise HTTPException(status_code=400, detail="Parametr 'side' musi być 'old' albo 'new'.")
+    if side not in ("old", "new", "diff"):
+        raise HTTPException(status_code=400, detail="Parametr 'side' musi być 'old', 'new' albo 'diff'.")
     file_path = get_screenshot_file(result_id, side, path)
     if file_path is None:
         raise HTTPException(status_code=404, detail="Nie znaleziono zrzutu ekranu dla tej podstrony.")

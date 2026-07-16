@@ -19,6 +19,7 @@ import asyncio
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Iterable
 
@@ -59,7 +60,39 @@ def screenshot_filename(path: str) -> str:
     return f"{slug}__{digest}.png"
 
 
-async def capture_screenshots(
+def capture_screenshots_sync(
+    pages: Iterable[tuple[str, str]],
+    out_dir: Path,
+    timeout_seconds: float,
+) -> list[str]:
+    """Blocking entry point for capture_screenshots -- runs it to completion
+    in a brand-new event loop, created explicitly on whatever thread this is
+    called from (meant to be called via asyncio.to_thread, see comparison.py).
+
+    Why this indirection exists: Playwright launches Chromium as a
+    subprocess, and on Windows asyncio's SelectorEventLoop cannot create
+    subprocesses at all (NotImplementedError, no useful message). Python 3.8+
+    defaults to ProactorEventLoop on Windows, which *does* support
+    subprocesses -- but uvicorn (especially combined with --reload, which
+    re-execs itself and sets up its own loop before app code is fully
+    imported) doesn't reliably leave that default in place by the time our
+    code runs, and setting the event loop policy at import time (see
+    main.py) can end up happening too late, after uvicorn's own loop already
+    exists. Explicitly building a fresh Proactor loop *here*, on a plain
+    worker thread with no prior asyncio state, sidesteps that timing problem
+    entirely instead of depending on it.
+    """
+    if sys.platform == "win32":
+        loop = asyncio.ProactorEventLoop()  # type: ignore[attr-defined]
+    else:
+        loop = asyncio.new_event_loop()
+    try:
+        return loop.run_until_complete(_capture_screenshots_async(pages, out_dir, timeout_seconds))
+    finally:
+        loop.close()
+
+
+async def _capture_screenshots_async(
     pages: Iterable[tuple[str, str]],
     out_dir: Path,
     timeout_seconds: float,
@@ -73,21 +106,41 @@ async def capture_screenshots(
     Reuses a single browser instance across every page (launching the
     browser itself is the expensive part) but opens a fresh tab per URL,
     bounded by SCREENSHOT_CONCURRENCY.
+
+    out_dir is created up front, before anything else can fail (import,
+    browser launch, ...) -- so the folder for this side always exists on
+    disk once this function has been called, even if every single page
+    then fails to capture. Makes it obvious from the results/ folder alone
+    whether capture was even attempted for a given report.
     """
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     try:
         from playwright.async_api import async_playwright
     except ImportError as exc:  # pragma: no cover - environment setup issue
         raise RuntimeError(
-            "Playwright nie jest zainstalowany. Uruchom `pip install playwright` "
-            "i `playwright install chromium`, aby włączyć zrzuty ekranów."
+            "Playwright nie jest zainstalowany w środowisku backendu. Uruchom "
+            "`pip install playwright` a potem `python -m playwright install chromium` "
+            "(w tym samym środowisku/venv, w którym uruchamiany jest `uvicorn`), "
+            "aby włączyć zrzuty ekranów."
         ) from exc
 
-    out_dir.mkdir(parents=True, exist_ok=True)
     captured: list[str] = []
     timeout_ms = min(timeout_seconds * 1000, SCREENSHOT_TIMEOUT_CAP_MS)
 
     async with async_playwright() as pw:
-        browser = await pw.chromium.launch()
+        try:
+            browser = await pw.chromium.launch()
+        except Exception as exc:
+            # Most common cause: `playwright install chromium` was never run,
+            # so the browser binary itself is missing (this is a SEPARATE
+            # install step from `pip install playwright`, easy to miss).
+            raise RuntimeError(
+                "Nie udało się uruchomić przeglądarki Chromium (Playwright). Uruchom "
+                "`python -m playwright install chromium` w środowisku backendu i spróbuj "
+                f"ponownie. Oryginalny błąd: {exc}"
+            ) from exc
+
         semaphore = asyncio.Semaphore(SCREENSHOT_CONCURRENCY)
 
         async def _capture_one(path: str, url: str) -> None:

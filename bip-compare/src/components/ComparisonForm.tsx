@@ -116,13 +116,6 @@ export default function ComparisonForm({
         </button>
       </div>
 
-      {scope.screenshots && !isRunning && (
-        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-700 ring-1 ring-amber-400/20 dark:text-amber-300">
-          <AlertCircle size={16} className="mt-0.5 shrink-0" />
-          <p>Zrzuty ekranów renderują każdą podstronę w przeglądarce — znacznie wydłuża to czas porównania.</p>
-        </div>
-      )}
-
       {noScopeSelected && !isRunning && (
         <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-blue-500/10 p-3 text-xs text-blue-700 ring-1 ring-blue-400/20 dark:text-blue-300">
           <AlertCircle size={16} className="mt-0.5 shrink-0" />

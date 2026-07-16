@@ -171,6 +171,22 @@ class LinkDiffEntry(BaseModel):
     status: str = Field(description="ok | broken | new | removed")
 
 
+class ScreenshotDiffEntry(BaseModel):
+    """Pixel-level visual comparison of one page's old vs. new full-page
+    screenshot (see visual_diff.py) -- only computed for paths that got a
+    screenshot captured on BOTH sides (a path only present on one side has
+    nothing to diff against, see ScreenshotManifest-style old/new path
+    lists returned by GET /api/compare/{id}/screenshots)."""
+
+    path: str
+    mismatched_pixels: int
+    total_pixels: int
+    diff_percent: float = Field(description="Odsetek pikseli różniących się między starym a nowym zrzutem")
+    old_height: int = Field(description="Wysokość (px) zrzutu ze starej wersji, przed dopełnieniem do wspólnego rozmiaru")
+    new_height: int = Field(description="Wysokość (px) zrzutu z nowej wersji, przed dopełnieniem do wspólnego rozmiaru")
+    status: str = Field(description="identical | different")
+
+
 class ComparisonResult(BaseModel):
     id: str
     generated_at: datetime
@@ -197,6 +213,19 @@ class ComparisonResult(BaseModel):
     )
     content_changed_count: int = Field(
         0, description="Ile z porównanych wspólnych podstron ma inną treść (HTML lub tekst) między starą a nową wersją"
+    )
+    screenshot_diffs: List[ScreenshotDiffEntry] = Field(
+        default_factory=list,
+        description="Pikselowe porównanie zrzutów ekranów dla podstron obecnych po obu stronach (puste gdy zakres „Zrzuty ekranów” był odznaczony)",
+    )
+    screenshot_error: Optional[str] = Field(
+        None,
+        description=(
+            "Komunikat błędu, jeśli przechwytywanie zrzutów ekranów nie powiodło się mimo "
+            "włączonego zakresu „Zrzuty ekranów” (np. Playwright nie jest zainstalowany albo "
+            "przeglądarka nie mogła się uruchomić) -- None, jeśli zakres był wyłączony albo "
+            "zrzuty przechwycono bez błędu na poziomie całego procesu."
+        ),
     )
 
 

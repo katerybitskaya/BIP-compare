@@ -87,9 +87,10 @@ export function getScreenshotManifest(resultId: string): Promise<{ old: string[]
   return request<{ old: string[]; new: string[] }>(`/api/compare/${resultId}/screenshots`);
 }
 
-/** Direct image URL for one page's screenshot on one side -- used as an
+/** Direct image URL for one page's screenshot -- "old"/"new" for the raw
+ * screenshot, "diff" for the pixelmatch visual-diff image. Used as an
  * <img src>, not fetched through request() (that expects a JSON body). */
-export function getScreenshotUrl(resultId: string, side: 'old' | 'new', path: string): string {
+export function getScreenshotUrl(resultId: string, side: 'old' | 'new' | 'diff', path: string): string {
   return `${API_BASE_URL}/api/compare/${resultId}/screenshot/${side}?path=${encodeURIComponent(path)}`;
 }
 

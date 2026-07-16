@@ -5,3 +5,5 @@ beautifulsoup4>=4.12
 lxml>=5.2
 pydantic>=2.7
 playwright>=1.45
+Pillow>=10.0
+pixelmatch>=0.3.0

@@ -45,13 +45,13 @@ export interface StatDefinition {
   label: string;
   value: string;
   helper: string;
-  tone: 'blue' | 'amber' | 'green' | 'red';
-  icon: 'files' | 'diff' | 'check' | 'alert' | 'globe' | 'code' | 'link' | 'file-x' | 'file-plus' | 'swap';
+  tone: 'blue' | 'amber' | 'green' | 'red' | 'pink';
+  icon: 'files' | 'diff' | 'check' | 'alert' | 'globe' | 'code' | 'link' | 'file-x' | 'file-plus' | 'swap' | 'camera';
 }
 
 // --- Dashboard overview (category-level summary of a report) --------------
 
-export type CategoryId = 'pages' | 'content' | 'links' | 'files';
+export type CategoryId = 'pages' | 'content' | 'links' | 'files' | 'screenshots';
 
 export type CategoryStatus = 'ok' | 'issues' | 'skipped';
 
@@ -67,6 +67,10 @@ export interface CategoryBreakdownStat {
   label: string;
   value: number;
   tone: 'default' | 'success' | 'danger' | 'warning';
+  // Optional percentage/context shown as a small sub-line under the value,
+  // e.g. "12,5% wszystkich stron" -- mirrors the helper text under each
+  // StatCard tile in the report itself.
+  helper?: string;
 }
 
 export interface CategoryOverviewEntry {

@@ -15,9 +15,10 @@ import {
   Camera,
 } from 'lucide-react';
 import type { ComparisonResult } from '../api/types';
-import { getReport, getScreenshotManifest, getScreenshotUrl } from '../api/compareApi';
+import { getReport, getScreenshotManifest } from '../api/compareApi';
 import { formatDateTime, formatDuration } from '../utils/format';
 import ContentComparisonSection from './ContentComparisonSection';
+import ScreenshotComparisonSection from './ScreenshotComparisonSection';
 import LinkResultsTable from './LinkResultsTable';
 import LinkDetailPanel from './LinkDetailPanel';
 import FileResultsTable from './FileResultsTable';
@@ -27,6 +28,7 @@ import { buildLinkRows, buildLinkStatItems } from '../utils/linkRows';
 import { buildFileRows, buildFileStatItems } from '../utils/fileRows';
 import { buildContentStatItems } from '../utils/contentStats';
 import { buildPageStatItems } from '../utils/pageStats';
+import { buildScreenshotStatItems } from '../utils/screenshotStats';
 import type { FileComparison, LinkComparison } from '../types';
 
 interface ReportDetailProps {
@@ -117,13 +119,10 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
   const linkStatItems = useMemo(() => (report ? buildLinkStatItems(report) : []), [report]);
   const fileRows = useMemo(() => (report ? buildFileRows(report) : []), [report]);
   const fileStatItems = useMemo(() => (report ? buildFileStatItems(report) : []), [report]);
-  // Union of every path that got a screenshot on at least one side, sorted --
-  // a path missing from one side just means that page doesn't exist there
-  // (e.g. it's in missing_in_new/extra_in_new), shown as "brak zrzutu" below.
-  const screenshotPaths = useMemo(() => {
-    if (!screenshots) return [];
-    return Array.from(new Set([...screenshots.old, ...screenshots.new])).sort();
-  }, [screenshots]);
+  const screenshotStatItems = useMemo(
+    () => (report ? buildScreenshotStatItems(report, screenshots) : []),
+    [report, screenshots]
+  );
 
   const scopeContent = report?.scope?.content ?? true;
   const scopeLinks = report?.scope?.links ?? true;
@@ -446,58 +445,20 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
                 <p className="text-sm text-slate-400 dark:text-slate-500">
                   Co najmniej jedna ze stron jest niedostępna, więc zrzuty ekranów nie zostały zrobione.
                 </p>
+              ) : report.screenshot_error ? (
+                <div className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/5 dark:text-rose-300">
+                  <p className="font-medium">Nie udało się zrobić zrzutów ekranów</p>
+                  <p className="mt-1 break-words text-xs opacity-90">{report.screenshot_error}</p>
+                </div>
               ) : screenshotsLoading ? (
                 <div className="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
                   <Loader2 size={16} className="animate-spin" />
                   Wczytywanie zrzutów…
                 </div>
-              ) : screenshotPaths.length === 0 ? (
-                <p className="text-sm text-slate-400 dark:text-slate-500">
-                  Nie udało się zrobić żadnego zrzutu ekranu (wszystkie podstrony mogły nie wyrenderować się poprawnie).
-                </p>
               ) : (
-                <div className="space-y-6">
-                  {screenshotPaths.map((path) => {
-                    const hasOld = screenshots?.old.includes(path) ?? false;
-                    const hasNew = screenshots?.new.includes(path) ?? false;
-                    return (
-                      <div key={path} className="rounded-xl border border-slate-200 dark:border-white/5 p-3">
-                        <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400 break-all">{path}</p>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          <div>
-                            <p className="mb-1 text-[11px] text-slate-400 dark:text-slate-500">Stary adres</p>
-                            {hasOld ? (
-                              <img
-                                src={getScreenshotUrl(report.id, 'old', path)}
-                                alt={`Zrzut ekranu (stary adres) — ${path}`}
-                                className="w-full rounded-lg border border-slate-200 dark:border-white/10"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-white/10 text-xs text-slate-400 dark:text-slate-500">
-                                Brak zrzutu
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <p className="mb-1 text-[11px] text-slate-400 dark:text-slate-500">Nowy adres</p>
-                            {hasNew ? (
-                              <img
-                                src={getScreenshotUrl(report.id, 'new', path)}
-                                alt={`Zrzut ekranu (nowy adres) — ${path}`}
-                                className="w-full rounded-lg border border-slate-200 dark:border-white/10"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-white/10 text-xs text-slate-400 dark:text-slate-500">
-                                Brak zrzutu
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="space-y-4">
+                  <StatCards items={screenshotStatItems} />
+                  <ScreenshotComparisonSection reportId={report.id} report={report} screenshots={screenshots} />
                 </div>
               )}
             </div>

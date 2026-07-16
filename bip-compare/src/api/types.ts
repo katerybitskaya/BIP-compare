@@ -101,6 +101,16 @@ export interface LinkDiffEntry {
   status: string; // "ok" | "broken" | "new" | "removed"
 }
 
+export interface ScreenshotDiffEntry {
+  path: string;
+  mismatched_pixels: number;
+  total_pixels: number;
+  diff_percent: number;
+  old_height: number;
+  new_height: number;
+  status: string; // "identical" | "different"
+}
+
 // --- Per-page content diff (on demand) --------------------------------------
 // Fetched via GET /api/compare/{id}/content-diff?path=... — only available
 // when the report's scope.content was enabled at compare time.
@@ -145,6 +155,10 @@ export interface ComparisonResult {
   link_diffs?: LinkDiffEntry[];
   content_checked_count?: number;
   content_changed_count?: number;
+  screenshot_diffs?: ScreenshotDiffEntry[];
+  // Set only if scope.screenshots was on AND the capture step itself failed
+  // (e.g. Playwright not installed) -- null/undefined otherwise.
+  screenshot_error?: string | null;
 }
 
 export interface ReportSummary {
