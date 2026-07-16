@@ -6,7 +6,7 @@ w każdej kategorii (Podstrony, Zawartość, Linki, Pliki, Zrzuty ekranów).
 
 ## Uruchomienie
 
-```
+```bash
 python serve-test-sites.py
 ```
 
