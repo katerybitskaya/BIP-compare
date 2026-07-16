@@ -5,6 +5,8 @@ export interface CompareScope {
   content: boolean;
   links: boolean;
   attachments: boolean;
+  // Optional: reports/requests from before this field existed won't have it.
+  screenshots?: boolean;
 }
 
 export interface CompareRequestPayload {

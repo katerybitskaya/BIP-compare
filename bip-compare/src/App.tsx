@@ -32,6 +32,7 @@ function App() {
     content: true,
     links: true,
     attachments: true,
+    screenshots: false,
   });
 
   const [currentReport, setCurrentReport] = useState<ComparisonResult | null>(null);

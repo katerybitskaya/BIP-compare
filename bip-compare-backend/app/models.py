@@ -9,12 +9,17 @@ from pydantic import BaseModel, Field, HttpUrl
 
 class CompareScope(BaseModel):
     """Which optional, extra-HTTP-request-heavy checks to run. Unchecking one
-    skips it entirely rather than just hiding it in the UI. Screenshot
-    comparison isn't implemented yet, so there's no flag for it here."""
+    skips it entirely rather than just hiding it in the UI."""
 
     content: bool = Field(True, description="Zbieranie/porównanie treści (obecnie: zbieranie surowej treści do dalszej analizy)")
     links: bool = Field(True, description="Porównanie linków (zarezerwowane na kolejny etap)")
     attachments: bool = Field(True, description="Porównanie plików (załączników) w skali całej witryny")
+    # Defaults to False (unlike the other three): rendering every page in a
+    # real browser via Playwright is much slower and heavier than a plain
+    # HTTP fetch, so this is opt-in rather than on-by-default.
+    screenshots: bool = Field(
+        False, description="Zrzuty ekranu (pełna strona) każdej podstrony przez Playwright, do ręcznego porównania wizualnego"
+    )
 
 
 class CompareRequest(BaseModel):

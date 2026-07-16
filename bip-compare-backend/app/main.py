@@ -24,14 +24,17 @@ from typing import List
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from .comparison import (
     clear_all_results,
     compare_sites,
     delete_result,
+    get_screenshot_file,
     list_result_summaries,
     load_raw_snapshot,
     load_result,
+    load_screenshot_manifest,
 )
 from .content_diff import build_page_content_diff
 from .models import CompareRequest, ComparisonResult, PageContentDiff, RawSiteSnapshot, ReportSummary
@@ -125,3 +128,28 @@ async def get_content_diff(result_id: str, path: str) -> PageContentDiff:
     if old_entry is None and new_entry is None:
         raise HTTPException(status_code=404, detail=f"Nie znaleziono podstrony '{path}' w żadnej z wersji.")
     return build_page_content_diff(old_entry, new_entry, path)
+
+
+@app.get("/api/compare/{result_id}/screenshots")
+async def get_screenshots_manifest(result_id: str) -> dict:
+    result = load_result(result_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Nie znaleziono raportu o podanym id.")
+    manifest = load_screenshot_manifest(result_id)
+    if manifest is None:
+        return {"old": [], "new": []}
+    return manifest
+
+
+@app.get("/api/compare/{result_id}/screenshot/{side}")
+async def get_screenshot(result_id: str, side: str, path: str) -> FileResponse:
+    # `path` is a query param (like /content-diff?path=...) rather than a URL
+    # path segment -- page paths can contain slashes and even a literal "?"
+    # (e.g. "/dokument/api/download/file?id=9543"), which would otherwise
+    # collide with URL routing.
+    if side not in ("old", "new"):
+        raise HTTPException(status_code=400, detail="Parametr 'side' musi być 'old' albo 'new'.")
+    file_path = get_screenshot_file(result_id, side, path)
+    if file_path is None:
+        raise HTTPException(status_code=404, detail="Nie znaleziono zrzutu ekranu dla tej podstrony.")
+    return FileResponse(file_path, media_type="image/png")

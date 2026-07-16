@@ -12,9 +12,10 @@ import {
   FileStack,
   Globe,
   ExternalLink,
+  Camera,
 } from 'lucide-react';
 import type { ComparisonResult } from '../api/types';
-import { getReport } from '../api/compareApi';
+import { getReport, getScreenshotManifest, getScreenshotUrl } from '../api/compareApi';
 import { formatDateTime, formatDuration } from '../utils/format';
 import ContentComparisonSection from './ContentComparisonSection';
 import LinkResultsTable from './LinkResultsTable';
@@ -52,6 +53,8 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedLink, setSelectedLink] = useState<LinkComparison | null>(null);
   const [selectedFile, setSelectedFile] = useState<FileComparison | null>(null);
+  const [screenshots, setScreenshots] = useState<{ old: string[]; new: string[] } | null>(null);
+  const [screenshotsLoading, setScreenshotsLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +62,7 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
     setError(null);
     setSelectedLink(null);
     setSelectedFile(null);
+    setScreenshots(null);
     getReport(reportId)
       .then((data) => {
         if (!cancelled) setReport(data);
@@ -73,6 +77,25 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
       cancelled = true;
     };
   }, [reportId]);
+
+  useEffect(() => {
+    if (!report || !(report.scope?.screenshots ?? false)) return;
+    let cancelled = false;
+    setScreenshotsLoading(true);
+    getScreenshotManifest(report.id)
+      .then((data) => {
+        if (!cancelled) setScreenshots(data);
+      })
+      .catch(() => {
+        // Non-critical -- the section below just falls back to an empty state.
+      })
+      .finally(() => {
+        if (!cancelled) setScreenshotsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [report]);
 
   const pageStatItems = useMemo(() => (report ? buildPageStatItems(report) : []), [report]);
   const contentStatItems = useMemo(() => (report ? buildContentStatItems(report) : []), [report]);
@@ -94,10 +117,18 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
   const linkStatItems = useMemo(() => (report ? buildLinkStatItems(report) : []), [report]);
   const fileRows = useMemo(() => (report ? buildFileRows(report) : []), [report]);
   const fileStatItems = useMemo(() => (report ? buildFileStatItems(report) : []), [report]);
+  // Union of every path that got a screenshot on at least one side, sorted --
+  // a path missing from one side just means that page doesn't exist there
+  // (e.g. it's in missing_in_new/extra_in_new), shown as "brak zrzutu" below.
+  const screenshotPaths = useMemo(() => {
+    if (!screenshots) return [];
+    return Array.from(new Set([...screenshots.old, ...screenshots.new])).sort();
+  }, [screenshots]);
 
   const scopeContent = report?.scope?.content ?? true;
   const scopeLinks = report?.scope?.links ?? true;
   const scopeAttachments = report?.scope?.attachments ?? true;
+  const scopeScreenshots = report?.scope?.screenshots ?? false;
 
   return (
     <div className="space-y-5">
@@ -185,6 +216,7 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
               <ScopeChip label="Zawartość" active={scopeContent} />
               <ScopeChip label="Linki" active={scopeLinks} />
               <ScopeChip label="Pliki" active={scopeAttachments} />
+              <ScopeChip label="Zrzuty ekranów" active={scopeScreenshots} />
             </div>
           </section>
 
@@ -395,6 +427,77 @@ export default function ReportDetail({ reportId, onBack }: ReportDetailProps) {
                     />
                     <FileDetailPanel file={selectedFile} onClose={() => setSelectedFile(null)} />
                   </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/[0.03] shadow-lg shadow-slate-200/50 dark:shadow-black/20">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-white/5 p-4">
+              <Camera size={16} className="text-pink-500" />
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Zrzuty ekranów</h3>
+            </div>
+            <div className="p-4">
+              {!scopeScreenshots ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Zrzuty ekranów nie były robione dla tego raportu — zakres „Zrzuty ekranów” był odznaczony przy uruchamianiu porównania.
+                </p>
+              ) : !report.both_reachable ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Co najmniej jedna ze stron jest niedostępna, więc zrzuty ekranów nie zostały zrobione.
+                </p>
+              ) : screenshotsLoading ? (
+                <div className="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
+                  <Loader2 size={16} className="animate-spin" />
+                  Wczytywanie zrzutów…
+                </div>
+              ) : screenshotPaths.length === 0 ? (
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Nie udało się zrobić żadnego zrzutu ekranu (wszystkie podstrony mogły nie wyrenderować się poprawnie).
+                </p>
+              ) : (
+                <div className="space-y-6">
+                  {screenshotPaths.map((path) => {
+                    const hasOld = screenshots?.old.includes(path) ?? false;
+                    const hasNew = screenshots?.new.includes(path) ?? false;
+                    return (
+                      <div key={path} className="rounded-xl border border-slate-200 dark:border-white/5 p-3">
+                        <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400 break-all">{path}</p>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div>
+                            <p className="mb-1 text-[11px] text-slate-400 dark:text-slate-500">Stary adres</p>
+                            {hasOld ? (
+                              <img
+                                src={getScreenshotUrl(report.id, 'old', path)}
+                                alt={`Zrzut ekranu (stary adres) — ${path}`}
+                                className="w-full rounded-lg border border-slate-200 dark:border-white/10"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-white/10 text-xs text-slate-400 dark:text-slate-500">
+                                Brak zrzutu
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="mb-1 text-[11px] text-slate-400 dark:text-slate-500">Nowy adres</p>
+                            {hasNew ? (
+                              <img
+                                src={getScreenshotUrl(report.id, 'new', path)}
+                                alt={`Zrzut ekranu (nowy adres) — ${path}`}
+                                className="w-full rounded-lg border border-slate-200 dark:border-white/10"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="flex h-32 items-center justify-center rounded-lg border border-dashed border-slate-300 dark:border-white/10 text-xs text-slate-400 dark:text-slate-500">
+                                Brak zrzutu
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

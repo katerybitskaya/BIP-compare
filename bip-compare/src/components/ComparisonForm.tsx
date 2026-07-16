@@ -10,6 +10,7 @@ const SCOPE_OPTIONS: ScopeOption[] = [
   { key: 'content', label: 'Zawartość' },
   { key: 'links', label: 'Linki' },
   { key: 'attachments', label: 'Pliki' },
+  { key: 'screenshots', label: 'Zrzuty ekranów' },
 ];
 
 interface ComparisonFormProps {
@@ -38,7 +39,7 @@ export default function ComparisonForm({
   const toggleScope = (key: keyof CompareScope) =>
     onScopeChange({ ...scope, [key]: !scope[key] });
 
-  const noScopeSelected = !scope.content && !scope.links && !scope.attachments;
+  const noScopeSelected = !scope.content && !scope.links && !scope.attachments && !scope.screenshots;
 
   function handleSubmit() {
     const trimmedOld = oldUrl.trim();
@@ -94,17 +95,13 @@ export default function ComparisonForm({
               >
                 <input
                   type="checkbox"
-                  checked={scope[opt.key]}
+                  checked={scope[opt.key] ?? false}
                   onChange={() => toggleScope(opt.key)}
                   className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-violet-500 focus:ring-violet-500/40 focus:ring-offset-0"
                 />
                 {opt.label}
               </label>
             ))}
-            <label className="flex cursor-not-allowed items-center gap-2 text-sm text-slate-300 dark:text-slate-600">
-              <input type="checkbox" checked={false} disabled className="h-4 w-4 rounded border-slate-300 dark:border-slate-600" />
-              Zrzuty ekranów (wkrótce)
-            </label>
           </div>
         </div>
 
@@ -118,6 +115,13 @@ export default function ComparisonForm({
           {isRunning ? 'Porównywanie…' : 'Uruchom porównanie'}
         </button>
       </div>
+
+      {scope.screenshots && !isRunning && (
+        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-700 ring-1 ring-amber-400/20 dark:text-amber-300">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          <p>Zrzuty ekranów renderują każdą podstronę w przeglądarce — znacznie wydłuża to czas porównania.</p>
+        </div>
+      )}
 
       {noScopeSelected && !isRunning && (
         <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-blue-500/10 p-3 text-xs text-blue-700 ring-1 ring-blue-400/20 dark:text-blue-300">

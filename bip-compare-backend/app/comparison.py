@@ -60,6 +60,7 @@ from .models import (
     ReportSummary,
     SiteReport,
 )
+from .screenshots import capture_screenshots, load_manifest, save_manifest, screenshot_filename
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
@@ -593,10 +594,50 @@ async def compare_sites(req: CompareRequest) -> ComparisonResult:
                 return await build_link_diffs(old_client, new_client, old_content, new_content, req.timeout_seconds)
             return []
 
-        file_diffs, link_diffs, _ = await asyncio.gather(
+        # --- Full-page screenshots (opt-in, off by default) ------------------
+        # Renders every reachable page in a real browser (Playwright/Chromium)
+        # and saves a full-page PNG -- for manual side-by-side visual
+        # comparison, not an automated pixel diff. Only runs when the
+        # "Zrzuty ekranów" scope is checked, since this is much slower and
+        # heavier per page than the plain HTTP fetch everything else uses.
+        async def _capture_screenshots_if_needed():
+            if not (both_reachable and req.scope.screenshots):
+                return
+            try:
+                screenshots_dir = result_dir / "screenshots"
+                old_targets = [(p.path, p.url) for p in old_report.pages if p.ok]
+                if same_site:
+                    old_paths = await capture_screenshots(old_targets, screenshots_dir / "old", req.timeout_seconds)
+                    # Same site on both sides -- reuse the already-rendered
+                    # images for "new" instead of opening every page twice.
+                    new_dir = screenshots_dir / "new"
+                    new_dir.mkdir(parents=True, exist_ok=True)
+                    for path in old_paths:
+                        filename = screenshot_filename(path)
+                        shutil.copyfile(screenshots_dir / "old" / filename, new_dir / filename)
+                    new_paths = old_paths
+                else:
+                    new_targets = [(p.path, p.url) for p in new_report.pages if p.ok]
+                    old_paths, new_paths = await asyncio.gather(
+                        capture_screenshots(old_targets, screenshots_dir / "old", req.timeout_seconds),
+                        capture_screenshots(new_targets, screenshots_dir / "new", req.timeout_seconds),
+                    )
+                save_manifest(screenshots_dir, old_paths, new_paths)
+            except Exception as exc:
+                # Screenshots are optional (opt-in) -- if Playwright isn't
+                # installed (`pip install playwright` + `playwright install
+                # chromium` weren't run) or the browser crashes for some
+                # other reason, that shouldn't take down the entire
+                # comparison. Log and continue with no screenshots for this
+                # run rather than failing podstrony/zawartość/linki/pliki
+                # too, which all succeeded independently of this step.
+                print(f"[screenshots] pominięto zrzuty ekranów dla {result_id}: {exc}")
+
+        file_diffs, link_diffs, _, _ = await asyncio.gather(
             _run_file_diffs(),
             _run_link_diffs(),
             _write_snapshots_if_needed(),
+            _capture_screenshots_if_needed(),
         )
 
     duration_ms = (time.perf_counter() - started) * 1000
@@ -687,6 +728,24 @@ def load_raw_snapshot(result_id: str, side: str) -> RawSiteSnapshot | None:
         return RawSiteSnapshot.model_validate(entry)
 
     return None
+
+
+def load_screenshot_manifest(result_id: str) -> dict[str, list[str]] | None:
+    """Returns {"old": [...], "new": [...]} -- the paths that actually got a
+    screenshot captured for each side of a saved comparison (see
+    screenshots.save_manifest). None if screenshots were never captured for
+    this report (scope.screenshots was off, or it predates this feature)."""
+    return load_manifest(RESULTS_DIR / result_id / "screenshots")
+
+
+def get_screenshot_file(result_id: str, side: str, path: str) -> Path | None:
+    """Resolves a page path to its saved screenshot file for one side of a
+    saved comparison, returning None if it doesn't exist (wrong side, path
+    was never captured, or screenshots weren't enabled for this report)."""
+    if side not in ("old", "new"):
+        return None
+    file_path = RESULTS_DIR / result_id / "screenshots" / side / screenshot_filename(path)
+    return file_path if file_path.exists() else None
 
 
 def list_result_summaries() -> list[ReportSummary]:
