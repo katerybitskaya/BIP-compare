@@ -124,10 +124,16 @@ export function buildCategoryOverview(report: ComparisonResult): CategoryOvervie
   {
     const checked = report.content_checked_count ?? 0;
     const changed = report.content_changed_count ?? 0;
+    // "Sprawdzone strony" matches the report's own Zawartość tile
+    // (buildContentStatItems in contentStats.ts): every page covered by the
+    // Podstrony analysis (common + only-old + only-new), not just the common
+    // pages that actually got HTML-diffed -- content_checked_count alone
+    // undercounts this since it only covers common pages.
+    const totalPages = report.unchanged_paths.length + report.missing_in_new.length + report.extra_in_new.length;
     const row: CategoryOverviewRow = {
       id: 'content',
       label: CATEGORY_LABELS.content,
-      checked,
+      checked: totalPages,
       issues: changed,
       status: rowStatus(scopeContent, changed),
     };
@@ -139,7 +145,7 @@ export function buildCategoryOverview(report: ComparisonResult): CategoryOvervie
       emptyMessage = 'Brak wspólnych podstron do porównania treści.';
     } else {
       breakdown = [
-        { label: 'Sprawdzone strony', value: checked, tone: 'default' },
+        { label: 'Sprawdzone strony', value: totalPages, tone: 'default' },
         { label: 'Zmienione', value: changed, tone: 'warning' },
         { label: 'Bez zmian', value: checked - changed, tone: 'success' },
         {
